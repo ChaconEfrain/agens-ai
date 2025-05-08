@@ -36,16 +36,26 @@ export const chatbots = pgTable("chatbots", {
   ]
 );
 
-export const embeddings = pgTable("embeddings", {
-  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
-  chatbotId: integer("chatbot_id").references(() => chatbots.id, { onDelete: 'cascade' }).notNull(),
-  content: text("content").notNull(),
-  embedding: vector("embedding", { dimensions: 1536 }).notNull(),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").$onUpdate(() => new Date()),
-}, table => [
-  index("embeddings_chatbot_id_idx").on(table.chatbotId),
-]);
+export const embeddings = pgTable(
+  "embeddings",
+  {
+    id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+    chatbotId: integer("chatbot_id")
+      .references(() => chatbots.id, { onDelete: "cascade" })
+      .notNull(),
+    content: text("content").notNull(),
+    embedding: vector("embedding", { dimensions: 1536 }).notNull(),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at").$onUpdate(() => new Date()),
+  },
+  (table) => [
+    index("embeddings_embedding_idx").using(
+      "hnsw",
+      table.embedding.op("vector_cosine_ops")
+    ),
+    index("embeddings_chatbot_id_idx").on(table.chatbotId),
+  ]
+);
 
 //Relations
 export const usersRelations = relations(users, ({ many }) => ({
