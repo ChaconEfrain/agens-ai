@@ -1,0 +1,37 @@
+import { SignedIn, SignedOut, SignInButton, UserButton } from '@clerk/nextjs'
+import React from 'react'
+import { Button } from './ui/button'
+import Link from 'next/link';
+import { BotMessageSquare } from 'lucide-react';
+import { auth } from '@clerk/nextjs/server';
+
+export default async function Nav() {
+  const {userId} = await auth()
+  return (
+    <nav className='flex justify-between items-center py-4 px-8 '>
+      <div className='text-xl flex items-center gap-1'>
+        <div>
+          <span>Agens</span>
+          <span className='font-bold'>AI</span>
+        </div>
+        <BotMessageSquare />
+      </div>
+      <div className='flex items-center gap-6'>
+        <ul className="flex gap-4">
+          <li>Pricing</li>
+          <li>About</li>
+          <li>Contact</li>
+          {userId && <li><Link href='/create-chatbot'>Create chatbot</Link></li>}
+        </ul>
+        <SignedIn>
+          <UserButton />
+        </SignedIn>
+        <SignedOut>
+          <Button asChild>
+            <SignInButton mode="modal">Sign in</SignInButton>
+          </Button>
+        </SignedOut>
+      </div>
+    </nav>
+  )
+}
