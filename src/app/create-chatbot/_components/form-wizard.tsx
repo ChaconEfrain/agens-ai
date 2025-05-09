@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button'
 import ProductsAndServices from "./products-services";
 import CustomerService from "./customer-service";
 import ChatbotConfig from "./chatbot-config";
+import DocumentsStep from "./documents";
 
 export interface BusinessData {
   generalInfo: {
@@ -320,7 +321,7 @@ function FormWizardStep({ step, form }: FormWizardStepProps) {
     case 4:
       return <ChatbotConfig form={form} />;
     case 5:
-      return <div>Step 6: Upload Documents</div>;
+      return <DocumentsStep form={form} />;
     case 6:
       return <div>Step 7: Summary</div>;
     default:
