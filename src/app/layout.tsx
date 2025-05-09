@@ -23,7 +23,7 @@ export default function RootLayout({
     <ClerkProvider>
       <html lang="en">
         <body className={`${outfit.variable} antialiased`}>
-          <div className="max-w-7xl font-outfit mx-auto">
+          <div className="max-w-7xl font-outfit mx-auto px-4">
             <Nav />
             {children}
           </div>

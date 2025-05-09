@@ -8,20 +8,24 @@ import { auth } from '@clerk/nextjs/server';
 export default async function Nav() {
   const {userId} = await auth()
   return (
-    <nav className='flex justify-between items-center py-4 px-8 '>
-      <div className='text-xl flex items-center gap-1'>
+    <nav className="flex justify-between items-center py-4">
+      <div className="text-xl flex items-center gap-1">
         <div>
           <span>Agens</span>
-          <span className='font-bold'>AI</span>
+          <span className="font-bold">AI</span>
         </div>
         <BotMessageSquare />
       </div>
-      <div className='flex items-center gap-6'>
+      <div className="flex items-center gap-6">
         <ul className="flex gap-4">
           <li>Pricing</li>
           <li>About</li>
           <li>Contact</li>
-          {userId && <li><Link href='/create-chatbot'>Create chatbot</Link></li>}
+          {userId && (
+            <li>
+              <Link href="/create-chatbot">Create chatbot</Link>
+            </li>
+          )}
         </ul>
         <SignedIn>
           <UserButton />
@@ -33,5 +37,5 @@ export default async function Nav() {
         </SignedOut>
       </div>
     </nav>
-  )
+  );
 }
