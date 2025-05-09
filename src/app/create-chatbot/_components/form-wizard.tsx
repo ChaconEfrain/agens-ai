@@ -11,6 +11,7 @@ import { Form } from '@/components/ui/form'
 import { useForm, UseFormReturn } from 'react-hook-form'
 import { Button } from '@/components/ui/button'
 import ProductsAndServices from "./products-services";
+import CustomerService from "./customer-service";
 
 export interface BusinessData {
   generalInfo: {
@@ -26,11 +27,11 @@ export interface BusinessData {
       description: string;
       price: string;
     }[];
-  };
-  newItem: {
-    name: string;
-    description: string;
-    price: string;
+    newItem: {
+      name: string;
+      description: string;
+      price: string;
+    };
   };
   hasPhysicalProducts: boolean;
   shippingLogistics: {
@@ -48,6 +49,14 @@ export interface BusinessData {
       question: string;
       answer: string;
     }[];
+    newQuestion: {
+      question: string;
+      answer: string;
+    };
+    email: string;
+    phone: string;
+    socialMedia: string;
+    whatsapp: string;
   };
   chatbotConfig: {
     objective: string;
@@ -68,11 +77,11 @@ const initialData: BusinessData = {
   productsServices: {
     type: "both",
     items: [],
-  },
-  newItem: {
-    name: "",
-    description: "",
-    price: "",
+    newItem: {
+      name: "",
+      description: "",
+      price: "",
+    },
   },
   hasPhysicalProducts: false,
   shippingLogistics: {
@@ -87,6 +96,14 @@ const initialData: BusinessData = {
     contactMethods: [],
     responseTime: "",
     commonQuestions: [],
+    newQuestion: {
+      question: "",
+      answer: "",
+    },
+    email: "",
+    phone: "",
+    socialMedia: "",
+    whatsapp: "",
   },
   chatbotConfig: {
     objective: "",
@@ -115,14 +132,14 @@ export const formSchema = z.object({
         })
       )
       .optional(),
+    newItem: z
+      .object({
+        name: z.string().optional(),
+        description: z.string().optional(),
+        price: z.string().optional(),
+      })
+      .optional(),
   }),
-  newItem: z
-    .object({
-      name: z.string().optional(),
-      description: z.string().optional(),
-      price: z.string().optional(),
-    })
-    .optional(),
   hasPhysicalProducts: z.boolean(),
   shippingLogistics: z
     .object({
@@ -133,23 +150,29 @@ export const formSchema = z.object({
       shippingRestrictions: z.string().optional(),
     })
     .optional(),
-  customerService: z
-    .object({
-      supportHours: z.string().optional(),
-      contactMethods: z
-        .array(z.string())
-        .min(1, "At least one contact method is required"),
-      responseTime: z.string().optional(),
-      commonQuestions: z
-        .array(
-          z.object({
-            question: z.string().optional(),
-            answer: z.string().optional(),
-          })
-        )
-        .optional(),
-    })
-    .optional(),
+  customerService: z.object({
+    supportHours: z.string().min(1, "Support hours are required"),
+    contactMethods: z
+      .array(z.string())
+      .refine((value) => value.some((item) => item), {
+        message: "You have to select at least one item.",
+      }),
+    email: z.string().email("Invalid email").or(z.literal("")).optional(),
+    phone: z.string().optional(),
+    socialMedia: z.string().url("Invalid URL").or(z.literal("")).optional(),
+    whatsapp: z.string().optional(),
+    responseTime: z.string().optional(),
+    commonQuestions: z.array(
+      z.object({
+        question: z.string().optional(),
+        answer: z.string().optional(),
+      })
+    ),
+    newQuestion: z.object({
+      question: z.string().optional(),
+      answer: z.string().optional(),
+    }),
+  }),
   chatbotConfig: z.object({
     objective: z.string().min(1, "Objective is required"),
     tone: z.enum(["formal", "casual", "friendly", "professional"]),
@@ -160,7 +183,7 @@ export const formSchema = z.object({
 });
 
 export default function FormWizard() {
-  const [currentStep, setCurrentStep] = useState(1);
+  const [currentStep, setCurrentStep] = useState(2);
   const [businessData, setBusinessData] = useState<BusinessData>(initialData);
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -290,7 +313,7 @@ function FormWizardStep({ step, form }: FormWizardStepProps) {
     case 1:
       return <ProductsAndServices form={form} />;
     case 2:
-      return <div>Step 3: Shipping and Logistics</div>;
+      return <CustomerService form={form} />;
     case 3:
       return <div>Step 4: Customer Service</div>;
     case 4:

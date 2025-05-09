@@ -37,13 +37,17 @@ export default function ProductsAndServices({ form }: ProductsAndServicesProps) 
   }
 
   const addNewItem = () => {
-    const newItem = form.getValues("newItem");
+    const newItem = form.getValues("productsServices.newItem");
 
     if (newItem?.name && newItem?.description && newItem?.price) {
       append(newItem);
-      form.setValue("newItem", { name: "", description: "", price: "" });
+      form.setValue("productsServices.newItem", {
+        name: "",
+        description: "",
+        price: "",
+      });
     }
-  }
+  };
 
   return (
     <Card>
@@ -52,133 +56,151 @@ export default function ProductsAndServices({ form }: ProductsAndServicesProps) 
           <h2>Products & Services</h2>
         </CardTitle>
         <CardDescription>
-          <p>
-            Tell us about what your business offers to customers.
-          </p>
+          <p>Tell us about what your business offers to customers.</p>
         </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
         <FormField
           control={form.control}
-          name='productsServices.type'
-          render={({field}) => (
-            <RadioGroup {...field} onValueChange={field.onChange} onChange={handleRadioChange}>
+          name="productsServices.type"
+          render={({ field }) => (
+            <RadioGroup
+              {...field}
+              onValueChange={field.onChange}
+              onChange={handleRadioChange}
+            >
               <p>What does your business offer?*</p>
-              <FormItem className='flex items-center gap-2'>
+              <FormItem className="flex items-center gap-2">
                 <FormControl>
-                  <RadioGroupItem value='products' />
+                  <RadioGroupItem value="products" />
                 </FormControl>
                 <FormLabel>Products</FormLabel>
               </FormItem>
-              <FormItem className='flex items-center gap-2'>
+              <FormItem className="flex items-center gap-2">
                 <FormControl>
-                  <RadioGroupItem value='services' />
+                  <RadioGroupItem value="services" />
                 </FormControl>
                 <FormLabel>Services</FormLabel>
               </FormItem>
-              <FormItem className='flex items-center gap-2'>
+              <FormItem className="flex items-center gap-2">
                 <FormControl>
-                  <RadioGroupItem value='both' />
+                  <RadioGroupItem value="both" />
                 </FormControl>
                 <FormLabel>Both Products & Services</FormLabel>
               </FormItem>
             </RadioGroup>
           )}
         />
-        {
-          type !== 'services' && (
-            <FormField
-              control={form.control}
-              name='hasPhysicalProducts'
-              render={({field}) => (
-                <FormItem className='flex items-center gap-2'>
-                  <FormControl>
-                    <Switch
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
-                  </FormControl>
-                  <FormLabel>We sell physical products that require shipping</FormLabel>
-                </FormItem>
-              )}
-            />
-          )
-        }
+        {type !== "services" && (
+          <FormField
+            control={form.control}
+            name="hasPhysicalProducts"
+            render={({ field }) => (
+              <FormItem className="flex items-center gap-2">
+                <FormControl>
+                  <Switch
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                </FormControl>
+                <FormLabel>
+                  We sell physical products that require shipping
+                </FormLabel>
+              </FormItem>
+            )}
+          />
+        )}
         <div className="flex flex-col gap-4 border rounded-md p-4">
-            <h3 className="text-lg font-semibold">Add {type === 'both' ? 'Products & Services' : `${type.charAt(0).toUpperCase()}${type.slice(1)}`}
-            </h3>
-            <FormField
-              control={form.control}
-              name="newItem.name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Name</FormLabel>
-                  <FormControl>
-                    <Input {...field} placeholder={type === 'services' ? 'Service name' : 'Product name'} />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="newItem.description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Description</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      {...field}
-                      placeholder={type === 'services' ? 'Describe this service' : 'Describe this product'}
-                      className="resize-none"
-                    />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="newItem.price"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Price</FormLabel>
-                  <FormControl>
-                    <Input {...field} placeholder="$0.00 or pricing structure" />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-            <Button
-              type="button"
-              onClick={addNewItem}
-            >
-              Add {type === 'both' ? 'Product/Service' : type.charAt(0).toUpperCase() + type.slice(1, -1)}
-            </Button>
-            {fields.length > 0 && (
-              <div className="space-y-4">
+          <h3 className="text-lg font-semibold">
+            Add{" "}
+            {type === "both"
+              ? "Products & Services"
+              : `${type.charAt(0).toUpperCase()}${type.slice(1)}`}
+          </h3>
+          <FormField
+            control={form.control}
+            name="productsServices.newItem.name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Name</FormLabel>
+                <FormControl>
+                  <Input
+                    {...field}
+                    placeholder={
+                      type === "services" ? "Service name" : "Product name"
+                    }
+                  />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="productsServices.newItem.description"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Description</FormLabel>
+                <FormControl>
+                  <Textarea
+                    {...field}
+                    placeholder={
+                      type === "services"
+                        ? "Describe this service"
+                        : "Describe this product"
+                    }
+                    className="resize-none"
+                  />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="productsServices.newItem.price"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Price</FormLabel>
+                <FormControl>
+                  <Input {...field} placeholder="$0.00 or pricing structure" />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+          <Button type="button" onClick={addNewItem} className="cursor-pointer">
+            Add{" "}
+            {type === "both"
+              ? "Product/Service"
+              : type.charAt(0).toUpperCase() + type.slice(1, -1)}
+          </Button>
+          {fields.length > 0 && (
+            <div className="space-y-4">
               <h3 className="font-medium">Added Items</h3>
               <div className="space-y-4">
                 {fields.map((item, index) => (
-                  <div key={index} className="border rounded-md p-4 relative">
+                  <div key={item.id} className="border rounded-md p-4 relative">
                     <Button
+                      type="button"
                       variant="ghost"
                       size="icon"
-                      className="absolute top-2 right-2"
+                      className="absolute top-2 right-2 cursor-pointer"
                       onClick={() => remove(index)}
                     >
                       <Trash className="h-4 w-4" />
                     </Button>
                     <div className="space-y-2">
                       <h4 className="font-medium">{item.name}</h4>
-                      <p className="text-sm text-muted-foreground">{item.description}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {item.description}
+                      </p>
                       <p className="text-sm">Price: {item.price}</p>
                     </div>
                   </div>
                 ))}
               </div>
             </div>
-            )}
-          </div>
+          )}
+        </div>
       </CardContent>
     </Card>
-  )
+  );
 }
