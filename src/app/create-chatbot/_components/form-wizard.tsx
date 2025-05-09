@@ -14,6 +14,7 @@ import ProductsAndServices from "./products-services";
 import CustomerService from "./customer-service";
 import ChatbotConfig from "./chatbot-config";
 import DocumentsStep from "./documents";
+import ShippingLogistics from "./shipping-logistics";
 
 export interface BusinessData {
   generalInfo: {
@@ -37,7 +38,7 @@ export interface BusinessData {
   };
   hasPhysicalProducts: boolean;
   shippingLogistics: {
-    shippingMethods: string[];
+    shippingMethods: string;
     deliveryTimeframes: string;
     returnPolicy: string;
     internationalShipping: boolean;
@@ -85,9 +86,9 @@ const initialData: BusinessData = {
       price: "",
     },
   },
-  hasPhysicalProducts: false,
+  hasPhysicalProducts: true,
   shippingLogistics: {
-    shippingMethods: [],
+    shippingMethods: "",
     deliveryTimeframes: "",
     returnPolicy: "",
     internationalShipping: false,
@@ -145,9 +146,9 @@ export const formSchema = z.object({
   hasPhysicalProducts: z.boolean(),
   shippingLogistics: z
     .object({
-      shippingMethods: z.array(z.string()).optional(),
-      deliveryTimeframes: z.string().optional(),
-      returnPolicy: z.string().optional(),
+      shippingMethods: z.string().min(1, "Shipping methods are required"),
+      deliveryTimeframes: z.string().min(1, "Delivery timeframes are required"),
+      returnPolicy: z.string().min(1, "Return policy is required"),
       internationalShipping: z.boolean(),
       shippingRestrictions: z.string().optional(),
     })
@@ -185,7 +186,7 @@ export const formSchema = z.object({
 });
 
 export default function FormWizard() {
-  const [currentStep, setCurrentStep] = useState(3);
+  const [currentStep, setCurrentStep] = useState(2);
   const [businessData, setBusinessData] = useState<BusinessData>(initialData);
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -315,7 +316,7 @@ function FormWizardStep({ step, form }: FormWizardStepProps) {
     case 1:
       return <ProductsAndServices form={form} />;
     case 2:
-      return <div>Step 3: Shipping & Logistics</div>;
+      return <ShippingLogistics form={form} />;
     case 3:
       return <CustomerService form={form} />;
     case 4:

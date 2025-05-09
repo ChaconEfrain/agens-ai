@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { FileText, Trash, Upload, X } from "lucide-react";
+import { FileText, Trash, Upload } from "lucide-react";
 import { UseFormReturn } from "react-hook-form";
 import { formSchema } from "./form-wizard";
 import { z } from "zod";
