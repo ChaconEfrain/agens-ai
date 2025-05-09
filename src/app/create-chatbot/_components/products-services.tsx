@@ -69,7 +69,7 @@ export default function ProductsAndServices({ form }: ProductsAndServicesProps) 
               onValueChange={field.onChange}
               onChange={handleRadioChange}
             >
-              <p>What does your business offer?*</p>
+              <FormLabel>What does your business offer?*</FormLabel>
               <FormItem className="flex items-center gap-2">
                 <FormControl>
                   <RadioGroupItem value="products" />

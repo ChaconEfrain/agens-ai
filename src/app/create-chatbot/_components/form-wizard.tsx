@@ -12,6 +12,7 @@ import { useForm, UseFormReturn } from 'react-hook-form'
 import { Button } from '@/components/ui/button'
 import ProductsAndServices from "./products-services";
 import CustomerService from "./customer-service";
+import ChatbotConfig from "./chatbot-config";
 
 export interface BusinessData {
   generalInfo: {
@@ -176,14 +177,14 @@ export const formSchema = z.object({
   chatbotConfig: z.object({
     objective: z.string().min(1, "Objective is required"),
     tone: z.enum(["formal", "casual", "friendly", "professional"]),
-    style: z.string().optional(),
-    personality: z.string().optional(),
+    style: z.string().min(1, "Communication Style is required"),
+    personality: z.string().min(1, "Personality is required"),
   }),
   documents: z.array(z.instanceof(File)).optional(),
 });
 
 export default function FormWizard() {
-  const [currentStep, setCurrentStep] = useState(2);
+  const [currentStep, setCurrentStep] = useState(3);
   const [businessData, setBusinessData] = useState<BusinessData>(initialData);
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -303,7 +304,7 @@ interface FormWizardStepProps {
 function FormWizardStep({ step, form }: FormWizardStepProps) {
   const baseStepIndex = form.getValues("hasPhysicalProducts")
     ? step
-    : step >= 3
+    : step >= 2
     ? step + 1
     : step;
 
@@ -313,11 +314,11 @@ function FormWizardStep({ step, form }: FormWizardStepProps) {
     case 1:
       return <ProductsAndServices form={form} />;
     case 2:
-      return <CustomerService form={form} />;
+      return <div>Step 3: Shipping & Logistics</div>;
     case 3:
-      return <div>Step 4: Customer Service</div>;
+      return <CustomerService form={form} />;
     case 4:
-      return <div>Step 5: Chatbot Configuration</div>;
+      return <ChatbotConfig form={form} />;
     case 5:
       return <div>Step 6: Upload Documents</div>;
     case 6:
