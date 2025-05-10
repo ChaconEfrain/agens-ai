@@ -54,7 +54,10 @@ export default function CustomerService({ form }: CustomerServiceProps) {
           <h2>Customer Service</h2>
         </CardTitle>
         <CardDescription>
-          <p>Provide details about your customer support policies and common questions.</p>
+          <p>
+            Provide details about your customer support policies and common
+            questions.
+          </p>
         </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
@@ -63,9 +66,12 @@ export default function CustomerService({ form }: CustomerServiceProps) {
           name="customerService.supportHours"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Support Hours</FormLabel>
+              <FormLabel>Support Hours*</FormLabel>
               <FormControl>
-                <Input {...field} placeholder="e.g., Monday-Friday, 9 AM - 5 PM EST" />
+                <Input
+                  {...field}
+                  placeholder="e.g., Monday-Friday, 9 AM - 5 PM EST"
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -76,7 +82,7 @@ export default function CustomerService({ form }: CustomerServiceProps) {
           name="customerService.contactMethods"
           render={() => (
             <FormItem>
-              <FormLabel>Contact Methods</FormLabel>
+              <FormLabel>Contact Methods*</FormLabel>
               {contactMethods.map((item) => (
                 <FormField
                   key={item.value}
@@ -98,15 +104,13 @@ export default function CustomerService({ form }: CustomerServiceProps) {
                                     field.value?.filter(
                                       (value) => value !== item.value
                                     )
-                                  )
+                                  );
                             }}
                           />
                         </FormControl>
-                        <FormLabel>
-                          {item.label}
-                        </FormLabel>
+                        <FormLabel>{item.label}</FormLabel>
                       </FormItem>
-                    )
+                    );
                   }}
                 />
               ))}
@@ -115,79 +119,80 @@ export default function CustomerService({ form }: CustomerServiceProps) {
           )}
         />
         {contactMethodsSelected.length > 0 && (
-        <div className='grid grid-cols-2 gap-4'>
-          {contactMethodsSelected.includes('email') && (
-            <FormField
-              control={form.control}
-              name="customerService.email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Email</FormLabel>
-                  <FormControl>
-                    <Input {...field} placeholder="mybusiness@abc.com" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          )}
-          {contactMethodsSelected.includes('phone') && (
-            <FormField
-              control={form.control}
-              name="customerService.phone"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Phone</FormLabel>
-                  <FormControl>
-                    <Input {...field} placeholder="+1 (123) 456-7890" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          )}
-          {contactMethodsSelected.includes('socialMedia') && (
-            <FormField
-              control={form.control}
-              name="customerService.socialMedia"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Social Media</FormLabel>
-                  <FormControl>
-                    <Input {...field} placeholder="https://mybusiness.com" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          )}
-          {contactMethodsSelected.includes('whatsapp') && (
-            <FormField
-              control={form.control}
-              name="customerService.whatsapp"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>WhatsApp</FormLabel>
-                  <FormControl>
-                    <Input {...field} placeholder="+1 (123) 456-7890" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          )}
-        </div>
+          <div className="grid grid-cols-2 gap-4 items-start">
+            {contactMethodsSelected.includes("email") && (
+              <FormField
+                control={form.control}
+                name="customerService.email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email*</FormLabel>
+                    <FormControl>
+                      <Input {...field} placeholder="mybusiness@abc.com" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
+            {contactMethodsSelected.includes("phone") && (
+              <FormField
+                control={form.control}
+                name="customerService.phone"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Phone*</FormLabel>
+                    <FormControl>
+                      <Input {...field} placeholder="+1 (123) 456-7890" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
+            {contactMethodsSelected.includes("socialMedia") && (
+              <FormField
+                control={form.control}
+                name="customerService.socialMedia"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Social Media*</FormLabel>
+                    <FormControl>
+                      <Input {...field} placeholder="https://mybusiness.com" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
+            {contactMethodsSelected.includes("whatsapp") && (
+              <FormField
+                control={form.control}
+                name="customerService.whatsapp"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>WhatsApp*</FormLabel>
+                    <FormControl>
+                      <Input {...field} placeholder="+1 (123) 456-7890" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
+          </div>
         )}
         <FormField
           control={form.control}
           name="customerService.responseTime"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>
-                Expected Response Time
-              </FormLabel>
+              <FormLabel>Expected Response Time</FormLabel>
               <FormControl>
-                <Input {...field} placeholder="e.g., Within 24 hours, same business day" />
+                <Input
+                  {...field}
+                  placeholder="e.g., Within 24 hours, same business day"
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -196,9 +201,11 @@ export default function CustomerService({ form }: CustomerServiceProps) {
         <div className="flex flex-col gap-4 border rounded-md p-4">
           <div>
             <h3 className="text-lg font-semibold">
-            Common Questions & Answers</h3>
+              Common Questions & Answers
+            </h3>
             <p className="text-sm text-muted-foreground">
-              Add frequently asked questions that your chatbot should know how to answer.
+              Add frequently asked questions that your chatbot should know how
+              to answer.
             </p>
           </div>
           <FormField
@@ -210,7 +217,7 @@ export default function CustomerService({ form }: CustomerServiceProps) {
                 <FormControl>
                   <Input
                     {...field}
-                    placeholder='e.g., What is your return policy?'
+                    placeholder="e.g., What is your return policy?"
                   />
                 </FormControl>
               </FormItem>
@@ -225,14 +232,18 @@ export default function CustomerService({ form }: CustomerServiceProps) {
                 <FormControl>
                   <Textarea
                     {...field}
-                    placeholder='e.g., Our return policy is 30 days from the date of purchase.'
+                    placeholder="e.g., Our return policy is 30 days from the date of purchase."
                     className="resize-none"
                   />
                 </FormControl>
               </FormItem>
             )}
           />
-          <Button type="button" onClick={addNewQuestion} className="cursor-pointer">
+          <Button
+            type="button"
+            onClick={addNewQuestion}
+            className="cursor-pointer"
+          >
             Add Question
           </Button>
           {fields.length > 0 && (
@@ -242,7 +253,7 @@ export default function CustomerService({ form }: CustomerServiceProps) {
                 {fields.map((item, index) => (
                   <div key={index} className="border rounded-md p-4 relative">
                     <Button
-                      type='button'
+                      type="button"
                       variant="ghost"
                       size="icon"
                       className="absolute top-2 right-2 cursor-pointer"
@@ -264,5 +275,5 @@ export default function CustomerService({ form }: CustomerServiceProps) {
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }

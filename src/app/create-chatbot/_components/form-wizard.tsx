@@ -86,7 +86,7 @@ const initialData: BusinessData = {
       price: "",
     },
   },
-  hasPhysicalProducts: true,
+  hasPhysicalProducts: false,
   shippingLogistics: {
     shippingMethods: "",
     deliveryTimeframes: "",
@@ -186,8 +186,7 @@ export const formSchema = z.object({
 });
 
 export default function FormWizard() {
-  const [currentStep, setCurrentStep] = useState(2);
-  const [businessData, setBusinessData] = useState<BusinessData>(initialData);
+  const [currentStep, setCurrentStep] = useState(0);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -232,11 +231,52 @@ export default function FormWizard() {
   ];
 
   const handleNextStep = () => {
-    // form.trigger("generalInfo").then((isValid) => {
-    //   if (isValid) {
-    setCurrentStep(currentStep + 1);
-    // }
-    // });
+    const stepKeys: Array<keyof z.infer<typeof formSchema>> = [
+      "generalInfo",
+      "productsServices",
+      ...(form.watch("hasPhysicalProducts")
+        ? (["shippingLogistics"] as Array<keyof z.infer<typeof formSchema>>)
+        : []),
+      "customerService",
+      "chatbotConfig",
+      "documents",
+    ];
+
+    const currentStepKey = stepKeys[currentStep];
+
+    form.trigger(currentStepKey).then((isValid) => {
+      let hasErrors = false;
+      if (currentStepKey === "customerService") {
+        const contactMethods = form.getValues("customerService.contactMethods");
+        const contactFields: Record<
+          string,
+          keyof z.infer<typeof formSchema>["customerService"]
+        > = {
+          email: "email",
+          phone: "phone",
+          socialMedia: "socialMedia",
+          whatsapp: "whatsapp",
+        };
+
+        contactMethods.forEach((method) => {
+          const field = contactFields[method];
+          if (field) {
+            const value = form.getValues(`customerService.${field}`);
+            if (!value) {
+              form.setError(`customerService.${field}`, {
+                type: "required",
+                message:
+                  "This field is required when selected as a contact method.",
+              });
+              hasErrors = true;
+            }
+          }
+        });
+      }
+      if (isValid && !hasErrors) {
+        setCurrentStep(currentStep + 1);
+      }
+    });
   };
 
   const handlePreviousStep = () => {
