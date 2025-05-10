@@ -106,7 +106,7 @@ export default function DocumentsStep({ form }: DocumentsProps) {
             <div className="space-y-1">
               <p className="text-sm font-medium">Drag and drop files or click to upload</p>
               <p className="text-xs text-muted-foreground">
-                Supported formats: PDF (max 10MB per file)
+                Supported formats: PDF (max 8MB per file)
               </p>
             </div>
             <Button type="button" variant="outline" size="sm" onClick={() => fileInputRef.current?.click()}>
