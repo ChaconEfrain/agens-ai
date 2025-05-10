@@ -1,38 +1,130 @@
 import { relations } from "drizzle-orm";
-import { index, integer, pgTable, text, timestamp, varchar, vector } from "drizzle-orm/pg-core";
+import {
+  boolean,
+  index,
+  integer,
+  json,
+  pgEnum,
+  pgTable,
+  text,
+  timestamp,
+  varchar,
+  vector,
+} from "drizzle-orm/pg-core";
 
 //Tables
 export const users = pgTable("users", {
-  id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
-  clerkId: varchar('clerk_id', { length: 255 }).notNull().unique(),
-  name: varchar('name', { length: 255 }).notNull(),
-  email: varchar('email', { length: 255 }).notNull().unique(),
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  clerkId: varchar("clerk_id", { length: 255 }).notNull().unique(),
+  name: varchar("name", { length: 255 }).notNull(),
+  email: varchar("email", { length: 255 }).notNull().unique(),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").$onUpdate(() => new Date()),
 });
 
-export const businesses = pgTable("businesses", {
-  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
-  userId: integer("user_id").references(() => users.id, { onDelete: 'cascade' }).notNull(),
-  name: varchar("name", { length: 255 }).notNull(),
-  description: varchar("description", { length: 1024 }),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").$onUpdate(() => new Date()),
-}, table => [index("businesses_user_id_idx").on(table.userId)]
+export const productsOrServicesEnum = pgEnum("products_or_services", [
+  "products",
+  "services",
+  "both",
+]);
+
+export const chatbotToneEnum = pgEnum("chatbot_tone", [
+  "formal",
+  "casual",
+  "friendly",
+  "professional",
+]);
+
+export const businesses = pgTable(
+  "businesses",
+  {
+    id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+    userId: integer("user_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    name: varchar("name", { length: 255 }).notNull(),
+    description: text("description").notNull(),
+    website: text("website"),
+    foundedYear: varchar("founded_year", { length: 255 }),
+    productsOrServices: productsOrServicesEnum(
+      "products_or_services"
+    ).notNull(),
+    items: json("items").$type<
+      {
+        name: string;
+        description: string;
+        price: string;
+      }[]
+    >(),
+    hasPhysicalProducts: boolean("has_physical_products").default(false),
+    shippingMethods: text("shipping_methods"),
+    deliveryTimeframes: text("delivery_timeframes"),
+    returnPolicy: text("return_policy"),
+    internationalShipping: boolean("international_shipping").default(false),
+    shippingRestrictions: text("shipping_restrictions"),
+    supportHours: text("support_hours"),
+    contactMethods: json("contact_methods").$type<string[]>(),
+    email: varchar("email", { length: 255 }),
+    phone: varchar("phone", { length: 255 }),
+    whatsapp: varchar("whatsapp", { length: 255 }),
+    socialMedia: text("social_media"),
+    responseTime: varchar("response_time", { length: 255 }),
+    commonQuestions: json("common_questions").$type<
+      {
+        question: string;
+        answer: string;
+      }[]
+    >(),
+    chatbotObjective: text("chatbot_objective").notNull(),
+    chatbotTone: chatbotToneEnum("chatbot_tone").notNull(),
+    chatbotStyle: varchar("chatbot_style", { length: 255 }).notNull(),
+    chatbotPersonality: text("chatbot_personality").notNull(),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at").$onUpdate(() => new Date()),
+  },
+  (table) => [index("businesses_user_id_idx").on(table.userId)]
 );
 
-export const chatbots = pgTable("chatbots", {
-  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
-  businessId: integer("business_id").references(() => businesses.id, { onDelete: 'cascade' }).notNull(),
-  userId: integer("user_id").references(() => users.id, { onDelete: 'cascade' }).notNull(),
-  name: varchar("name", { length: 255 }).notNull(),
-  instructions: varchar("instructions", { length: 2000 }), // system prompt
-  slug: varchar("slug", { length: 255 }).notNull().unique(), // para compartir tipo embed
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").$onUpdate(() => new Date()),
-}, table => [
-  index("chatbots_business_id_idx").on(table.businessId),
-  index("chatbots_user_id_idx").on(table.userId)
+export const files = pgTable(
+  "files",
+  {
+    id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+    userId: integer("user_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    businessId: integer("business_id")
+      .references(() => businesses.id, { onDelete: "cascade" })
+      .notNull(),
+    title: varchar("title", { length: 255 }).notNull(),
+    fileUrl: varchar("file_url", { length: 512 }).notNull(),
+    createdAT: timestamp("created_at").notNull().defaultNow(),
+    updatedAT: timestamp("updated_at").$onUpdate(() => new Date()),
+  },
+  (table) => [
+    index("presentations_user_id_idx").on(table.userId),
+    index("presentations_created_at_idx").on(table.createdAT),
+  ]
+);
+
+export const chatbots = pgTable(
+  "chatbots",
+  {
+    id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+    businessId: integer("business_id")
+      .references(() => businesses.id, { onDelete: "cascade" })
+      .notNull(),
+    userId: integer("user_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    name: varchar("name", { length: 255 }).notNull(),
+    instructions: varchar("instructions", { length: 2000 }), // system prompt
+    slug: varchar("slug", { length: 255 }).notNull().unique(), // para compartir tipo embed
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at").$onUpdate(() => new Date()),
+  },
+  (table) => [
+    index("chatbots_business_id_idx").on(table.businessId),
+    index("chatbots_user_id_idx").on(table.userId),
   ]
 );
 
@@ -61,23 +153,43 @@ export const embeddings = pgTable(
 export const usersRelations = relations(users, ({ many }) => ({
   businesses: many(businesses),
   chatbots: many(chatbots),
+  files: many(files),
 }));
 
 export const businessesRelations = relations(businesses, ({ one, many }) => ({
   user: one(users, { fields: [businesses.userId], references: [users.id] }),
   chatbots: many(chatbots),
+  files: many(files),
+}));
+
+export const filesRelations = relations(files, ({ one }) => ({
+  business: one(businesses, {
+    fields: [files.businessId],
+    references: [businesses.id],
+  }),
+  user: one(users, {
+    fields: [files.userId],
+    references: [users.id],
+  }),
 }));
 
 export const chatbotsRelations = relations(chatbots, ({ one }) => ({
-  business: one(businesses, { fields: [chatbots.businessId], references: [businesses.id] }),
+  business: one(businesses, {
+    fields: [chatbots.businessId],
+    references: [businesses.id],
+  }),
   user: one(users, { fields: [chatbots.userId], references: [users.id] }),
 }));
 
 export const embeddingsRelations = relations(embeddings, ({ one }) => ({
-  chatbot: one(chatbots, { fields: [embeddings.chatbotId], references: [chatbots.id] }),
+  chatbot: one(chatbots, {
+    fields: [embeddings.chatbotId],
+    references: [chatbots.id],
+  }),
 }));
 
 //Types
 export type User = typeof users.$inferSelect;
 export type Chatbot = typeof chatbots.$inferSelect;
 export type Business = typeof businesses.$inferSelect;
+export type Files = typeof files.$inferSelect;
