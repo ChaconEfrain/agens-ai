@@ -15,6 +15,7 @@ import CustomerService from "./customer-service";
 import ChatbotConfig from "./chatbot-config";
 import DocumentsStep from "./documents";
 import ShippingLogistics from "./shipping-logistics";
+import Summary from "./summary";
 
 export interface BusinessData {
   generalInfo: {
@@ -273,7 +274,7 @@ export default function FormWizard() {
           }
         });
       }
-      if (isValid && !hasErrors) {
+      if (isValid && !hasErrors && currentStep < steps.length - 1) {
         setCurrentStep(currentStep + 1);
       }
     });
@@ -329,8 +330,12 @@ export default function FormWizard() {
           <ChevronLeft />
           Previous
         </Button>
-        <Button className="cursor-pointer" onClick={handleNextStep}>
-          {currentStep === steps.length - 1 ? "Finish" : "Next"}
+        <Button
+          className="cursor-pointer"
+          onClick={handleNextStep}
+          disabled={currentStep === steps.length - 1}
+        >
+          Next
           <ChevronRight />
         </Button>
       </div>
@@ -364,7 +369,7 @@ function FormWizardStep({ step, form }: FormWizardStepProps) {
     case 5:
       return <DocumentsStep form={form} />;
     case 6:
-      return <div>Step 7: Summary</div>;
+      return <Summary form={form} />;
     default:
       return null;
   }
