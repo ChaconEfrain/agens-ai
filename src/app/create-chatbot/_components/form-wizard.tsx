@@ -16,6 +16,8 @@ import ChatbotConfig from "./chatbot-config";
 import DocumentsStep from "./documents";
 import ShippingLogistics from "./shipping-logistics";
 import Summary from "./summary";
+import { processDataAction } from "../_actions";
+import { toast } from "sonner";
 
 export interface BusinessData {
   generalInfo: {
@@ -147,9 +149,18 @@ export const formSchema = z.object({
   hasPhysicalProducts: z.boolean(),
   shippingLogistics: z
     .object({
-      shippingMethods: z.string().min(1, "Shipping methods are required"),
-      deliveryTimeframes: z.string().min(1, "Delivery timeframes are required"),
-      returnPolicy: z.string().min(1, "Return policy is required"),
+      shippingMethods: z
+        .string()
+        // .min(1, "Shipping methods are required")
+        .optional(),
+      deliveryTimeframes: z
+        .string()
+        // .min(1, "Delivery timeframes are required")
+        .optional(),
+      returnPolicy: z
+        .string()
+        // .min(1, "Return policy is required")
+        .optional(),
       internationalShipping: z.boolean(),
       shippingRestrictions: z.string().optional(),
     })
@@ -286,6 +297,16 @@ export default function FormWizard() {
     }
   };
 
+  const processData = async (form: z.infer<typeof formSchema>) => {
+    const { message, success } = await processDataAction(form);
+
+    if (success) {
+      toast.success(message);
+    } else {
+      toast.error(message);
+    }
+  };
+
   return (
     <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-md p-6 flex flex-col gap-6">
       <h1 className="text-3xl font-bold">Configure your chatbot</h1>
@@ -316,7 +337,7 @@ export default function FormWizard() {
         />
       </div>
       <Form {...form}>
-        <form action="">
+        <form onSubmit={form.handleSubmit(processData)}>
           <FormWizardStep step={currentStep} form={form} />
         </form>
       </Form>

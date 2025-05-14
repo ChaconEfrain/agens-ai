@@ -63,7 +63,7 @@ export const businesses = pgTable(
     internationalShipping: boolean("international_shipping").default(false),
     shippingRestrictions: text("shipping_restrictions"),
     supportHours: text("support_hours"),
-    contactMethods: json("contact_methods").$type<string[]>(),
+    contactMethods: json("contact_methods").$type<string[]>().notNull(),
     email: varchar("email", { length: 255 }),
     phone: varchar("phone", { length: 255 }),
     whatsapp: varchar("whatsapp", { length: 255 }),
@@ -116,15 +116,15 @@ export const chatbots = pgTable(
     userId: integer("user_id")
       .references(() => users.id, { onDelete: "cascade" })
       .notNull(),
-    name: varchar("name", { length: 255 }).notNull(),
-    instructions: varchar("instructions", { length: 2000 }), // system prompt
-    slug: varchar("slug", { length: 255 }).notNull().unique(), // para compartir tipo embed
+    instructions: text("instructions"),
+    slug: varchar("slug", { length: 255 }).notNull().unique(),
     createdAt: timestamp("created_at").notNull().defaultNow(),
     updatedAt: timestamp("updated_at").$onUpdate(() => new Date()),
   },
   (table) => [
     index("chatbots_business_id_idx").on(table.businessId),
     index("chatbots_user_id_idx").on(table.userId),
+    index("chatbots_slug_idx").on(table.slug),
   ]
 );
 

@@ -3,6 +3,7 @@ import { Outfit } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import "./globals.css";
 import Nav from "@/components/nav";
+import { Toaster } from "@/components/ui/sonner";
 
 const outfit = Outfit({
   variable: "--font-outfit",
@@ -27,6 +28,7 @@ export default function RootLayout({
             <Nav />
             {children}
           </div>
+          <Toaster position="bottom-right" />
         </body>
       </html>
     </ClerkProvider>
