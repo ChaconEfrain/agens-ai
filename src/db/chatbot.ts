@@ -1,39 +1,50 @@
 import { auth } from "@clerk/nextjs/server";
-import { getUser } from "./user";
-import { getBusiness } from "./business";
+import { getUserByClerkId } from "./user";
 import { db } from ".";
-import { chatbots, users } from "./schema";
+import { chatbots } from "./schema";
 import { eq } from "drizzle-orm";
 
-export async function createChatbot({instructions, slug, businessId}: {instructions: string; slug: string, businessId: number}) {
-  const {userId} = await auth();
+export async function createChatbot({
+  instructions,
+  slug,
+  businessId,
+}: {
+  instructions: string;
+  slug: string;
+  businessId: number;
+}) {
+  const { userId } = await auth();
 
   try {
-    if (!userId) throw new Error('No session detected');
-  
-    const user = await getUser({clerkId: userId})
-  
-    return await db.insert(chatbots).values({
-      userId: user.id,
-      businessId,
-      instructions,
-      slug
-    }).returning({id: chatbots.id})
+    if (!userId) throw new Error("No session detected");
+
+    const user = await getUserByClerkId({ clerkId: userId });
+
+    return await db
+      .insert(chatbots)
+      .values({
+        userId: user.id,
+        businessId,
+        instructions,
+        slug,
+      })
+      .returning({ id: chatbots.id });
   } catch (error) {
     if (error instanceof Error) {
-      throw new Error('Chatbot', {
-        cause: error.message
-      })
+      throw new Error("Chatbot", {
+        cause: error.message,
+      });
     }
   }
 }
 
-export async function getChatbot({userId}: {userId: number}) {
+export async function getChatbotBySlug({ slug }: { slug: string }) {
   const chatbot = await db.query.chatbots.findFirst({
-    where: eq(chatbots.userId, userId)
-  })
-
-  if (!chatbot) throw new Error('Chatbot not found');
+    where: eq(chatbots.slug, slug),
+    with: {
+      business: true,
+    },
+  });
 
   return chatbot;
 }

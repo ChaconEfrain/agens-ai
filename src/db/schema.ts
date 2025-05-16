@@ -116,7 +116,7 @@ export const chatbots = pgTable(
     userId: integer("user_id")
       .references(() => users.id, { onDelete: "cascade" })
       .notNull(),
-    instructions: text("instructions"),
+    instructions: text("instructions").notNull(),
     slug: varchar("slug", { length: 255 }).notNull().unique(),
     createdAt: timestamp("created_at").notNull().defaultNow(),
     updatedAt: timestamp("updated_at").$onUpdate(() => new Date()),
