@@ -2,7 +2,14 @@ import React from "react";
 import { getChatbotBySlug } from "@/db/chatbot";
 import { notFound, redirect } from "next/navigation";
 import { auth } from "@clerk/nextjs/server";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Bot, Box, File, Info, Smile, Truck } from "lucide-react";
 import {
   Accordion,
@@ -11,6 +18,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import Chat from "./_components/chat";
+import { Button } from "@/components/ui/button";
 
 export default async function TestChatbot({
   params,
@@ -333,6 +341,10 @@ export default async function TestChatbot({
                   </AccordionItem>
                 </Accordion>
               </CardContent>
+              <CardFooter>
+                {/* TODO: Implement modal to add context */}
+                <Button className="w-full">Add context</Button>
+              </CardFooter>
             </Card>
           </section>
         </div>
