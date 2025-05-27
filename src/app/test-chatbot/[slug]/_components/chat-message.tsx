@@ -32,10 +32,15 @@ export default function ChatMessage({ sender, message }: ChatMessageProps) {
           "bg-primary text-white": sender === "user",
           "bg-gray-100 text-gray-800": sender === "ai",
           "p-3": message !== "",
+          "bg-red-200": message === "error",
         })}
       >
         {message !== "" ? (
-          message
+          message === "error" ? (
+            "⚠️ Something went wrong, please try again."
+          ) : (
+            message
+          )
         ) : (
           <span className="flex">
             <Dot className="animate-bounce delay-0" />

@@ -272,7 +272,7 @@ export default function Summary({ form }: SummaryProps) {
         >
           {form.formState.isSubmitting ? (
             <>
-              Creating Chatbot <LoaderCircle className="spin-in" />
+              Creating Chatbot <LoaderCircle className="animate-spin" />
             </>
           ) : (
             "Create Chatbot"

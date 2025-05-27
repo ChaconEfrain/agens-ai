@@ -95,14 +95,17 @@ export const files = pgTable(
     businessId: integer("business_id")
       .references(() => businesses.id, { onDelete: "cascade" })
       .notNull(),
+    chatbotId: integer("chatbot_id")
+      .references(() => chatbots.id, { onDelete: "cascade" })
+      .notNull(),
     title: varchar("title", { length: 255 }).notNull(),
     fileUrl: varchar("file_url", { length: 512 }).notNull(),
     createdAT: timestamp("created_at").notNull().defaultNow(),
     updatedAT: timestamp("updated_at").$onUpdate(() => new Date()),
   },
   (table) => [
-    index("presentations_user_id_idx").on(table.userId),
-    index("presentations_created_at_idx").on(table.createdAT),
+    index("files_business_id_idx").on(table.businessId),
+    index("files_chatbot_id_idx").on(table.chatbotId),
   ]
 );
 
@@ -171,14 +174,19 @@ export const filesRelations = relations(files, ({ one }) => ({
     fields: [files.userId],
     references: [users.id],
   }),
+  chatbot: one(chatbots, {
+    fields: [files.chatbotId],
+    references: [chatbots.id],
+  }),
 }));
 
-export const chatbotsRelations = relations(chatbots, ({ one }) => ({
+export const chatbotsRelations = relations(chatbots, ({ one, many }) => ({
   business: one(businesses, {
     fields: [chatbots.businessId],
     references: [businesses.id],
   }),
   user: one(users, { fields: [chatbots.userId], references: [users.id] }),
+  files: many(files),
 }));
 
 export const embeddingsRelations = relations(embeddings, ({ one }) => ({

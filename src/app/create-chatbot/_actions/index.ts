@@ -2,12 +2,12 @@
 
 import { z } from "zod"
 import { formSchema } from "../_components/form-wizard"
-import { createbusiness } from "@/db/business"
-import { createChatbot } from "@/db/chatbot";
-import { saveEmbeddings } from "@/db/embeddings";
+import { utapi } from "@/app/api/uploadthing/core";
+import type { UploadFileResult } from "uploadthing/types";
+import { createChatbotTransaction } from "@/db/transactions";
+import { UploadThingError } from "uploadthing/server";
 
-export async function processDataAction (form: z.infer<typeof formSchema>) {
-  
+export async function processDataAction(form: z.infer<typeof formSchema>) {
   const chunks = normalizeFormChunks(form);
 
   const instructions = `You are a helpful and knowledgeable AI assistant for the business "${form.generalInfo.businessName}".
@@ -16,41 +16,60 @@ export async function processDataAction (form: z.infer<typeof formSchema>) {
 
   This configuration was provided by the business owner and must be followed at all times. In addition to that, you must always follow these rules:
 
+  - If the user asks something that is not related to the business, politely inform them that you can only assist with questions related to the business.
+  - If the user asks for personal information, such as your name or location, politely decline to answer.
   - Be respectful, concise, and efficient in all your responses.
   - Never explain your reasoning or thought process—just provide the direct answer.
-  - If you cannot answer a question based on the context, suggest contacting customer support. 
-  - If the context includes any contact methods (such as an email, phone number, or WhatsApp), include them in your suggestion. Otherwise, just suggest contacting support in general.`;
+  - If you cannot answer a question based on the context, suggest contacting customer support on these channels if not undefined: email: ${form.customerService.email}, phone: ${form.customerService.phone}, WhatsApp: ${form.customerService.whatsapp}.`;
 
-  const slug = form.generalInfo.businessName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9\-]/g, '');
-  const randomId = Math.floor(Math.random() * 0xffffff).toString(16).padStart(6, '0');
+  const slug = form.generalInfo.businessName
+    .toLowerCase()
+    .replace(/\s+/g, "-")
+    .replace(/[^a-z0-9\-]/g, "");
+  const randomId = Math.floor(Math.random() * 0xffffff)
+    .toString(16)
+    .padStart(6, "0");
   const uniqueSlug = `${slug}-${randomId}`;
+  let filesResult: UploadFileResult[] = [];
 
   try {
-    const businessInsert = await createbusiness(form);
-
-    if (businessInsert) {
-      const chatbotInsert = await createChatbot({
-        instructions,
-        businessId: businessInsert[0].id,
-        slug: uniqueSlug
-      })
-
-      if (chatbotInsert) {
-        await saveEmbeddings({chunks, chatbotId: chatbotInsert[0].id});
-      }
+    if (form.documents) {
+      filesResult = await utapi.uploadFiles(form.documents);
+    }
+    if (filesResult[0]?.error) {
+      throw new UploadThingError({
+        message: filesResult[0].error.message,
+        code: filesResult[0].error.code,
+      });
     }
 
-    return {success: true, message: 'Your chatbot was created successfully.'}
+    await createChatbotTransaction({
+      form,
+      instructions,
+      slug: uniqueSlug,
+      chunks,
+      filesResult,
+    });
+
+    return {
+      success: true,
+      message: "Your chatbot was created successfully.",
+      slug: uniqueSlug,
+    };
   } catch (error) {
-    if (error instanceof Error) {
-      const { message } = error;
-      if (message === 'Business') {
-        return {success: false, message: 'Something went wrong saving the business information.'}
-      } else if (message === 'Chatbot' || message === 'Embeddings') {
-        return {success: false, message: 'Something went wrong creating the chatbot.'}
-      }
+    console.error(error);
+    if (error instanceof UploadThingError) {
+      return {
+        success: false,
+        message: "File upload failed",
+        slug: uniqueSlug,
+      };
     }
-    return {success: false, message: 'Something went wrong, please try again later.'}
+    return {
+      success: false,
+      message: "Something went wrong, please try again.",
+      slug: uniqueSlug,
+    };
   }
 }
 

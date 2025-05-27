@@ -18,6 +18,7 @@ import ShippingLogistics from "./shipping-logistics";
 import Summary from "./summary";
 import { processDataAction } from "../_actions";
 import { toast } from "sonner";
+import { redirect } from "next/navigation";
 
 export interface BusinessData {
   generalInfo: {
@@ -198,6 +199,7 @@ export const formSchema = z.object({
 });
 
 export default function FormWizard() {
+  //TODO: Save step on url and form info on localStorage
   const [currentStep, setCurrentStep] = useState(0);
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -298,10 +300,11 @@ export default function FormWizard() {
   };
 
   const processData = async (form: z.infer<typeof formSchema>) => {
-    const { message, success } = await processDataAction(form);
+    const { message, success, slug } = await processDataAction(form);
 
     if (success) {
       toast.success(message);
+      redirect(`/test-chatbot/${slug}`);
     } else {
       toast.error(message);
     }
