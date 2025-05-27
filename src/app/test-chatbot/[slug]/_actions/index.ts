@@ -7,7 +7,7 @@ import { extractTextFromPdf } from "@/services/utils";
 import { chatCompletions, createEmbeddings } from "@/services/openai";
 import type { ChatCompletionMessageParam } from "openai/resources/index.mjs";
 import { chunkText } from "@/lib/utils";
-import { createMessage, getLatestMessagesByChatbotId } from "@/db/messages";
+import { createMessages, getLatestMessagesByChatbotId } from "@/db/messages";
 
 export async function sendMessageAction({
   message,
@@ -20,12 +20,6 @@ export async function sendMessageAction({
 }) {
   //TODO: Check auth and fields before proceding
   try {
-    await createMessage({
-      chatbotId,
-      role: "user",
-      message,
-    });
-
     const [{ embedding: userEmbedding }] = await createEmbeddings([message]);
     const contextChunks = await getRelatedEmbeddings({
       userEmbedding,
@@ -50,11 +44,18 @@ export async function sendMessageAction({
 
     const answer = await chatCompletions({ messages });
 
-    await createMessage({
-      chatbotId,
-      role: "assistant",
-      message: answer ?? "",
-    });
+    await createMessages([
+      {
+        chatbotId,
+        role: "user",
+        message,
+      },
+      {
+        chatbotId,
+        role: "assistant",
+        message: answer ?? "",
+      },
+    ]);
 
     return answer;
   } catch (error) {

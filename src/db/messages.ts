@@ -3,21 +3,26 @@ import { db } from ".";
 import { messages } from "./schema";
 import { asc, desc, eq } from "drizzle-orm";
 
-export async function createMessage({ chatbotId, role, message }: { chatbotId: number; role: "user" | "assistant"; message: string }) {
-
+export async function createMessages(
+  messagesArr: {
+    chatbotId: number;
+    role: "user" | "assistant";
+    message: string;
+  }[]
+) {
   const user = await auth();
 
   if (!user) {
     throw new Error("No session detected");
   }
 
-  const [msg] = await db.insert(messages).values({
-    chatbotId,
-    role,
-    message,
-  }).returning();
-
-  return msg;
+  await db.insert(messages).values(
+    messagesArr.map(({ chatbotId, role, message }) => ({
+      chatbotId,
+      role,
+      message,
+    }))
+  );
 }
 
 export async function getLatestMessagesByChatbotId({chatbotId, limit = 5}: { chatbotId: number; limit?: number }) {
