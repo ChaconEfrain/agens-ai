@@ -7,25 +7,25 @@ import { Textarea } from '@/components/ui/textarea'
 import { Send } from 'lucide-react'
 import ChatMessage from './chat-message'
 import { sendMessageAction } from '../_actions'
-
-interface Message {
-  sender: "user" | "ai";
-  message: string;
-}
+import type { Message } from "@/db/schema";
 
 interface Props {
   chatbotId: number;
   chatbotInstructions: string;
+  historyMessages?: Pick<Message, "role" | "message">[];
 }
 
-export default function Chat({chatbotId, chatbotInstructions}: Props) {
-
-  const [messages, setMessages] = useState<Message[]>([]);
+export default function Chat({
+  chatbotId,
+  chatbotInstructions,
+  historyMessages,
+}: Props) {
+  const [messages, setMessages] = useState(historyMessages ?? []);
   const scrollDiv = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    scrollDiv.current?.scrollIntoView()
-  }, [messages])
+    scrollDiv.current?.scrollIntoView();
+  }, [messages]);
 
   const handleTextAreaResize = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const target = e.target;
@@ -34,7 +34,6 @@ export default function Chat({chatbotId, chatbotInstructions}: Props) {
   };
 
   const sendMessage = async (e: FormEvent<HTMLFormElement>) => {
-    //TODO: Save messages to local storage for UI persistence
     e.preventDefault();
     const form = e.target as HTMLFormElement;
     const formData = new FormData(form);
@@ -43,8 +42,8 @@ export default function Chat({chatbotId, chatbotInstructions}: Props) {
 
     setMessages((prev) => [
       ...prev,
-      { sender: "user", message },
-      { sender: "ai", message: "" },
+      { role: "user", message },
+      { role: "assistant", message: "" },
     ]);
     form.reset();
 
@@ -59,27 +58,23 @@ export default function Chat({chatbotId, chatbotInstructions}: Props) {
         const updated = [...prev];
 
         const lastIndex = updated.length - 1;
-        updated[lastIndex] = { sender: "ai", message: answer };
+        updated[lastIndex] = { role: "assistant", message: answer };
 
         return updated;
       });
     }
-  }
+  };
 
   return (
     <Card className="flex flex-col h-full">
       <CardContent className="flex-grow overflow-y-scroll h-full max-h-11/12 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-accent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-muted-foreground mask-b-from-[95%] pt-4">
-      {messages.map(({message, sender}, i) => (
-        <ChatMessage
-          key={i}
-          message={message}
-          sender={sender}
-        />
-      ))}
-      <div ref={scrollDiv} aria-hidden='true' className='w-0 h-0' />
+        {messages.map(({ message, role }, i) => (
+          <ChatMessage key={i} message={message} sender={role} />
+        ))}
+        <div ref={scrollDiv} aria-hidden="true" className="w-0 h-0" />
       </CardContent>
       <CardFooter>
-        <form 
+        <form
           onSubmit={sendMessage}
           className="relative border-primary/50 border-2 rounded-lg flex flex-col focus-within:border-primary/70 w-full"
         >
@@ -104,5 +99,5 @@ export default function Chat({chatbotId, chatbotInstructions}: Props) {
         </form>
       </CardFooter>
     </Card>
-  )
+  );
 }

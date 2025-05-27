@@ -4,6 +4,7 @@ import { notFound, redirect } from "next/navigation";
 import { auth } from "@clerk/nextjs/server";
 import Chat from "./_components/chat";
 import ChatbotContext from "./_components/chatbot-context";
+import { getMessagesByChatbotId } from "@/db/messages";
 
 export default async function TestChatbot({
   params,
@@ -21,6 +22,10 @@ export default async function TestChatbot({
 
   if (!chatbot) notFound();
 
+  const messages = await getMessagesByChatbotId({
+    chatbotId: chatbot.id,
+  });
+
   return (
     <div>
       <header className="my-4">
@@ -35,6 +40,7 @@ export default async function TestChatbot({
             <Chat
               chatbotId={chatbot.id}
               chatbotInstructions={chatbot.instructions}
+              historyMessages={messages}
             />
           </section>
           <section className="h-[80dvh] overflow-hidden">

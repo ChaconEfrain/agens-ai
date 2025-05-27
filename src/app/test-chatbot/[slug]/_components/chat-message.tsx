@@ -30,7 +30,7 @@ export default function ChatMessage({ sender, message }: ChatMessageProps) {
       <p
         className={cn("max-w-[70%] rounded-lg text-sm font-outfit", {
           "bg-primary text-white": sender === "user",
-          "bg-gray-100 text-gray-800": sender === "ai",
+          "bg-gray-100 text-gray-800": sender === "assistant",
           "p-3": message !== "",
           "bg-red-200": message === "error",
         })}
