@@ -16,15 +16,14 @@ import {
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
+} from "@/components/ui/dialog";
 import { Bot, Box, File, Info, Smile, Truck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { Business, Chatbot, File as FileSchema } from "@/db/schema";
-import EditTabs from "./edit-tabs";
+import EditContext from "./edit-context";
 
 interface Props {
   chatbot: Chatbot & {
@@ -35,7 +34,6 @@ interface Props {
 }
 
 export default function ChatbotContext({ chatbot }: Props) {
-  console.log(chatbot)
   return (
     <Card className="h-full gap-4">
       <CardHeader>
@@ -249,7 +247,7 @@ export default function ChatbotContext({ chatbot }: Props) {
                   </AccordionItem>
                 )}
                 {
-                //TODO: Render the other contact items
+                  //TODO: Render the other contact items
                 }
               </Accordion>
             </AccordionContent>
@@ -321,18 +319,16 @@ export default function ChatbotContext({ chatbot }: Props) {
       <CardFooter>
         <Dialog>
           <Button asChild className="w-full cursor-pointer">
-            <DialogTrigger>
-              Add context
-            </DialogTrigger>
+            <DialogTrigger>Add context</DialogTrigger>
           </Button>
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Add more context to your chatbot</DialogTitle>
-              <DialogDescription>
-                Describe the new information or upload new files
-              </DialogDescription>
             </DialogHeader>
-            <EditTabs chatbotId={chatbot.id} businessId={chatbot.businessId} />
+            <EditContext
+              chatbotId={chatbot.id}
+              businessId={chatbot.businessId}
+            />
           </DialogContent>
         </Dialog>
       </CardFooter>
