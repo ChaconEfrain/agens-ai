@@ -23,15 +23,15 @@ import {
 } from "@/components/ui/dialog"
 import { Bot, Box, File, Info, Smile, Truck } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import type { Business, Chatbot, Files } from "@/db/schema";
+import type { Business, Chatbot, File as FileSchema } from "@/db/schema";
 import EditTabs from "./edit-tabs";
 
 interface Props {
   chatbot: Chatbot & {
     business: Business;
   } & {
-    files: Files[]
-  }
+    files: FileSchema[];
+  };
 }
 
 export default function ChatbotContext({ chatbot }: Props) {
