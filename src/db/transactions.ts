@@ -96,21 +96,24 @@ export async function createChatbotTransaction({form, instructions, slug, chunks
 
     if (!formEmbeddingsInsert) tx.rollback();
 
-    for (const { data } of filesResult) {
-      if (!data) continue;
-
-      const fileInsert = await tx
-        .insert(files)
-        .values({
+    const filesInsert = await tx
+      .insert(files)
+      .values(
+        filesResult.map(({ data }) => ({
           userId: user.id,
           businessId: businessInsert[0].id,
           chatbotId: chatbotInsert[0].id,
-          fileUrl: data.ufsUrl,
-          title: data.name,
-        })
-        .returning({ id: files.id });
+          fileUrl: data?.ufsUrl ?? "",
+          title: data?.name ?? "",
+        }))
+      )
+      .returning({ id: files.id });
 
-      if (!fileInsert) tx.rollback();
+    if (!filesInsert) tx.rollback();
+
+    for (const { data } of filesResult) {
+      if (!data) continue;
+
       const fullText = await extractTextFromPdf({ fileUrl: data.ufsUrl });
       const chunks = chunkText(fullText);
       const openAIFileEmbeddings = await createEmbeddings(chunks);
