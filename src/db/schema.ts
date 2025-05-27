@@ -152,6 +152,23 @@ export const embeddings = pgTable(
   ]
 );
 
+export const messageRoleEnum = pgEnum("message_role", ["user", "assistant"]);
+
+export const messages = pgTable(
+  "messages",
+  {
+    id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+    chatbotId: integer("chatbot_id")
+      .references(() => chatbots.id, { onDelete: "cascade" })
+      .notNull(),
+    role: messageRoleEnum("role").notNull(),
+    message: text("message").notNull(),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at").$onUpdate(() => new Date()),
+  },
+  (table) => [index("messages_chatbot_id_idx").on(table.chatbotId)]
+);
+
 //Relations
 export const usersRelations = relations(users, ({ many }) => ({
   businesses: many(businesses),
@@ -192,6 +209,13 @@ export const chatbotsRelations = relations(chatbots, ({ one, many }) => ({
 export const embeddingsRelations = relations(embeddings, ({ one }) => ({
   chatbot: one(chatbots, {
     fields: [embeddings.chatbotId],
+    references: [chatbots.id],
+  }),
+}));
+
+export const messagesRelations = relations(messages, ({ one }) => ({
+  chatbot: one(chatbots, {
+    fields: [messages.chatbotId],
     references: [chatbots.id],
   }),
 }));
