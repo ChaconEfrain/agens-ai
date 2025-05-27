@@ -34,26 +34,35 @@ export default function Chat({chatbotId, chatbotInstructions}: Props) {
   };
 
   const sendMessage = async (e: FormEvent<HTMLFormElement>) => {
+    //TODO: Save messages to local storage for UI persistence
     e.preventDefault();
     const form = e.target as HTMLFormElement;
-    const formData = new FormData(form)
-    const message = formData.get('chat-prompt')?.toString();
+    const formData = new FormData(form);
+    const message = formData.get("chat-prompt")?.toString();
     if (!message?.trim()) return;
-    
-    setMessages(prev => [...prev, {sender: 'user', message}, {sender: 'ai', message: ''}])
-    form.reset()
 
-    const answer = await sendMessageAction({message, chatbotId, chatbotInstructions})
+    setMessages((prev) => [
+      ...prev,
+      { sender: "user", message },
+      { sender: "ai", message: "" },
+    ]);
+    form.reset();
+
+    const answer = await sendMessageAction({
+      message,
+      chatbotId,
+      chatbotInstructions,
+    });
 
     if (answer) {
       setMessages((prev) => {
         const updated = [...prev];
 
         const lastIndex = updated.length - 1;
-        updated[lastIndex] = { sender: 'ai', message: answer };
+        updated[lastIndex] = { sender: "ai", message: answer };
 
         return updated;
-      })
+      });
     }
   }
 
