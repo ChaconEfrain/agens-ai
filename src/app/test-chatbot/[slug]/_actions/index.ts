@@ -7,7 +7,12 @@ import { extractTextFromPdf } from "@/services/utils";
 import { chatCompletions, createEmbeddings } from "@/services/openai";
 import type { ChatCompletionMessageParam } from "openai/resources/index.mjs";
 import { chunkText } from "@/lib/utils";
-import { createMessages, getLatestMessagesByChatbotId } from "@/db/messages";
+import {
+  createMessages,
+  deleteMessagesByChatbotId,
+  getLatestMessagesByChatbotId,
+} from "@/db/messages";
+import { revalidatePath } from "next/cache";
 
 export async function sendMessageAction({
   message,
@@ -111,5 +116,28 @@ export async function updateChatbotFilesAction({
         return { success: false, message };
       }
     }
+  }
+}
+
+export async function deleteMessagesAction({
+  chatbotId,
+  chatbotSlug,
+}: {
+  chatbotId: number;
+  chatbotSlug: string;
+}) {
+  try {
+    await deleteMessagesByChatbotId({ chatbotId });
+    revalidatePath(`/test-chatbot/${chatbotSlug}`);
+    return {
+      success: true,
+      message: "Chatbot messages deleted successfully",
+    };
+  } catch (error) {
+    console.error("Error deleting messages:", error);
+    return {
+      success: false,
+      message: "Error deleting messages",
+    };
   }
 }

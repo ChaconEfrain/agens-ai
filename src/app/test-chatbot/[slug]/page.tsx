@@ -36,14 +36,15 @@ export default async function TestChatbot({
       </header>
       <main>
         <div className="grid grid-cols-[70fr_30fr] gap-4">
-          <section className="h-[80dvh] overflow-hidden">
+          <section className="h-[80dvh]">
             <Chat
               chatbotId={chatbot.id}
+              chatbotSlug={chatbot.slug}
               chatbotInstructions={chatbot.instructions}
               historyMessages={messages}
             />
           </section>
-          <section className="h-[80dvh] overflow-hidden">
+          <section className="h-[80dvh]">
             <ChatbotContext chatbot={chatbot} />
           </section>
         </div>

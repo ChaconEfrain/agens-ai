@@ -45,3 +45,11 @@ export async function getMessagesByChatbotId({ chatbotId }: { chatbotId: number 
 
   return messagesList;
 }
+
+export async function deleteMessagesByChatbotId({
+  chatbotId,
+}: {
+  chatbotId: number;
+}) {
+  await db.delete(messages).where(eq(messages.chatbotId, chatbotId));
+}

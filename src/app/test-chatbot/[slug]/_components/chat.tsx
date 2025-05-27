@@ -4,23 +4,27 @@ import React, { type FormEvent, useEffect, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardFooter } from '@/components/ui/card'
 import { Textarea } from '@/components/ui/textarea'
-import { Send } from 'lucide-react'
-import ChatMessage from './chat-message'
-import { sendMessageAction } from '../_actions'
+import { LoaderCircle, Send, Trash } from "lucide-react";
+import ChatMessage from "./chat-message";
+import { deleteMessagesAction, sendMessageAction } from "../_actions";
 import type { Message } from "@/db/schema";
+import { toast } from "sonner";
 
 interface Props {
   chatbotId: number;
+  chatbotSlug: string;
   chatbotInstructions: string;
-  historyMessages?: Pick<Message, "role" | "message">[];
+  historyMessages: Pick<Message, "role" | "message">[];
 }
 
 export default function Chat({
   chatbotId,
+  chatbotSlug,
   chatbotInstructions,
   historyMessages,
 }: Props) {
-  const [messages, setMessages] = useState(historyMessages ?? []);
+  const [messages, setMessages] = useState(historyMessages);
+  const [loading, setLoading] = useState(false);
   const scrollDiv = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -65,8 +69,39 @@ export default function Chat({
     }
   };
 
+  const clearChat = async () => {
+    setLoading(true);
+    const result = await deleteMessagesAction({
+      chatbotId,
+      chatbotSlug,
+    });
+
+    if (result.success) {
+      toast.success(result.message);
+    } else {
+      toast.error(result.message);
+    }
+    setLoading(false);
+    setMessages([]);
+  };
+
   return (
-    <Card className="flex flex-col h-full">
+    <Card className="flex flex-col h-full relative">
+      <Button
+        className="absolute -top-10 right-0"
+        variant="outline"
+        onClick={clearChat}
+        disabled={loading || messages.length === 0}
+      >
+        <Trash />{" "}
+        {loading ? (
+          <>
+            Clearing chat <LoaderCircle className="animate-spin" />
+          </>
+        ) : (
+          "Clear chat"
+        )}
+      </Button>
       <CardContent className="flex-grow overflow-y-scroll h-full max-h-11/12 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-accent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-muted-foreground mask-b-from-[95%] pt-4">
         {messages.map(({ message, role }, i) => (
           <ChatMessage key={i} message={message} sender={role} />
