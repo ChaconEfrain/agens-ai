@@ -7,6 +7,7 @@ import { extractTextFromPdf } from "@/services/utils";
 import { chatCompletions, createEmbeddings } from "@/services/openai";
 import type { ChatCompletionMessageParam } from "openai/resources/index.mjs";
 import { chunkText } from "@/lib/utils";
+import { createMessage, getLatestMessagesByChatbotId } from "@/db/messages";
 
 export async function sendMessageAction({
   message,
@@ -19,22 +20,42 @@ export async function sendMessageAction({
 }) {
   //TODO: Check auth and fields before proceding
   try {
+    await createMessage({
+      chatbotId,
+      role: "user",
+      message,
+    });
+
     const [{ embedding: userEmbedding }] = await createEmbeddings([message]);
     const contextChunks = await getRelatedEmbeddings({
       userEmbedding,
       chatbotId,
     });
 
+    const latestMessages = await getLatestMessagesByChatbotId({ chatbotId });
+
+    const historyMessages = latestMessages.map(({ role, message }) => ({
+      role,
+      content: message,
+    }));
+
     const context = contextChunks.map((c) => c.content).join("\n");
 
-    //TODO: Add last 5 messages from the chat history to the context
     const messages = [
       { role: "system", content: chatbotInstructions },
+      ...historyMessages,
       { role: "user", content: `Context:\n${context}` },
       { role: "user", content: message },
     ] as ChatCompletionMessageParam[];
 
     const answer = await chatCompletions({ messages });
+
+    await createMessage({
+      chatbotId,
+      role: "assistant",
+      message: answer ?? "",
+    });
+
     return answer;
   } catch (error) {
     console.error(error);
