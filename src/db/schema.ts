@@ -224,4 +224,5 @@ export const messagesRelations = relations(messages, ({ one }) => ({
 export type User = typeof users.$inferSelect;
 export type Chatbot = typeof chatbots.$inferSelect;
 export type Business = typeof businesses.$inferSelect;
-export type Files = typeof files.$inferSelect;
+export type File = typeof files.$inferSelect;
+export type Message = typeof messages.$inferSelect;
