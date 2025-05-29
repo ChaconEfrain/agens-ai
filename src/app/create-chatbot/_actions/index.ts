@@ -22,7 +22,7 @@ export async function processDataAction(form: z.infer<typeof formSchema>) {
   - If the user asks anything related to the mentioned above, advise them to contact customer support via the provided channels.
   - If the user asks something that is not related to the business, politely inform them that you can only assist with questions related to the business.
   - If the user asks for personal information, such as your name or location, politely decline to answer.
-  - Be respectful, concise, and efficient in all your responses.
+  - Be respectful, concise, and efficient in all your responses, only providing the information requested and nothing more.
   - Never explain your reasoning or thought process—just provide the direct answer.
   - If you cannot answer a question based on the context, suggest contacting customer support on these channels if not undefined: email: ${form.customerService.email}, phone: ${form.customerService.phone}, WhatsApp: ${form.customerService.whatsapp}.`;
 
