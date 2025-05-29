@@ -91,7 +91,11 @@ export default function Chat({
       </Button>
       <CardContent className="flex-grow overflow-y-scroll h-full max-h-11/12 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-accent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-muted-foreground mask-b-from-[95%] pt-4">
         {messages.map(({ message, role }, i) => (
-          <ChatMessage key={i} message={message} sender={role} />
+          <ChatMessage
+            key={i}
+            message={message}
+            role={role}
+          />
         ))}
         <div ref={scrollDiv} aria-hidden="true" className="w-0 h-0" />
       </CardContent>

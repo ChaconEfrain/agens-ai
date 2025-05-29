@@ -3,22 +3,25 @@ import { cn } from '@/lib/utils'
 import { Dot } from "lucide-react";
 
 interface ChatMessageProps {
-  sender: string;
+  role: string;
   message: string;
 }
 
-export default function ChatMessage({ sender, message }: ChatMessageProps) {
+export default function ChatMessage({
+  role,
+  message,
+}: ChatMessageProps) {
   return (
     <div
       className={cn(
         "flex mb-4",
-        sender === "user" ? "justify-end" : "justify-start"
+        role === "user" ? "justify-end" : "justify-start"
       )}
     >
       <p
         className={cn("max-w-[70%] rounded-lg text-sm font-outfit", {
-          "bg-primary text-white": sender === "user",
-          "bg-gray-100 text-gray-800": sender === "assistant",
+          "bg-primary text-white": role === "user",
+          "bg-gray-100 text-gray-800": role === "assistant",
           "p-3": message !== "",
           "bg-red-200": message === "error",
         })}
