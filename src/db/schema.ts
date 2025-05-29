@@ -162,6 +162,7 @@ export const messages = pgTable(
       .references(() => chatbots.id, { onDelete: "cascade" })
       .notNull(),
     sessionId: varchar("session_id", { length: 255 }).notNull(),
+    isActive: boolean("is_active").default(true).notNull(),
     role: messageRoleEnum("role").notNull(),
     message: text("message").notNull(),
     createdAt: timestamp("created_at").notNull().defaultNow(),
@@ -170,6 +171,7 @@ export const messages = pgTable(
   (table) => [
     index("messages_chatbot_id_idx").on(table.chatbotId),
     index("messages_session_id_idx").on(table.sessionId),
+    index("messages_is_active_idx").on(table.isActive),
   ]
 );
 

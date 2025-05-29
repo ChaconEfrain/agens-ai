@@ -9,7 +9,7 @@ import type { ChatCompletionMessageParam } from "openai/resources/index.mjs";
 import { chunkText } from "@/lib/utils";
 import {
   createMessages,
-  deleteMessagesByChatbotId,
+  disableMessagesByChatbotId,
   getLatestMessagesByChatbotId,
 } from "@/db/messages";
 import { revalidatePath } from "next/cache";
@@ -136,7 +136,7 @@ export async function deleteMessagesAction({
   chatbotSlug: string;
 }) {
   try {
-    await deleteMessagesByChatbotId({ chatbotId, sessionId });
+    await disableMessagesByChatbotId({ chatbotId, sessionId });
     revalidatePath(`/test-chatbot/${chatbotSlug}`);
     return {
       success: true,

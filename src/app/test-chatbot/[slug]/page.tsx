@@ -4,7 +4,7 @@ import { notFound, redirect } from "next/navigation";
 import { auth } from "@clerk/nextjs/server";
 import Chat from "@/components/chat";
 import ChatbotContext from "./_components/chatbot-context";
-import { getMessagesByChatbotId } from "@/db/messages";
+import { getActiveMessagesByChatbotId } from "@/db/messages";
 import { cookies } from "next/headers";
 
 export default async function TestChatbot({
@@ -25,7 +25,7 @@ export default async function TestChatbot({
 
   const sessionId = (await cookies()).get(`chat-session-${slug}`)?.value;
 
-  const messages = await getMessagesByChatbotId({
+  const messages = await getActiveMessagesByChatbotId({
     chatbotId: chatbot.id,
     sessionId: sessionId ?? "",
   });

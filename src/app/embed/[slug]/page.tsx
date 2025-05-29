@@ -1,10 +1,9 @@
 import Chat from "@/components/chat";
 import { getChatbotBySlug } from "@/db/chatbot";
-import { getMessagesByChatbotId } from "@/db/messages";
+import { getActiveMessagesByChatbotId } from "@/db/messages";
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 
-// Archivo en app/embed/[slug]/page.tsx (componente del servidor)
 export default async function EmbedPage({
   params,
 }: {
@@ -15,10 +14,8 @@ export default async function EmbedPage({
 
   if (!chatbot) return notFound();
 
-  const sessionId = (await cookies()).get(
-      `chat-session-${slug}`
-    )?.value;
-  const messages = await getMessagesByChatbotId({
+  const sessionId = (await cookies()).get(`chat-session-${slug}`)?.value;
+  const messages = await getActiveMessagesByChatbotId({
     chatbotId: chatbot.id,
     sessionId: sessionId ?? "",
   });

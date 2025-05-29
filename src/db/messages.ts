@@ -48,7 +48,7 @@ export async function getLatestMessagesByChatbotId({
   return latestMessages.reverse();
 }
 
-export async function getMessagesByChatbotId({
+export async function getActiveMessagesByChatbotId({
   chatbotId,
   sessionId,
 }: {
@@ -59,14 +59,18 @@ export async function getMessagesByChatbotId({
     .select()
     .from(messages)
     .where(
-      and(eq(messages.chatbotId, chatbotId), eq(messages.sessionId, sessionId))
+      and(
+        eq(messages.chatbotId, chatbotId),
+        eq(messages.sessionId, sessionId),
+        eq(messages.isActive, true)
+      )
     )
     .orderBy(asc(messages.createdAt));
 
   return messagesList;
 }
 
-export async function deleteMessagesByChatbotId({
+export async function disableMessagesByChatbotId({
   chatbotId,
   sessionId,
 }: {
@@ -74,7 +78,8 @@ export async function deleteMessagesByChatbotId({
   sessionId: string;
 }) {
   await db
-    .delete(messages)
+    .update(messages)
+    .set({ isActive: false })
     .where(
       and(eq(messages.chatbotId, chatbotId), eq(messages.sessionId, sessionId))
     );
