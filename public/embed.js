@@ -4,7 +4,8 @@
 
   const chatbotSlug = script.dataset.chatbotSlug;
   const position = script.dataset.position || "bottom-right";
-  const themeColor = script.dataset.themeColor || "#4f46e5";
+  const themeColor = script.dataset.themeColor || "oklch(0.21 0.006 285.885)";
+  const color = script.dataset.color || "#fff";
   const width = script.dataset.width || "350px";
   const height = script.dataset.height || "500px";
   const customStyles = script.dataset.customStyles || "";
@@ -24,7 +25,7 @@
   button.style.borderRadius = "50%";
   button.style.border = "none";
   button.style.backgroundColor = themeColor;
-  button.style.color = "#fff";
+  button.style.color = color;
   button.style.fontSize = "24px";
   button.style.cursor = "pointer";
   button.style.zIndex = "999998";
@@ -61,6 +62,14 @@
     isOpen = !isOpen;
     wrapper.style.display = isOpen ? "block" : "none";
     button.innerHTML = isOpen ? "❌" : "💬";
+  });
+  // Cerrar el chat con Escape
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && isOpen) {
+      isOpen = false;
+      wrapper.style.display = "none";
+      button.innerHTML = "💬";
+    }
   });
 
   // Estilos extra del cliente (opcional)

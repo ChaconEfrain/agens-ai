@@ -36,10 +36,8 @@ export default function RootLayout({
           src="http://localhost:3000/embed.js"
           data-chatbot-slug="greenlife-a6b73f"
           data-position="bottom-right"
-          data-theme-color="oklch(0.21 0.006 285.885)"
           data-width="350px"
           data-height="500px"
-          data-custom-styles=""
         />
       </html>
     </ClerkProvider>
