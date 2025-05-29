@@ -4,11 +4,11 @@ import React, { type FormEvent, useEffect, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardFooter } from '@/components/ui/card'
 import { Textarea } from '@/components/ui/textarea'
-import { LoaderCircle, Send, Trash } from "lucide-react";
+import { Send, Trash } from "lucide-react";
 import ChatMessage from "./chat-message";
-import { deleteMessagesAction, sendMessageAction } from "../_actions";
+import { deleteMessagesAction, sendMessageAction } from "../app/test-chatbot/[slug]/_actions";
 import type { Message } from "@/db/schema";
-import { toast } from "sonner";
+import { useChatSession } from '@/hooks/use-chat-session'
 
 interface Props {
   chatbotId: number;
@@ -23,8 +23,8 @@ export default function Chat({
   chatbotInstructions,
   historyMessages,
 }: Props) {
+  const sessionId = useChatSession(chatbotSlug);
   const [messages, setMessages] = useState(historyMessages);
-  const [loading, setLoading] = useState(false);
   const scrollDiv = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -54,6 +54,7 @@ export default function Chat({
     const answer = await sendMessageAction({
       message,
       chatbotId,
+      sessionId,
       chatbotInstructions,
     });
 
@@ -70,37 +71,23 @@ export default function Chat({
   };
 
   const clearChat = async () => {
-    setLoading(true);
-    const result = await deleteMessagesAction({
+    setMessages([]);
+    await deleteMessagesAction({
       chatbotId,
+      sessionId,
       chatbotSlug,
     });
-
-    if (result.success) {
-      toast.success(result.message);
-    } else {
-      toast.error(result.message);
-    }
-    setLoading(false);
-    setMessages([]);
   };
 
   return (
     <Card className="flex flex-col h-full relative">
       <Button
-        className="absolute -top-10 right-0"
-        variant="outline"
+        className="absolute top-0 left-2 px-0 has-[>svg]:px-0 hover:bg-transparent"
+        variant="ghost"
         onClick={clearChat}
-        disabled={loading || messages.length === 0}
+        disabled={messages.length === 0}
       >
-        <Trash />{" "}
-        {loading ? (
-          <>
-            Clearing chat <LoaderCircle className="animate-spin" />
-          </>
-        ) : (
-          "Clear chat"
-        )}
+        <Trash />
       </Button>
       <CardContent className="flex-grow overflow-y-scroll h-full max-h-11/12 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-accent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-muted-foreground mask-b-from-[95%] pt-4">
         {messages.map(({ message, role }, i) => (

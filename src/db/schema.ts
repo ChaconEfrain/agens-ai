@@ -161,12 +161,16 @@ export const messages = pgTable(
     chatbotId: integer("chatbot_id")
       .references(() => chatbots.id, { onDelete: "cascade" })
       .notNull(),
+    sessionId: varchar("session_id", { length: 255 }).notNull(),
     role: messageRoleEnum("role").notNull(),
     message: text("message").notNull(),
     createdAt: timestamp("created_at").notNull().defaultNow(),
     updatedAt: timestamp("updated_at").$onUpdate(() => new Date()),
   },
-  (table) => [index("messages_chatbot_id_idx").on(table.chatbotId)]
+  (table) => [
+    index("messages_chatbot_id_idx").on(table.chatbotId),
+    index("messages_session_id_idx").on(table.sessionId),
+  ]
 );
 
 //Relations

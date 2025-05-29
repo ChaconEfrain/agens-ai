@@ -20,7 +20,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Bot, Box, File, Info, Smile, Truck } from "lucide-react";
+import { ArrowRight, Bot, Box, File, Info, Smile, Truck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { Business, Chatbot, File as FileSchema } from "@/db/schema";
 import EditContext from "./edit-context";
@@ -35,7 +35,10 @@ interface Props {
 
 export default function ChatbotContext({ chatbot }: Props) {
   return (
-    <Card className="h-full gap-4">
+    <Card className="h-full gap-4 relative">
+      <Button className="absolute -top-10 right-0" variant="ghost">
+        Generate script <ArrowRight />
+      </Button>
       <CardHeader>
         <CardTitle>
           <h2 className="text-xl font-bold">Chatbot context</h2>

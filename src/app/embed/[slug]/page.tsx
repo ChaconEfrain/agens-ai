@@ -1,0 +1,44 @@
+import Chat from "@/components/chat";
+import { getChatbotBySlug } from "@/db/chatbot";
+import { getMessagesByChatbotId } from "@/db/messages";
+import { cookies } from "next/headers";
+import { notFound } from "next/navigation";
+
+// Archivo en app/embed/[slug]/page.tsx (componente del servidor)
+export default async function EmbedPage({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+  const { slug } = await params;
+  const chatbot = await getChatbotBySlug({ slug });
+
+  if (!chatbot) return notFound();
+
+  const sessionId = (await cookies()).get(
+      `chat-session-${slug}`
+    )?.value;
+  const messages = await getMessagesByChatbotId({
+    chatbotId: chatbot.id,
+    sessionId: sessionId ?? "",
+  });
+
+  return (
+    <div
+      style={{
+        width: "100%",
+        height: "100vh",
+        boxSizing: "border-box",
+        fontFamily: "sans-serif",
+        overflow: "hidden",
+      }}
+    >
+      <Chat
+        chatbotId={chatbot.id}
+        chatbotInstructions={chatbot.instructions}
+        chatbotSlug={chatbot.slug}
+        historyMessages={messages}
+      />
+    </div>
+  );
+}

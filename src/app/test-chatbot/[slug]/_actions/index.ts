@@ -18,10 +18,12 @@ export async function sendMessageAction({
   message,
   chatbotId,
   chatbotInstructions,
+  sessionId,
 }: {
   message: string;
   chatbotId: number;
   chatbotInstructions: string;
+  sessionId: string;
 }) {
   //TODO: Check auth and fields before proceding
   try {
@@ -31,7 +33,10 @@ export async function sendMessageAction({
       chatbotId,
     });
 
-    const latestMessages = await getLatestMessagesByChatbotId({ chatbotId });
+    const latestMessages = await getLatestMessagesByChatbotId({
+      chatbotId,
+      sessionId,
+    });
 
     const historyMessages = latestMessages.map(({ role, message }) => ({
       role,
@@ -52,11 +57,13 @@ export async function sendMessageAction({
     await createMessages([
       {
         chatbotId,
+        sessionId,
         role: "user",
         message,
       },
       {
         chatbotId,
+        sessionId,
         role: "assistant",
         message: answer ?? "",
       },
@@ -121,13 +128,15 @@ export async function updateChatbotFilesAction({
 
 export async function deleteMessagesAction({
   chatbotId,
+  sessionId,
   chatbotSlug,
 }: {
   chatbotId: number;
+  sessionId: string;
   chatbotSlug: string;
 }) {
   try {
-    await deleteMessagesByChatbotId({ chatbotId });
+    await deleteMessagesByChatbotId({ chatbotId, sessionId });
     revalidatePath(`/test-chatbot/${chatbotSlug}`);
     return {
       success: true,

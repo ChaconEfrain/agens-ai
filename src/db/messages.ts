@@ -1,11 +1,12 @@
 import { auth } from "@clerk/nextjs/server";
 import { db } from ".";
 import { messages } from "./schema";
-import { asc, desc, eq } from "drizzle-orm";
+import { and, asc, desc, eq } from "drizzle-orm";
 
 export async function createMessages(
   messagesArr: {
     chatbotId: number;
+    sessionId: string;
     role: "user" | "assistant";
     message: string;
   }[]
@@ -17,30 +18,49 @@ export async function createMessages(
   }
 
   await db.insert(messages).values(
-    messagesArr.map(({ chatbotId, role, message }) => ({
+    messagesArr.map(({ chatbotId, role, message, sessionId }) => ({
       chatbotId,
+      sessionId,
       role,
       message,
     }))
   );
 }
 
-export async function getLatestMessagesByChatbotId({chatbotId, limit = 5}: { chatbotId: number; limit?: number }) {
+export async function getLatestMessagesByChatbotId({
+  chatbotId,
+  sessionId,
+  limit = 5,
+}: {
+  chatbotId: number;
+  sessionId: string;
+  limit?: number;
+}) {
   const latestMessages = await db
     .select()
     .from(messages)
-    .where(eq(messages.chatbotId, chatbotId))
+    .where(
+      and(eq(messages.chatbotId, chatbotId), eq(messages.sessionId, sessionId))
+    )
     .orderBy(desc(messages.createdAt))
     .limit(limit);
 
   return latestMessages.reverse();
 }
 
-export async function getMessagesByChatbotId({ chatbotId }: { chatbotId: number }) {
+export async function getMessagesByChatbotId({
+  chatbotId,
+  sessionId,
+}: {
+  chatbotId: number;
+  sessionId: string;
+}) {
   const messagesList = await db
     .select()
     .from(messages)
-    .where(eq(messages.chatbotId, chatbotId))
+    .where(
+      and(eq(messages.chatbotId, chatbotId), eq(messages.sessionId, sessionId))
+    )
     .orderBy(asc(messages.createdAt));
 
   return messagesList;
@@ -48,8 +68,14 @@ export async function getMessagesByChatbotId({ chatbotId }: { chatbotId: number 
 
 export async function deleteMessagesByChatbotId({
   chatbotId,
+  sessionId,
 }: {
   chatbotId: number;
+  sessionId: string;
 }) {
-  await db.delete(messages).where(eq(messages.chatbotId, chatbotId));
+  await db
+    .delete(messages)
+    .where(
+      and(eq(messages.chatbotId, chatbotId), eq(messages.sessionId, sessionId))
+    );
 }

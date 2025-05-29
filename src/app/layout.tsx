@@ -4,6 +4,8 @@ import { ClerkProvider } from "@clerk/nextjs";
 import "./globals.css";
 import Nav from "@/components/nav";
 import { Toaster } from "@/components/ui/sonner";
+import Script from "next/script";
+import AppWrapper from "@/components/app-wrapper";
 
 const outfit = Outfit({
   variable: "--font-outfit",
@@ -24,12 +26,21 @@ export default function RootLayout({
     <ClerkProvider>
       <html lang="en">
         <body className={`${outfit.variable} antialiased`}>
-          <div className="max-w-7xl font-outfit mx-auto px-4">
+          <AppWrapper>
             <Nav />
             {children}
-          </div>
+          </AppWrapper>
           <Toaster position="bottom-right" />
         </body>
+        <Script
+          src="http://localhost:3000/embed.js"
+          data-chatbot-slug="greenlife-a6b73f"
+          data-position="bottom-right"
+          data-theme-color="oklch(0.21 0.006 285.885)"
+          data-width="350px"
+          data-height="500px"
+          data-custom-styles=""
+        />
       </html>
     </ClerkProvider>
   );

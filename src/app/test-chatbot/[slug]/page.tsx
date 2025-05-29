@@ -2,9 +2,10 @@ import React from "react";
 import { getChatbotBySlug } from "@/db/chatbot";
 import { notFound, redirect } from "next/navigation";
 import { auth } from "@clerk/nextjs/server";
-import Chat from "./_components/chat";
+import Chat from "@/components/chat";
 import ChatbotContext from "./_components/chatbot-context";
 import { getMessagesByChatbotId } from "@/db/messages";
+import { cookies } from "next/headers";
 
 export default async function TestChatbot({
   params,
@@ -22,8 +23,11 @@ export default async function TestChatbot({
 
   if (!chatbot) notFound();
 
+  const sessionId = (await cookies()).get(`chat-session-${slug}`)?.value;
+
   const messages = await getMessagesByChatbotId({
     chatbotId: chatbot.id,
+    sessionId: sessionId ?? "",
   });
 
   return (
