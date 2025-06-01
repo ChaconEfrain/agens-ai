@@ -24,6 +24,7 @@ import { ArrowRight, Bot, Box, File, Info, Smile, Truck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { Business, Chatbot, File as FileSchema } from "@/db/schema";
 import EditContext from "./edit-context";
+import Link from "next/link";
 
 interface Props {
   chatbot: Chatbot & {
@@ -36,8 +37,10 @@ interface Props {
 export default function ChatbotContext({ chatbot }: Props) {
   return (
     <Card className="h-full gap-4 relative">
-      <Button className="absolute -top-10 right-0" variant="ghost">
-        Generate script <ArrowRight />
+      <Button className="absolute -top-10 right-0" variant="ghost" asChild>
+        <Link href={`/script/${chatbot.slug}`}>
+          Generate script <ArrowRight />
+        </Link>
       </Button>
       <CardHeader>
         <CardTitle>

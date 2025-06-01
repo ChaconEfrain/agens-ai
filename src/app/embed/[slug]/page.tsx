@@ -28,6 +28,10 @@ export default async function EmbedPage({
         boxSizing: "border-box",
         fontFamily: "sans-serif",
         overflow: "hidden",
+        backgroundColor: "transparent",
+        marginLeft: "auto",
+        boxShadow: "0 30px 30px rgba(0,0,0,0.15)",
+        borderRadius: "16px",
       }}
     >
       <Chat

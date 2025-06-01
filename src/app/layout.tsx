@@ -25,7 +25,7 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html lang="en">
-        <body className={`${outfit.variable} antialiased`}>
+        <body className={`${outfit.variable} antialiased bg-transparent`}>
           <AppWrapper>
             <Nav />
             {children}
@@ -35,9 +35,6 @@ export default function RootLayout({
         <Script
           src="http://localhost:3000/embed.js"
           data-chatbot-slug="greenlife-a6b73f"
-          data-position="bottom-right"
-          data-width="350px"
-          data-height="500px"
         />
       </html>
     </ClerkProvider>
