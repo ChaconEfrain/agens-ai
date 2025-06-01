@@ -4,7 +4,7 @@ import { Pool } from "pg";
 import * as schema from "./schema";
 
 const globalForDb = globalThis as unknown as {
-  db: ReturnType<typeof drizzle> | undefined;
+  db: ReturnType<typeof drizzle<typeof schema>> | undefined;
 };
 
 export const db =
