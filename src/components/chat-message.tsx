@@ -3,12 +3,11 @@
 import React from "react";
 import { cn } from "@/lib/utils";
 import { Dot } from "lucide-react";
-import { ScriptStyles } from "@/app/script/[slug]/_components/page-container";
-
+import { ChatbotStyles } from "@/types/embedded-chatbot";
 interface ChatMessageProps {
   role: string;
   message: string;
-  styles?: ScriptStyles;
+  styles?: ChatbotStyles;
 }
 
 export default function ChatMessage({
@@ -33,8 +32,12 @@ export default function ChatMessage({
         style={{
           backgroundColor:
             role === "user"
-              ? styles?.primaryColor ?? "oklch(0.21 0.006 285.885)"
-              : "#f3f4f6",
+              ? styles?.chat.userBgColor ?? "oklch(0.21 0.006 285.885)"
+              : styles?.chat.botBgColor ?? "#f3f4f6",
+          color:
+            role === "user"
+              ? styles?.chat.userTextColor ?? "#ffffff"
+              : styles?.chat.botTextColor ?? "#1e2939",
         }}
       >
         {message !== "" ? (

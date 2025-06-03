@@ -1,3 +1,4 @@
+import { ChatbotStyles } from "@/types/embedded-chatbot";
 import { relations } from "drizzle-orm";
 import {
   boolean,
@@ -121,6 +122,7 @@ export const chatbots = pgTable(
       .notNull(),
     instructions: text("instructions").notNull(),
     slug: varchar("slug", { length: 255 }).notNull().unique(),
+    styles: json("styles").$type<ChatbotStyles>(),
     createdAt: timestamp("created_at").notNull().defaultNow(),
     updatedAt: timestamp("updated_at").$onUpdate(() => new Date()),
   },

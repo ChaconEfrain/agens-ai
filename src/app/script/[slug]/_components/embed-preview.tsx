@@ -7,25 +7,25 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Globe, MessageCircle } from "lucide-react";
+import { BotMessageSquare, Globe } from "lucide-react";
 import React, { useState } from "react";
-import { ScriptStyles } from "./page-container";
 import MockChat from "./mock-chat";
+import { ChatbotStyles } from "@/types/embedded-chatbot";
 
 interface Props {
-  styles: ScriptStyles;
+  styles: ChatbotStyles;
 }
 
 export default function EmbedPreview({ styles }: Props) {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(true);
   return (
     <Card className="col-span-full">
       <CardHeader>
-        <CardTitle><h2>Embed Preview</h2></CardTitle>
+        <CardTitle>
+          <h2>Embed Preview</h2>
+        </CardTitle>
         <CardDescription>
-          <p>
-            See how your chatbot will appear on your website
-          </p>
+          <p>See how your chatbot will appear on your website</p>
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -40,34 +40,50 @@ export default function EmbedPreview({ styles }: Props) {
           <div
             className={`absolute bg-transparent shadow-lg ${
               styles.position.includes("bottom") ? "bottom-20" : "top-20"
-            } ${styles.position.includes("right") ? "right-4" : "left-4"} ${open ? "block" : "hidden"}`}
+            } ${styles.position.includes("right") ? "right-4" : "left-4"} ${
+              open ? "block" : "hidden"
+            }`}
             style={{
-              width: styles.width,
-              height: styles.height,
+              width: styles.chat.width,
+              height: styles.chat.height,
               boxSizing: "border-box",
-              fontFamily: "sans-serif",
               overflow: "hidden",
             }}
           >
             <MockChat styles={styles} />
-            {styles.showBranding && (
-              <p
-                className="absolute top-2 right-4 text-xs text-muted-foreground"
-              >
-                Powered by <a href="https://agens.ai" target="_blank" rel="noopener noreferrer" className="hover:underline">AgensAI</a>
+            {styles.chat.showBranding && (
+              <p className="absolute top-2 right-4 text-xs text-muted-foreground">
+                Powered by{" "}
+                <a
+                  href="https://agens.ai"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:underline"
+                >
+                  AgensAI
+                </a>
               </p>
             )}
           </div>
-          <button className={`cursor-pointer ${
+          <button
+            className={`cursor-pointer absolute flex items-center justify-center ${
               styles.position.includes("bottom") ? "bottom-4" : "top-4"
-            } ${styles.position.includes("right") ? "right-4" : "left-4"}`} style={{
-            position: "absolute",
-            backgroundColor: styles?.primaryColor,
-            borderRadius: "50%",
-            padding: "12px",
-            boxShadow: "0 2px 10px rgba(0,0,0,0.1)",
-          }} onClick={() => setOpen(!open)}>
-            <MessageCircle className="text-white" />
+            } ${styles.position.includes("right") ? "right-4" : "left-4"}`}
+            style={{
+              width: styles.button.width,
+              height: styles.button.height,
+              backgroundColor: styles.button.bgColor,
+              borderRadius: styles.button.borderRadius,
+              boxShadow: "0 2px 10px rgba(0,0,0,0.1)",
+            }}
+            onClick={() => setOpen(!open)}
+            {...(styles.button.icon
+              ? { dangerouslySetInnerHTML: { __html: styles.button.icon } }
+              : {})}
+          >
+            {styles.button.icon ? null : (
+              <BotMessageSquare style={{ color: styles.chat.userTextColor }} />
+            )}
           </button>
         </div>
       </CardContent>

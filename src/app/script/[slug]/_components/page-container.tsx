@@ -1,75 +1,54 @@
 'use client'
 
 import React, { useState } from 'react'
-import { Badge } from '@/components/ui/badge'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Code, Globe, Smartphone } from 'lucide-react'
-import { ScriptDisplay } from './script-display'
-import Customization from './customization'
-import EmbedPreview from './embed-preview'
+import { ScriptDisplay } from "./script-display";
+import Customization from "./customization";
+import EmbedPreview from "./embed-preview";
+import { ChatbotStyles } from "@/types/embedded-chatbot";
+import ChatbotReady from "./chatbot-ready";
 
-export interface ScriptStyles {
-  position: "bottom-right" | "bottom-left" | "top-right" | "top-left"
-  width: string
-  height: string
-  primaryColor: string
-  showBranding: boolean
+interface Props {
+  slug: string;
+  styles: ChatbotStyles | null;
 }
 
-const defaultStyles: ScriptStyles = {
+const defaultStyles: ChatbotStyles = {
   position: "bottom-right",
-  width: "350px",
-  height: "500px",
-  primaryColor: "#000000",
-  showBranding: true,
-}
+  chat: {
+    width: 350,
+    height: 500,
+    userBgColor: "#2b2233",
+    userTextColor: "#ffffff",
+    botBgColor: "#f3f4f6",
+    botTextColor: "#1e2939",
+    showBranding: true,
+  },
+  button: {
+    width: 50,
+    height: 50,
+    bgColor: "#2b2233",
+    icon: "",
+    borderRadius: 30,
+  },
+};
 
-export default function PageContainer({ slug }: { slug: string }) {
-  const [styles, setStyles] = useState<ScriptStyles>(defaultStyles);
+export default function PageContainer({ slug, styles: chatbotStyles }: Props) {
+  const [styles, setStyles] = useState<ChatbotStyles>(
+    chatbotStyles ?? defaultStyles
+  );
 
-  const updateStyles = (updates: Partial<ScriptStyles>) => {
-    setStyles({ ...styles, ...updates })
-  }
-  
+  const updateStyles = (updates: Partial<ChatbotStyles>) => {
+    setStyles({ ...styles, ...updates });
+  };
+
   return (
     <>
-      <div className='space-y-6'>
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle className="flex items-center gap-2">
-                  <div className="h-2 w-2 rounded-full bg-green-500"></div>
-                  <h2>Chatbot Ready</h2>
-                </CardTitle>
-                <CardDescription><p>Your chatbot is live and ready to be embedded on your website</p></CardDescription>
-              </div>
-              <Badge variant="secondary" className="bg-green-50 text-green-700 border-green-200">
-                Active
-              </Badge>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-              <div className="flex items-center gap-2">
-                <Globe className="h-4 w-4 text-muted-foreground" />
-                <span>Web Compatible</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Smartphone className="h-4 w-4 text-muted-foreground" />
-                <span>Mobile Responsive</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Code className="h-4 w-4 text-muted-foreground" />
-                <span>Easy Integration</span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+      <div className="flex flex-col gap-6">
+        <ChatbotReady />
         <ScriptDisplay slug={slug} />
       </div>
-      <Customization styles={styles} updateStyles={updateStyles} />
+      <Customization styles={styles} updateStyles={updateStyles} slug={slug} />
       <EmbedPreview styles={styles} />
     </>
-  )
+  );
 }

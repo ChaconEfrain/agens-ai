@@ -6,10 +6,10 @@ import { Card, CardContent, CardFooter } from '@/components/ui/card'
 import { Textarea } from '@/components/ui/textarea'
 import { Send, Trash } from "lucide-react";
 import ChatMessage from '@/components/chat-message'
-import { ScriptStyles } from './page-container'
+import { ChatbotStyles } from "@/types/embedded-chatbot";
 
 interface Props {
-  styles: ScriptStyles
+  styles: ChatbotStyles;
 }
 
 export default function MockChat({styles}: Props) {

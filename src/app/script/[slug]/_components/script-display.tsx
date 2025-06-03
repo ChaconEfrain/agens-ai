@@ -58,63 +58,78 @@ export default function ChatbotWidget() {
   }
 
   return (
-      <Card>
-        <CardHeader>
-          <CardTitle><h2>Embed Code</h2></CardTitle>
-          <CardDescription><p>Copy and paste this code into your website to add the chatbot</p></CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Tabs defaultValue="html" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="html">HTML Script</TabsTrigger>
-              <TabsTrigger value="react">React Component</TabsTrigger>
-            </TabsList>
-            <TabsContent value="html" className="space-y-4">
-              <div className="relative">
-                <pre className="bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto text-sm h-96">
-                  <code>{generateScript()}</code>
-                </pre>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="absolute top-2 right-2 bg-white/10 border-white/20 text-white hover:bg-white/20"
-                  onClick={() => copyToClipboard(generateScript(), "script")}
-                >
-                  {copiedScript ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-                  {copiedScript ? "Copied!" : "Copy"}
-                </Button>
-              </div>
-              <div className="text-sm text-muted-foreground">
-                <p>
-                  <strong>Instructions:</strong> Paste this script tag anywhere in your HTML, preferably before the
-                  closing {"</body>"} tag.
-                </p>
-              </div>
-            </TabsContent>
-            <TabsContent value="react" className="space-y-4">
-              <div className="relative">
-                <pre className="bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto text-sm h-96">
-                  <code>{generateReactComponent()}</code>
-                </pre>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="absolute top-2 right-2 bg-white/10 border-white/20 text-white hover:bg-white/20"
-                  onClick={() => copyToClipboard(generateReactComponent(), "react")}
-                >
-                  {copiedReact ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-                  {copiedReact ? "Copied!" : "Copy"}
-                </Button>
-              </div>
-              <div className="text-sm text-muted-foreground">
-                <p>
-                  <strong>Instructions:</strong> Import and use this component in your React application. The chatbot
-                  will automatically appear on your page.
-                </p>
-              </div>
-            </TabsContent>
-          </Tabs>
-        </CardContent>
-      </Card>
-  )
+    <Card className="grow">
+      <CardHeader>
+        <CardTitle>
+          <h2>Embed Code</h2>
+        </CardTitle>
+        <CardDescription>
+          <p>Copy and paste this code into your website to add the chatbot</p>
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <Tabs defaultValue="html" className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="html">HTML Script</TabsTrigger>
+            <TabsTrigger value="react">React Component</TabsTrigger>
+          </TabsList>
+          <TabsContent value="html" className="space-y-4">
+            <div className="relative">
+              <pre className="bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto text-sm h-96">
+                <code>{generateScript()}</code>
+              </pre>
+              <Button
+                size="sm"
+                variant="outline"
+                className="absolute top-2 right-2 bg-white/10 border-white/20 text-white hover:bg-white/20"
+                onClick={() => copyToClipboard(generateScript(), "script")}
+              >
+                {copiedScript ? (
+                  <Check className="h-4 w-4" />
+                ) : (
+                  <Copy className="h-4 w-4" />
+                )}
+                {copiedScript ? "Copied!" : "Copy"}
+              </Button>
+            </div>
+            <div className="text-sm text-muted-foreground">
+              <p>
+                <strong>Instructions:</strong> Paste this script tag anywhere in
+                your HTML, preferably before the closing {"</body>"} tag.
+              </p>
+            </div>
+          </TabsContent>
+          <TabsContent value="react" className="space-y-4">
+            <div className="relative">
+              <pre className="bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto text-sm h-96">
+                <code>{generateReactComponent()}</code>
+              </pre>
+              <Button
+                size="sm"
+                variant="outline"
+                className="absolute top-2 right-2 bg-white/10 border-white/20 text-white hover:bg-white/20"
+                onClick={() =>
+                  copyToClipboard(generateReactComponent(), "react")
+                }
+              >
+                {copiedReact ? (
+                  <Check className="h-4 w-4" />
+                ) : (
+                  <Copy className="h-4 w-4" />
+                )}
+                {copiedReact ? "Copied!" : "Copy"}
+              </Button>
+            </div>
+            <div className="text-sm text-muted-foreground">
+              <p>
+                <strong>Instructions:</strong> Import and use this component in
+                your React application. The chatbot will automatically appear on
+                your page.
+              </p>
+            </div>
+          </TabsContent>
+        </Tabs>
+      </CardContent>
+    </Card>
+  );
 }
