@@ -1,43 +1,59 @@
-(function () {
+(async function () {
   if (window.location.pathname.includes("/embed/")) return;
   const script = document.currentScript;
 
   const chatbotSlug = script.dataset.chatbotSlug;
-  const position = script.dataset.position || "bottom-right";
-  const themeColor = script.dataset.themeColor || "oklch(0.21 0.006 285.885)";
-  const color = script.dataset.color || "#fff";
-  const width = script.dataset.width || "350px";
-  const height = script.dataset.height || "500px";
-  const customStyles = script.dataset.customStyles || "";
 
-  // Posiciones
+  let styles;
+  try {
+    const res = await fetch(
+      `http://localhost:3000/api/embed-styles?slug=${chatbotSlug}`
+    );
+
+    if (!res.ok) {
+      console.error("Error fetching embed configuration:", res.statusText);
+    }
+
+    styles = await res.json();
+  } catch (error) {
+    console.error("Error fetching embed styles:", error);
+  }
+
+  const position = styles.position ?? "bottom-right";
+  const themeColor = styles.button.bgColor ?? "oklch(0.21 0.006 285.885)";
+  const buttonWidth = styles.button.width ?? "50px";
+  const buttonHeight = styles.button.height ?? "50px";
+  const borderRadius = styles.button.borderRadius ?? "30px";
+  const width = styles.chat.width ?? "350px";
+  const height = styles.chat.height ?? "500px";
   const isBottom = position.includes("bottom");
   const isRight = position.includes("right");
 
-  // Crear botón flotante
+  // Floating button
   const button = document.createElement("button");
-  button.innerHTML = "💬";
+  button.innerHTML = styles.button.icon ?? "💬";
   button.style.position = "fixed";
-  button.style[isBottom ? "bottom" : "top"] = "20px";
-  button.style[isRight ? "right" : "left"] = "20px";
-  button.style.width = "56px";
-  button.style.height = "56px";
-  button.style.borderRadius = "50%";
+  button.style[isBottom ? "bottom" : "top"] = "16px";
+  button.style[isRight ? "right" : "left"] = "16px";
+  button.style.width = `${buttonWidth}px`;
+  button.style.height = `${buttonHeight}px`;
+  button.style.borderRadius = `${borderRadius}px`;
   button.style.border = "none";
   button.style.backgroundColor = themeColor;
-  button.style.color = color;
-  button.style.fontSize = "24px";
   button.style.cursor = "pointer";
   button.style.zIndex = "999998";
   button.style.boxShadow = "0 2px 10px rgba(0,0,0,0.2)";
+  button.style.display = "flex";
+  button.style.alignItems = "center";
+  button.style.justifyContent = "center";
 
-  // Crear wrapper (contenedor del iframe)
+  // iframe wrapper
   const wrapper = document.createElement("div");
   wrapper.style.position = "fixed";
   wrapper.style[isBottom ? "bottom" : "top"] = "80px";
-  wrapper.style[isRight ? "right" : "left"] = "20px";
-  wrapper.style.width = width;
-  wrapper.style.height = height;
+  wrapper.style[isRight ? "right" : "left"] = "16px";
+  wrapper.style.width = `${width}px`;
+  wrapper.style.height = `${height}px`;
   wrapper.style.borderRadius = "16px";
   wrapper.style.overflow = "hidden";
   wrapper.style.boxShadow = "0 0 12px rgba(0,0,0,0.15)";
@@ -56,26 +72,29 @@
   document.body.appendChild(button);
   document.body.appendChild(wrapper);
 
-  // Toggle del chat
+  // Chat toggle
   let isOpen = false;
   button.addEventListener("click", () => {
     isOpen = !isOpen;
     wrapper.style.display = isOpen ? "block" : "none";
-    button.innerHTML = isOpen ? "❌" : "💬";
   });
-  // Cerrar el chat con Escape
+
+  // Close with Escape key
   document.addEventListener("keydown", (event) => {
     if (event.key === "Escape" && isOpen) {
       isOpen = false;
       wrapper.style.display = "none";
-      button.innerHTML = "💬";
     }
   });
-
-  // Estilos extra del cliente (opcional)
-  if (customStyles) {
-    const styleTag = document.createElement("style");
-    styleTag.innerHTML = customStyles;
-    document.head.appendChild(styleTag);
-  }
+  // Close with click outside
+  document.addEventListener("click", (event) => {
+    if (
+      isOpen &&
+      !wrapper.contains(event.target) &&
+      !button.contains(event.target)
+    ) {
+      isOpen = false;
+      wrapper.style.display = "none";
+    }
+  });
 })();

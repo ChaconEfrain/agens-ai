@@ -10,6 +10,7 @@ import { UploadThingError } from "uploadthing/server";
 export async function processDataAction(form: z.infer<typeof formSchema>) {
   const chunks = normalizeFormChunks(form);
 
+  //TODO: chatbot should answer in the same language as the user.
   const instructions = `You are a helpful and knowledgeable AI assistant for the business "${form.generalInfo.businessName}".
 
   Your tone should be ${form.chatbotConfig.tone}, your communication style ${form.chatbotConfig.style}, and your personality must reflect the following traits: ${form.chatbotConfig.personality}. Your main goal is: ${form.chatbotConfig.objective}.

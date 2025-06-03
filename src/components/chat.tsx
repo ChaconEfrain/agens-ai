@@ -9,11 +9,13 @@ import ChatMessage from "./chat-message";
 import { deleteMessagesAction, sendMessageAction } from "../app/test-chatbot/[slug]/_actions";
 import type { Message } from "@/db/schema";
 import { useChatSession } from '@/hooks/use-chat-session'
+import { ChatbotStyles } from "@/types/embedded-chatbot";
 
 interface Props {
   chatbotId: number;
   chatbotSlug: string;
   chatbotInstructions: string;
+  chatbotStyles?: ChatbotStyles | null;
   historyMessages: Pick<Message, "role" | "message">[];
 }
 
@@ -22,6 +24,7 @@ export default function Chat({
   chatbotSlug,
   chatbotInstructions,
   historyMessages,
+  chatbotStyles,
 }: Props) {
   const sessionId = useChatSession(chatbotSlug);
   const [messages, setMessages] = useState(historyMessages);
@@ -81,6 +84,19 @@ export default function Chat({
 
   return (
     <Card className="flex flex-col h-full relative">
+      {chatbotStyles?.chat.showBranding && (
+        <p className="absolute top-2 right-4 text-xs text-muted-foreground">
+          Powered by{" "}
+          <a
+            href="https://agens.ai"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:underline"
+          >
+            AgensAI
+          </a>
+        </p>
+      )}
       <Button
         className="absolute top-0 left-2 px-0 has-[>svg]:px-0 hover:bg-transparent"
         variant="ghost"
@@ -95,6 +111,7 @@ export default function Chat({
             key={i}
             message={message}
             role={role}
+            styles={chatbotStyles}
           />
         ))}
         <div ref={scrollDiv} aria-hidden="true" className="w-0 h-0" />
