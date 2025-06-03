@@ -7,7 +7,7 @@
   let styles;
   try {
     const res = await fetch(
-      `http://localhost:3000/api/embed-styles?slug=${chatbotSlug}`
+      `https://agens-ai.vercel.app/api/embed-styles?slug=${chatbotSlug}`
     );
 
     if (!res.ok) {
