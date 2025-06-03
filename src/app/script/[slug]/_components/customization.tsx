@@ -32,8 +32,7 @@ import {
 import { ChatbotStyles } from "@/types/embedded-chatbot";
 import { updateStylesAction } from "../_actions";
 import { toast } from "sonner";
-import { useState } from "react";
-import { cn } from "@/lib/utils";
+import { cn, sanitizeSvg } from "@/lib/utils";
 
 interface Props {
   styles: ChatbotStyles;
@@ -541,9 +540,10 @@ export default function Customization({ styles, updateStyles, slug }: Props) {
                     <Input
                       value={field.value ?? ""}
                       onChange={(e) => {
-                        field.onChange(e.target.value);
+                        const sanitizedSvg = sanitizeSvg(e.target.value);
+                        field.onChange(sanitizedSvg);
                         updateStyles({
-                          button: { ...styles.button, icon: e.target.value },
+                          button: { ...styles.button, icon: sanitizedSvg },
                         });
                       }}
                       placeholder="Copy and paste your SVG icon here"
