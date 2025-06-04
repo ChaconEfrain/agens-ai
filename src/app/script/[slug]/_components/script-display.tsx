@@ -19,7 +19,7 @@ export function ScriptDisplay({ slug }: ScriptDisplayProps) {
     return `<script
   src="${baseUrl}/embed.js"
   data-chatbot-slug="${slug}"
-/>`
+></script>`;
   }
 
   const generateReactComponent = () => {
