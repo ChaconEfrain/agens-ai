@@ -14,11 +14,12 @@ import { BotMessageSquare } from "lucide-react";
 import { usePathname } from "next/navigation";
 
 export default function Nav() {
-  const { isSignedIn } = useUser();
   const pathname = usePathname();
   const isEmbed = pathname.startsWith("/embed");
 
   if (isEmbed) return null; // Don't render the nav in embed mode
+
+  const { isSignedIn } = useUser();
 
   return (
     <nav className="flex justify-between items-center py-4">

@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 import { Outfit } from "next/font/google";
-import { ClerkProvider } from "@clerk/nextjs";
 import "./globals.css";
 import Nav from "@/components/nav";
 import { Toaster } from "@/components/ui/sonner";
 import Script from "next/script";
 import AppWrapper from "@/components/app-wrapper";
+import ClerkWrapper from "@/components/clerk-wrapper";
 
 const outfit = Outfit({
   variable: "--font-outfit",
@@ -23,7 +23,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider>
+    <ClerkWrapper>
       <html lang="en">
         <body className={`${outfit.variable} antialiased bg-transparent`}>
           <AppWrapper>
@@ -37,6 +37,6 @@ export default function RootLayout({
           data-chatbot-slug="greenlife-a6b73f"
         />
       </html>
-    </ClerkProvider>
+    </ClerkWrapper>
   );
 }
