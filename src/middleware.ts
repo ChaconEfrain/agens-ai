@@ -8,7 +8,7 @@ export const config = {
   matcher: [
     // Skip Next.js internals and all static files, unless found in search params
     "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
-    // Run for API routes except for webhooks
-    "/api((?!/webhooks).*)",
+    // Run for API routes except for webhooks and /embed-styles
+    "/api((?!/webhooks|/embed-styles).*)",
   ],
 };
