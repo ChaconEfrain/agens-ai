@@ -1,5 +1,5 @@
 import Chat from "@/components/chat";
-import { getChatbotBySlug } from "@/db/chatbot";
+import { getChatbotBySlugEmbed } from "@/db/chatbot-embed";
 import { getActiveMessagesByChatbotId } from "@/db/messages";
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
@@ -10,7 +10,7 @@ export default async function EmbedPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const chatbot = await getChatbotBySlug({ slug });
+  const chatbot = await getChatbotBySlugEmbed({ slug });
 
   if (!chatbot) return notFound();
 

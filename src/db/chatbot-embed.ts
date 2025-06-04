@@ -1,0 +1,17 @@
+import { eq } from "drizzle-orm";
+import { db } from ".";
+import { chatbots } from "./schema";
+
+export async function getChatbotBySlugEmbed({ slug }: { slug: string }) {
+  const chatbot = await db.query.chatbots.findFirst({
+    where: eq(chatbots.slug, slug),
+    with: {
+      business: true,
+      files: true,
+    },
+  });
+
+  if (!chatbot) throw new Error("Chatbot not found");
+
+  return chatbot;
+}
