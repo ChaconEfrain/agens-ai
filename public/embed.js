@@ -1,5 +1,4 @@
 (async function () {
-  if (window.location.pathname.includes("/embed/")) return;
   const script = document.currentScript;
 
   const chatbotSlug = script.dataset.chatbotSlug;

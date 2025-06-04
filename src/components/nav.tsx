@@ -11,14 +11,8 @@ import React from "react";
 import { Button } from "./ui/button";
 import Link from "next/link";
 import { BotMessageSquare } from "lucide-react";
-import { usePathname } from "next/navigation";
 
 export default function Nav() {
-  const pathname = usePathname();
-  const isEmbed = pathname.startsWith("/embed");
-
-  if (isEmbed) return null; // Don't render the nav in embed mode
-
   const { isSignedIn } = useUser();
 
   return (
