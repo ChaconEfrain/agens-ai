@@ -6,6 +6,6 @@ export default clerkMiddleware({
 
 export const config = {
   matcher: [
-    "/((?!_next|.*\\..*|embed($|/)|api/embed-styles|api/public|api/webhooks).*).*",
+    "/((?!_next|.*\\..*|(?:embed)(?:$|/)|api/(?:embed-styles|public|webhooks)).*)",
   ],
 };
