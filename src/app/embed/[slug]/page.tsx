@@ -1,7 +1,5 @@
 import Chat from "@/components/chat";
 import { getChatbotBySlugEmbed } from "@/db/chatbot-embed";
-import { getActiveMessagesByChatbotId } from "@/db/messages";
-import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 
 export default async function EmbedPage({
@@ -13,12 +11,6 @@ export default async function EmbedPage({
   const chatbot = await getChatbotBySlugEmbed({ slug });
 
   if (!chatbot) return notFound();
-
-  const sessionId = (await cookies()).get(`chat-session-${slug}`)?.value;
-  const messages = await getActiveMessagesByChatbotId({
-    chatbotId: chatbot.id,
-    sessionId: sessionId ?? "",
-  });
 
   return (
     <div
@@ -39,7 +31,6 @@ export default async function EmbedPage({
         chatbotInstructions={chatbot.instructions}
         chatbotSlug={chatbot.slug}
         chatbotStyles={chatbot.styles}
-        historyMessages={messages}
       />
     </div>
   );

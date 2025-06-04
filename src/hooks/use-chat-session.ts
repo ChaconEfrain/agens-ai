@@ -5,17 +5,14 @@ export function useChatSession(chatbotSlug: string) {
 
   useEffect(() => {
     const key = `chat-session-${chatbotSlug}`;
-    const cookies = document.cookie.split("; ").reduce((acc: Record<string, string>, cookie) => {
-      const [name, value] = cookie.split("=");
-      acc[name] = value;
-      return acc;
-    }, {});
-    let id = cookies[key];
+    let id = localStorage.getItem(key);
 
     if (!id) {
       id = crypto.randomUUID();
-      document.cookie = `${key}=${id}; path=/; max-age=604800`;
+      localStorage.setItem(key, id);
     }
+
+    console.log("Chat session ID:", id);
 
     setSessionId(id);
   }, [chatbotSlug]);

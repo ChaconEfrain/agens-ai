@@ -1,7 +1,12 @@
 'use server'
 
 import { getRelatedEmbeddings } from "@/db/embeddings";
-import { createMessages, disableMessagesByChatbotId, getLatestMessagesByChatbotId } from "@/db/messages";
+import {
+  createMessages,
+  disableMessagesByChatbotId,
+  getActiveMessagesByChatbotId,
+  getLatestMessagesByChatbotId,
+} from "@/db/messages";
 import { chatCompletions, createEmbeddings } from "@/services/openai";
 import { ChatCompletionMessageParam } from "openai/resources/index.mjs";
 
@@ -85,5 +90,24 @@ export async function deleteMessagesAction({
       success: false,
       message: "Error deleting messages",
     };
+  }
+}
+
+export async function getActiveMessagesAction({
+  chatbotId,
+  sessionId,
+}: {
+  chatbotId: number;
+  sessionId: string;
+}) {
+  try {
+    const messages = await getActiveMessagesByChatbotId({
+      chatbotId,
+      sessionId,
+    });
+    return messages;
+  } catch (error) {
+    console.error("Error fetching active messages:", error);
+    return [];
   }
 }

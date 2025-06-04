@@ -1,13 +1,14 @@
 'use client'
 
-import React, { type FormEvent, useEffect, useRef, useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardFooter } from '@/components/ui/card'
-import { Textarea } from '@/components/ui/textarea'
+import React, { type FormEvent, useEffect, useRef, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Textarea } from "@/components/ui/textarea";
 import { Send, Trash } from "lucide-react";
 import ChatMessage from "./chat-message";
 import {
   deleteMessagesAction,
+  getActiveMessagesAction,
   sendMessageAction,
 } from "@/actions/chatbot-messages";
 import type { Message } from "@/db/schema";
@@ -19,19 +20,40 @@ interface Props {
   chatbotSlug: string;
   chatbotInstructions: string;
   chatbotStyles?: ChatbotStyles | null;
-  historyMessages: Pick<Message, "role" | "message">[];
 }
 
 export default function Chat({
   chatbotId,
   chatbotSlug,
   chatbotInstructions,
-  historyMessages,
   chatbotStyles,
 }: Props) {
   const sessionId = useChatSession(chatbotSlug);
-  const [messages, setMessages] = useState(historyMessages);
+  const [messages, setMessages] = useState<Pick<Message, "role" | "message">[]>(
+    []
+  );
+  const [loading, setLoading] = useState(false);
   const scrollDiv = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setLoading(true);
+    (async () => {
+      const latestMessages = await getActiveMessagesAction({
+        chatbotId,
+        sessionId,
+      });
+
+      console.log("Latest messages:", latestMessages);
+
+      setMessages(
+        latestMessages.map(({ role, message }) => ({
+          role,
+          message,
+        }))
+      );
+      setLoading(false);
+    })();
+  }, [sessionId, chatbotId]);
 
   useEffect(() => {
     scrollDiv.current?.scrollIntoView();
@@ -108,14 +130,39 @@ export default function Chat({
         <Trash />
       </Button>
       <CardContent className="flex-grow overflow-y-scroll h-full max-h-11/12 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-accent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-muted-foreground mask-b-from-[95%] pt-4">
-        {messages.map(({ message, role }, i) => (
-          <ChatMessage
-            key={i}
-            message={message}
-            role={role}
-            styles={chatbotStyles}
-          />
-        ))}
+        {loading ? (
+          <div aria-hidden className="animate-pulse flex flex-col space-y-4">
+            <div
+              aria-hidden
+              className="h-14 bg-muted-foreground rounded w-3/4 self-end"
+            />
+            <div
+              aria-hidden
+              className="h-14 bg-muted-foreground rounded w-3/4"
+            />
+            <div
+              aria-hidden
+              className="h-14 bg-muted-foreground rounded w-3/4 self-end"
+            />
+            <div
+              aria-hidden
+              className="h-14 bg-muted-foreground rounded w-3/4"
+            />
+            <div
+              aria-hidden
+              className="h-14 bg-muted-foreground rounded w-3/4 self-end"
+            />
+          </div>
+        ) : (
+          messages.map(({ message, role }, i) => (
+            <ChatMessage
+              key={i}
+              message={message}
+              role={role}
+              styles={chatbotStyles}
+            />
+          ))
+        )}
         <div ref={scrollDiv} aria-hidden="true" className="w-0 h-0" />
       </CardContent>
       <CardFooter>
