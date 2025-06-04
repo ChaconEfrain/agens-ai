@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getChatbotBySlug } from "@/db/chatbot";
+import { getChatbotBySlugEmbed } from "@/db/chatbot-embed";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*", // Puedes restringir esto a un dominio si prefieres
@@ -18,7 +18,7 @@ export async function GET(request: Request) {
     );
   }
 
-  const chatbot = await getChatbotBySlug({ slug });
+  const chatbot = await getChatbotBySlugEmbed({ slug });
 
   if (!chatbot) {
     return NextResponse.json(
