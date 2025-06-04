@@ -1,7 +1,6 @@
 import { createEmbeddings } from "@/services/openai";
 import { db } from ".";
 import { embeddings } from "./schema";
-import { auth } from "@clerk/nextjs/server";
 import { cosineDistance, eq } from "drizzle-orm";
 
 export async function saveEmbeddings({
@@ -11,11 +10,7 @@ export async function saveEmbeddings({
   chunks: string[];
   chatbotId: number;
 }) {
-  const { userId } = await auth();
-
   try {
-    if (!userId) throw new Error("No session detected");
-
     const openAIEmbeddings = await createEmbeddings(chunks);
 
     return await db

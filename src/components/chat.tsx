@@ -6,9 +6,12 @@ import { Card, CardContent, CardFooter } from '@/components/ui/card'
 import { Textarea } from '@/components/ui/textarea'
 import { Send, Trash } from "lucide-react";
 import ChatMessage from "./chat-message";
-import { deleteMessagesAction, sendMessageAction } from "../app/test-chatbot/[slug]/_actions";
+import {
+  deleteMessagesAction,
+  sendMessageAction,
+} from "@/actions/chatbot-messages";
 import type { Message } from "@/db/schema";
-import { useChatSession } from '@/hooks/use-chat-session'
+import { useChatSession } from "@/hooks/use-chat-session";
 import { ChatbotStyles } from "@/types/embedded-chatbot";
 
 interface Props {
@@ -78,7 +81,6 @@ export default function Chat({
     await deleteMessagesAction({
       chatbotId,
       sessionId,
-      chatbotSlug,
     });
   };
 

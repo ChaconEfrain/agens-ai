@@ -1,4 +1,3 @@
-import { auth } from "@clerk/nextjs/server";
 import { db } from ".";
 import { messages } from "./schema";
 import { and, asc, desc, eq } from "drizzle-orm";
@@ -11,12 +10,6 @@ export async function createMessages(
     message: string;
   }[]
 ) {
-  const user = await auth();
-
-  if (!user) {
-    throw new Error("No session detected");
-  }
-
   await db.insert(messages).values(
     messagesArr.map(({ chatbotId, role, message, sessionId }) => ({
       chatbotId,
