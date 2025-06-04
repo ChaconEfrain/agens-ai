@@ -1,5 +1,5 @@
 import React from 'react'
-import { formSchema, type BusinessData } from './form-wizard'
+import { formSchema } from './form-wizard'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { UseFormReturn } from 'react-hook-form'

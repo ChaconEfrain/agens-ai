@@ -3,9 +3,9 @@ import { getChatbotBySlug } from "@/db/chatbot";
 import { notFound, redirect } from "next/navigation";
 import { auth } from "@clerk/nextjs/server";
 import Chat from "@/components/chat";
-import ChatbotContext from "./_components/chatbot-context";
 import { getActiveMessagesByChatbotId } from "@/db/messages";
 import { cookies } from "next/headers";
+import ChatbotContext from "./_components/chatbot-context";
 
 export default async function TestChatbot({
   params,

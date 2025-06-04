@@ -2,7 +2,7 @@ import React from 'react'
 import { getChatbotBySlug } from '@/db/chatbot';
 import { auth } from '@clerk/nextjs/server';
 import { notFound, redirect } from 'next/navigation';
-import PageContainer from './_components/page-container';
+import PageContainer from "./_components/page-container";
 
 export default async function ScriptPage({ params }: { params: Promise<{ slug: string }> }) {
   const { userId } = await auth();

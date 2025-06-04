@@ -1,4 +1,4 @@
-import { formSchema } from "@/app/create-chatbot/_components/form-wizard";
+import { formSchema } from "@/app/(auth)/create-chatbot/_components/form-wizard";
 import { z } from "zod";
 import { businesses, chatbots, embeddings, files } from "./schema";
 import { getUserByClerkId } from "./user";
@@ -17,7 +17,13 @@ interface CreateChatbotTransactionParams {
   filesResult: UploadFileResult[];
 }
 
-export async function createChatbotTransaction({form, instructions, slug, chunks, filesResult}: CreateChatbotTransactionParams) {
+export async function createChatbotTransaction({
+  form,
+  instructions,
+  slug,
+  chunks,
+  filesResult,
+}: CreateChatbotTransactionParams) {
   const { userId } = await auth();
 
   if (!userId) throw new Error("No session detected");
@@ -26,58 +32,56 @@ export async function createChatbotTransaction({form, instructions, slug, chunks
 
   return await db.transaction(async (tx) => {
     const businessInsert = await tx
-    .insert(businesses)
-    .values({
-      userId: user.id,
-      chatbotObjective: form.chatbotConfig.objective,
-      chatbotPersonality: form.chatbotConfig.personality,
-      chatbotStyle: form.chatbotConfig.style,
-      chatbotTone: form.chatbotConfig.tone,
-      description: form.generalInfo.description,
-      name: form.generalInfo.businessName,
-      productsOrServices: form.productsServices.type,
-      commonQuestions:
-        form.customerService.commonQuestions?.map((q) => ({
-          question: q.question || "",
-          answer: q.answer || "",
-        })) ?? [],
-      contactMethods: form.customerService.contactMethods,
-      deliveryTimeframes: form.shippingLogistics?.deliveryTimeframes,
-      email: form.customerService.email,
-      foundedYear: form.generalInfo.foundedYear,
-      hasPhysicalProducts: form.hasPhysicalProducts,
-      internationalShipping:
-        form.shippingLogistics?.internationalShipping,
-      items:
-        form.productsServices.items?.map((item) => ({
-          name: item.name || "",
-          description: item.description || "",
-          price: item.price || "",
-        })) ?? [],
-      phone: form.customerService.phone,
-      responseTime: form.customerService.responseTime,
-      returnPolicy: form.shippingLogistics?.returnPolicy,
-      shippingMethods: form.shippingLogistics?.shippingMethods,
-      shippingRestrictions:
-        form.shippingLogistics?.shippingRestrictions,
-      socialMedia: form.customerService.socialMedia,
-      supportHours: form.customerService.supportHours,
-      website: form.generalInfo.website,
-      whatsapp: form.customerService.whatsapp,
-    })
-    .returning({ id: businesses.id });
+      .insert(businesses)
+      .values({
+        userId: user.id,
+        chatbotObjective: form.chatbotConfig.objective,
+        chatbotPersonality: form.chatbotConfig.personality,
+        chatbotStyle: form.chatbotConfig.style,
+        chatbotTone: form.chatbotConfig.tone,
+        description: form.generalInfo.description,
+        name: form.generalInfo.businessName,
+        productsOrServices: form.productsServices.type,
+        commonQuestions:
+          form.customerService.commonQuestions?.map((q) => ({
+            question: q.question || "",
+            answer: q.answer || "",
+          })) ?? [],
+        contactMethods: form.customerService.contactMethods,
+        deliveryTimeframes: form.shippingLogistics?.deliveryTimeframes,
+        email: form.customerService.email,
+        foundedYear: form.generalInfo.foundedYear,
+        hasPhysicalProducts: form.hasPhysicalProducts,
+        internationalShipping: form.shippingLogistics?.internationalShipping,
+        items:
+          form.productsServices.items?.map((item) => ({
+            name: item.name || "",
+            description: item.description || "",
+            price: item.price || "",
+          })) ?? [],
+        phone: form.customerService.phone,
+        responseTime: form.customerService.responseTime,
+        returnPolicy: form.shippingLogistics?.returnPolicy,
+        shippingMethods: form.shippingLogistics?.shippingMethods,
+        shippingRestrictions: form.shippingLogistics?.shippingRestrictions,
+        socialMedia: form.customerService.socialMedia,
+        supportHours: form.customerService.supportHours,
+        website: form.generalInfo.website,
+        whatsapp: form.customerService.whatsapp,
+      })
+      .returning({ id: businesses.id });
 
     if (!businessInsert) tx.rollback();
 
     const chatbotInsert = await tx
-    .insert(chatbots)
-    .values({
-      userId: user.id,
-      instructions,
-      businessId: businessInsert[0].id,
-      slug
-    })
-    .returning({ id: chatbots.id });
+      .insert(chatbots)
+      .values({
+        userId: user.id,
+        instructions,
+        businessId: businessInsert[0].id,
+        slug,
+      })
+      .returning({ id: chatbots.id });
 
     if (!chatbotInsert) tx.rollback();
 
