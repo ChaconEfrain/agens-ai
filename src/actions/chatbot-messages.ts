@@ -1,5 +1,6 @@
 'use server'
 
+import { getChatbotAllowedDomainsEmbed } from "@/db/chatbot-embed";
 import { getRelatedEmbeddings } from "@/db/embeddings";
 import {
   createMessages,
@@ -15,13 +16,24 @@ export async function sendMessageAction({
   chatbotId,
   chatbotInstructions,
   sessionId,
+  origin,
 }: {
   message: string;
   chatbotId: number;
   chatbotInstructions: string;
   sessionId: string;
+  origin?: string;
 }) {
   try {
+    if (origin) {
+      const allowedDomains = await getChatbotAllowedDomainsEmbed({
+        id: chatbotId,
+      });
+      const isAllowed = allowedDomains.some((d: string) => origin === d);
+
+      if (!isAllowed) throw new Error("Domain not allowed");
+    }
+
     const [{ embedding: userEmbedding }] = await createEmbeddings([message]);
     const contextChunks = await getRelatedEmbeddings({
       userEmbedding,

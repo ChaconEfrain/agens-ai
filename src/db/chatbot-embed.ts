@@ -3,17 +3,21 @@ import { db } from ".";
 import { chatbots } from "./schema";
 
 export async function getChatbotBySlugEmbed({ slug }: { slug: string }) {
-  const chatbot = await db.query.chatbots.findFirst({
-    where: eq(chatbots.slug, slug),
-    with: {
-      business: true,
-      files: true,
-    },
-  });
+  try {
+    const chatbot = await db.query.chatbots.findFirst({
+      where: eq(chatbots.slug, slug),
+      with: {
+        business: true,
+        files: true,
+      },
+    });
 
-  if (!chatbot) return null;
+    if (!chatbot) throw new Error("Chatbot not found");
 
-  return chatbot;
+    return chatbot;
+  } catch (error) {
+    console.error(error);
+  }
 }
 
 export async function getChatbotByIdEmbed({ id }: { id: number }) {
@@ -24,4 +28,17 @@ export async function getChatbotByIdEmbed({ id }: { id: number }) {
   if (!chatbot) return null;
 
   return chatbot;
+}
+
+export async function getChatbotAllowedDomainsEmbed({ id }: { id: number }) {
+  const chatbot = await db.query.chatbots.findFirst({
+    where: eq(chatbots.id, id),
+    columns: {
+      allowedDomains: true,
+    },
+  });
+
+  if (!chatbot) throw new Error("Error fetching allowed domains");
+
+  return chatbot.allowedDomains;
 }

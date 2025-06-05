@@ -14,7 +14,6 @@ import {
 import type { Message } from "@/db/schema";
 import { useChatSession } from "@/hooks/use-chat-session";
 import { ChatbotStyles } from "@/types/embedded-chatbot";
-import { safePostChatbotMessage } from "@/lib/chatbot-message";
 
 interface Props {
   chatbotId: number;
@@ -82,26 +81,13 @@ export default function Chat({
     ]);
     form.reset();
 
-    let answer = "";
-
-    if (origin) {
-      const { message: chatbotAnswer } = await safePostChatbotMessage({
-        message,
-        chatbotId,
-        sessionId,
-        chatbotInstructions,
-        origin,
-      });
-
-      answer = chatbotAnswer;
-    } else {
-      answer = await sendMessageAction({
-        message,
-        chatbotId,
-        sessionId,
-        chatbotInstructions,
-      });
-    }
+    const answer = await sendMessageAction({
+      message,
+      chatbotId,
+      sessionId,
+      chatbotInstructions,
+      origin,
+    });
 
     if (answer) {
       setMessages((prev) => {
