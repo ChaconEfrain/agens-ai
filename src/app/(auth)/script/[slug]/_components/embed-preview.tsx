@@ -7,10 +7,11 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { BotMessageSquare, Globe } from "lucide-react";
-import React, { useState } from "react";
+import { Globe } from "lucide-react";
+import React, { useEffect, useState } from "react";
 import MockChat from "./mock-chat";
 import { ChatbotStyles } from "@/types/embedded-chatbot";
+import { sanitizeSvg } from "@/lib/utils";
 
 interface Props {
   styles: ChatbotStyles;
@@ -18,6 +19,12 @@ interface Props {
 
 export default function EmbedPreview({ styles }: Props) {
   const [open, setOpen] = useState(true);
+  const [sanitizedSvg, setSanitizedSvg] = useState("");
+
+  useEffect(() => {
+    setSanitizedSvg(sanitizeSvg(styles.button.icon));
+  }, []);
+
   return (
     <Card className="col-span-full">
       <CardHeader>
@@ -77,14 +84,10 @@ export default function EmbedPreview({ styles }: Props) {
               boxShadow: "0 2px 10px rgba(0,0,0,0.1)",
             }}
             onClick={() => setOpen(!open)}
-            {...(styles.button.icon
-              ? { dangerouslySetInnerHTML: { __html: styles.button.icon } }
-              : {})}
-          >
-            {styles.button.icon ? null : (
-              <BotMessageSquare style={{ color: styles.chat.userTextColor }} />
-            )}
-          </button>
+            dangerouslySetInnerHTML={{
+              __html: sanitizedSvg,
+            }}
+          ></button>
         </div>
       </CardContent>
     </Card>
