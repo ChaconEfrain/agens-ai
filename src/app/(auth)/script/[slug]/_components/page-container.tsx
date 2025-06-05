@@ -6,7 +6,6 @@ import Customization from "./customization";
 import EmbedPreview from "./embed-preview";
 import { ChatbotStyles } from "@/types/embedded-chatbot";
 import ChatbotReady from "./chatbot-ready";
-import { defaultStyles } from "@/consts/chatbot";
 
 interface Props {
   slug: string;
@@ -14,9 +13,7 @@ interface Props {
 }
 
 export default function PageContainer({ slug, styles: chatbotStyles }: Props) {
-  const [styles, setStyles] = useState<ChatbotStyles>(
-    chatbotStyles ?? defaultStyles
-  );
+  const [styles, setStyles] = useState<ChatbotStyles>(chatbotStyles);
 
   const updateStyles = (updates: Partial<ChatbotStyles>) => {
     setStyles({ ...styles, ...updates });
