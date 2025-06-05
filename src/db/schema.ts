@@ -45,7 +45,7 @@ export const businesses = pgTable(
       .notNull(),
     name: varchar("name", { length: 255 }).notNull(),
     description: text("description").notNull(),
-    website: text("website"),
+    allowedWebsites: json("allowed_websites").$type<string[]>().notNull(),
     foundedYear: varchar("founded_year", { length: 255 }),
     productsOrServices: productsOrServicesEnum(
       "products_or_services"
@@ -120,6 +120,7 @@ export const chatbots = pgTable(
     userId: integer("user_id")
       .references(() => users.id, { onDelete: "cascade" })
       .notNull(),
+    allowedDomains: json("allowed_domains").$type<string[]>().notNull(),
     instructions: text("instructions").notNull(),
     slug: varchar("slug", { length: 255 }).notNull().unique(),
     styles: json("styles").$type<ChatbotStyles>(),

@@ -31,6 +31,7 @@ export default async function EmbedPage({
         chatbotInstructions={chatbot.instructions}
         chatbotSlug={chatbot.slug}
         chatbotStyles={chatbot.styles}
+        isEmbed
       />
     </div>
   );

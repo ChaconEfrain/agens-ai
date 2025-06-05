@@ -7,12 +7,11 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { UseFormReturn } from "react-hook-form";
-import { formSchema } from "./form-wizard";
-import { z } from "zod";
+import { FormWizardData } from "./form-wizard";
 import DragAndDrop from "@/components/drag-and-drop";
 
 interface DocumentsProps {
-  form: UseFormReturn<z.infer<typeof formSchema>>;
+  form: UseFormReturn<FormWizardData>;
 }
 
 export default function DocumentsStep({ form }: DocumentsProps) {

@@ -1,5 +1,4 @@
-import { formSchema } from "@/app/(auth)/create-chatbot/_components/form-wizard";
-import { z } from "zod";
+import { FormWizardData } from "@/app/(auth)/create-chatbot/_components/form-wizard";
 import { businesses, chatbots, embeddings, files } from "./schema";
 import { getUserByClerkId } from "./user";
 import { auth } from "@clerk/nextjs/server";
@@ -10,7 +9,7 @@ import { extractTextFromPdf } from "@/services/utils";
 import { chunkText } from "@/lib/utils";
 
 interface CreateChatbotTransactionParams {
-  form: z.infer<typeof formSchema>;
+  form: FormWizardData;
   instructions: string;
   slug: string;
   chunks: string[];
@@ -66,12 +65,19 @@ export async function createChatbotTransaction({
         shippingRestrictions: form.shippingLogistics?.shippingRestrictions,
         socialMedia: form.customerService.socialMedia,
         supportHours: form.customerService.supportHours,
-        website: form.generalInfo.website,
+        allowedWebsites: form.generalInfo.allowedWebsites.map(({ url }) => url),
         whatsapp: form.customerService.whatsapp,
       })
-      .returning({ id: businesses.id });
+      .returning({
+        id: businesses.id,
+        allowedDomains: businesses.allowedWebsites,
+      });
 
     if (!businessInsert) tx.rollback();
+
+    const allowedDomains = businessInsert[0].allowedDomains.map((url) =>
+      new URL(url).hostname.replace(/^www\./, "")
+    );
 
     const chatbotInsert = await tx
       .insert(chatbots)
@@ -79,6 +85,7 @@ export async function createChatbotTransaction({
         userId: user.id,
         instructions,
         businessId: businessInsert[0].id,
+        allowedDomains,
         slug,
       })
       .returning({ id: chatbots.id });

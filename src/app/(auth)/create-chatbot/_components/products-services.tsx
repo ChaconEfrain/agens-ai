@@ -1,18 +1,22 @@
 import React, { useEffect, type ChangeEvent } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { useFieldArray, type UseFormReturn } from 'react-hook-form';
-import { z } from 'zod';
-import { formSchema } from './form-wizard';
-import { FormControl, FormField, FormItem, FormLabel } from '@/components/ui/form';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Switch } from '@/components/ui/switch';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { Trash } from 'lucide-react';
+import { FormWizardData } from "./form-wizard";
+import {
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+} from "@/components/ui/form";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Switch } from "@/components/ui/switch";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Trash } from "lucide-react";
 
 interface ProductsAndServicesProps {
-  form: UseFormReturn<z.infer<typeof formSchema>>;
+  form: UseFormReturn<FormWizardData>;
 }
 
 export default function ProductsAndServices({ form }: ProductsAndServicesProps) {

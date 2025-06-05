@@ -11,7 +11,17 @@ export async function getChatbotBySlugEmbed({ slug }: { slug: string }) {
     },
   });
 
-  if (!chatbot) throw new Error("Chatbot not found");
+  if (!chatbot) return null;
+
+  return chatbot;
+}
+
+export async function getChatbotByIdEmbed({ id }: { id: number }) {
+  const chatbot = await db.query.chatbots.findFirst({
+    where: eq(chatbots.id, id),
+  });
+
+  if (!chatbot) return null;
 
   return chatbot;
 }

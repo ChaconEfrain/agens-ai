@@ -1,13 +1,12 @@
 'use server'
 
-import { z } from "zod"
-import { formSchema } from "../_components/form-wizard"
+import { FormWizardData } from "../_components/form-wizard";
 import { utapi } from "@/app/api/uploadthing/core";
 import type { UploadFileResult } from "uploadthing/types";
 import { createChatbotTransaction } from "@/db/transactions";
 import { UploadThingError } from "uploadthing/server";
 
-export async function processDataAction(form: z.infer<typeof formSchema>) {
+export async function processDataAction(form: FormWizardData) {
   const chunks = normalizeFormChunks(form);
 
   //TODO: chatbot should answer in the same language as the user.
@@ -78,35 +77,42 @@ export async function processDataAction(form: z.infer<typeof formSchema>) {
   }
 }
 
-function normalizeFormChunks(form: z.infer<typeof formSchema>) {
+function normalizeFormChunks(form: FormWizardData) {
   const chunks: string[] = [];
 
   // General Info
-  const { businessName, description, website, foundedYear } = form.generalInfo;
+  const { businessName, description, allowedWebsites, foundedYear } =
+    form.generalInfo;
   chunks.push(
     `The business is called ${businessName} and was founded in ${foundedYear}.`,
-    website ? `Its website is ${website}.` : '',
-    description ? `Business description: ${description}` : ''
+    allowedWebsites.length > 1
+      ? `Its websites are ${allowedWebsites.join(", ")}.`
+      : "Its website is " + allowedWebsites[0],
+    description ? `Business description: ${description}` : ""
   );
 
   // Products & Services
-  if (form.productsServices?.type === 'products') {
+  if (form.productsServices?.type === "products") {
     const items = form.productsServices.items ?? [];
     const itemDescriptions = items.map(
       (item: any) =>
         `Product: "${item.name}", Description: ${item.description}, Price: ${item.price}`
     );
     chunks.push(
-      `The business offers the following products:\n${itemDescriptions.join('\n')}`
+      `The business offers the following products:\n${itemDescriptions.join(
+        "\n"
+      )}`
     );
-  } else if (form.productsServices?.type === 'services') {
+  } else if (form.productsServices?.type === "services") {
     const items = form.productsServices.items ?? [];
     const itemDescriptions = items.map(
       (item: any) =>
         `Service: "${item.name}", Description: ${item.description}, Price: ${item.price}`
     );
     chunks.push(
-      `The business offers the following services:\n${itemDescriptions.join('\n')}`
+      `The business offers the following services:\n${itemDescriptions.join(
+        "\n"
+      )}`
     );
   }
 
@@ -116,7 +122,7 @@ function normalizeFormChunks(form: z.infer<typeof formSchema>) {
     if (logistics) {
       const details = Object.entries(logistics)
         .map(([key, value]) => `${key}: ${value}`)
-        .join(', ');
+        .join(", ");
       chunks.push(`Shipping logistics details: ${details}`);
     }
   }
@@ -127,10 +133,10 @@ function normalizeFormChunks(form: z.infer<typeof formSchema>) {
     chunks.push(
       `Customer support is available ${cs.supportHours}.`,
       `Contact methods: ${cs.contactMethods}.`,
-      cs.email ? `Email: ${cs.email}` : '',
-      cs.phone ? `Phone: ${cs.phone}` : '',
-      cs.whatsapp ? `WhatsApp: ${cs.whatsapp}` : '',
-      cs.socialMedia ? `Social media: ${cs.socialMedia}` : '',
+      cs.email ? `Email: ${cs.email}` : "",
+      cs.phone ? `Phone: ${cs.phone}` : "",
+      cs.whatsapp ? `WhatsApp: ${cs.whatsapp}` : "",
+      cs.socialMedia ? `Social media: ${cs.socialMedia}` : "",
       `Typical response time: ${cs.responseTime}`
     );
 

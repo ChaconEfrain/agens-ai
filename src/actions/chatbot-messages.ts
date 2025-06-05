@@ -64,7 +64,7 @@ export async function sendMessageAction({
       },
     ]);
 
-    return answer;
+    return answer ?? "error";
   } catch (error) {
     console.error(error);
     return "error";

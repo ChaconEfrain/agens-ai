@@ -10,13 +10,12 @@ import {
   Smile,
 } from "lucide-react";
 import { UseFormReturn } from "react-hook-form";
-import { z } from "zod";
-import { formSchema } from "./form-wizard";
+import { FormWizardData } from "./form-wizard";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 interface SummaryProps {
-  form: UseFormReturn<z.infer<typeof formSchema>>;
+  form: UseFormReturn<FormWizardData>;
 }
 
 export default function Summary({ form }: SummaryProps) {
@@ -41,8 +40,13 @@ export default function Summary({ form }: SummaryProps) {
               <p>{form.getValues("generalInfo.businessName")}</p>
             </div>
             <div>
-              <p className=" font-medium text-muted-foreground">Website</p>
-              <p>{form.getValues("generalInfo.website") || "Not provided"}</p>
+              <p className=" font-medium text-muted-foreground">Websites</p>
+              <p>
+                {form
+                  .getValues("generalInfo.allowedWebsites")
+                  .map(({ url }: { url: string }) => url)
+                  .join(", ")}
+              </p>
             </div>
             <div>
               <p className=" font-medium text-muted-foreground">Founded</p>

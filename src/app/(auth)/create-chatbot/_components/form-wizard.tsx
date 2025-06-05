@@ -24,7 +24,10 @@ export interface BusinessData {
   generalInfo: {
     businessName: string;
     description: string;
-    website: string;
+    allowedWebsites: {
+      url: string;
+    }[];
+    website: "";
     foundedYear: string;
   };
   productsServices: {
@@ -78,6 +81,7 @@ const initialData: BusinessData = {
   generalInfo: {
     businessName: "",
     description: "",
+    allowedWebsites: [],
     website: "",
     foundedYear: "",
   },
@@ -125,7 +129,10 @@ export const formSchema = z.object({
   generalInfo: z.object({
     businessName: z.string().min(1, "Business name is required"),
     description: z.string().min(1, "Description is required"),
-    website: z.string().url("Invalid URL").or(z.literal("")).optional(),
+    allowedWebsites: z
+      .array(z.object({ url: z.string().url("Invalid URL") }))
+      .min(1, "You must provide at least one website"),
+    website: z.string().url("Invalid URL").or(z.literal("")),
     foundedYear: z.string().optional(),
   }),
   productsServices: z.object({
@@ -198,11 +205,13 @@ export const formSchema = z.object({
   documents: z.array(z.instanceof(File)).optional(),
 });
 
+export type FormWizardData = z.infer<typeof formSchema>;
+
 export default function FormWizard() {
   //TODO: Save step on url and form info on localStorage
   const [currentStep, setCurrentStep] = useState(0);
 
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm<FormWizardData>({
     resolver: zodResolver(formSchema),
     defaultValues: initialData,
     mode: "onChange",
@@ -245,11 +254,11 @@ export default function FormWizard() {
   ];
 
   const handleNextStep = () => {
-    const stepKeys: Array<keyof z.infer<typeof formSchema>> = [
+    const stepKeys: Array<keyof FormWizardData> = [
       "generalInfo",
       "productsServices",
       ...(form.watch("hasPhysicalProducts")
-        ? (["shippingLogistics"] as Array<keyof z.infer<typeof formSchema>>)
+        ? (["shippingLogistics"] as Array<keyof FormWizardData>)
         : []),
       "customerService",
       "chatbotConfig",
@@ -264,7 +273,7 @@ export default function FormWizard() {
         const contactMethods = form.getValues("customerService.contactMethods");
         const contactFields: Record<
           string,
-          keyof z.infer<typeof formSchema>["customerService"]
+          keyof FormWizardData["customerService"]
         > = {
           email: "email",
           phone: "phone",
@@ -299,7 +308,7 @@ export default function FormWizard() {
     }
   };
 
-  const processData = async (form: z.infer<typeof formSchema>) => {
+  const processData = async (form: FormWizardData) => {
     const { message, success, slug } = await processDataAction(form);
 
     if (success) {
@@ -369,7 +378,7 @@ export default function FormWizard() {
 
 interface FormWizardStepProps {
   step: number;
-  form: UseFormReturn<z.infer<typeof formSchema>>;
+  form: UseFormReturn<FormWizardData>;
 }
 
 function FormWizardStep({ step, form }: FormWizardStepProps) {

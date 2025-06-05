@@ -1,20 +1,61 @@
-import React from 'react'
-import { formSchema } from './form-wizard'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
-import { UseFormReturn } from 'react-hook-form'
-import { z } from 'zod'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import React from "react";
+import { FormWizardData } from "./form-wizard";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { useFieldArray, UseFormReturn } from "react-hook-form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import { X } from "lucide-react";
 
 interface GeneralInfoProps {
-  form: UseFormReturn<z.infer<typeof formSchema>>;
+  form: UseFormReturn<FormWizardData>;
 }
 
 export default function GeneralInfo({ form }: GeneralInfoProps) {
   const currentYear = new Date().getFullYear();
   const years = Array.from({ length: 100 }, (_, i) => currentYear - i);
+
+  const { append, fields, remove } = useFieldArray({
+    control: form.control,
+    name: "generalInfo.allowedWebsites",
+  });
+
+  const addWebsite = () => {
+    const website = form.getValues("generalInfo.website");
+    const included = fields.some(({ url }) => url === website);
+
+    if (included) {
+      form.setError("generalInfo.website", {
+        message: "You already included this website",
+      });
+      return;
+    }
+
+    if (website) {
+      append({ url: website });
+      form.setValue("generalInfo.website", "");
+    }
+  };
 
   return (
     <Card>
@@ -59,19 +100,58 @@ export default function GeneralInfo({ form }: GeneralInfoProps) {
             </FormItem>
           )}
         />
-        <FormField
-          control={form.control}
-          name="generalInfo.website"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Website</FormLabel>
-              <FormControl>
-                <Input placeholder="https://yourbusiness.com" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        <div className="flex flex-col gap-2">
+          <FormField
+            control={form.control}
+            name="generalInfo.website"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Websites that will use the chatbot</FormLabel>
+                <div className="flex gap-2 items-center">
+                  <FormControl>
+                    <Input placeholder="https://yourbusiness.com" {...field} />
+                  </FormControl>
+                  <Button
+                    type="button"
+                    onClick={addWebsite}
+                    disabled={
+                      !!form.getFieldState("generalInfo.website").error ||
+                      field.value === ""
+                    }
+                  >
+                    Add website
+                  </Button>
+                </div>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          {fields.length > 0 &&
+            fields.map(({ url }, i) => (
+              <div
+                key={url}
+                className="bg-muted px-2 py-1 relative rounded w-fit flex items-center justify-center"
+              >
+                <span className="text-sm">{url}</span>
+                <button
+                  className="absolute cursor-pointer -top-2 -right-2"
+                  type="button"
+                  onClick={() => remove(i)}
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            ))}
+          <FormField
+            control={form.control}
+            name="generalInfo.allowedWebsites"
+            render={() => (
+              <FormItem>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
         <FormField
           control={form.control}
           name="generalInfo.foundedYear"

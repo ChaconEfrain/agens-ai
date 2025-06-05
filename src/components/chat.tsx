@@ -14,12 +14,14 @@ import {
 import type { Message } from "@/db/schema";
 import { useChatSession } from "@/hooks/use-chat-session";
 import { ChatbotStyles } from "@/types/embedded-chatbot";
+import { safePostChatbotMessage } from "@/lib/chatbot-message";
 
 interface Props {
   chatbotId: number;
   chatbotSlug: string;
   chatbotInstructions: string;
   chatbotStyles?: ChatbotStyles | null;
+  isEmbed?: boolean;
 }
 
 export default function Chat({
@@ -27,6 +29,7 @@ export default function Chat({
   chatbotSlug,
   chatbotInstructions,
   chatbotStyles,
+  isEmbed,
 }: Props) {
   const sessionId = useChatSession(chatbotSlug);
   const [messages, setMessages] = useState<Pick<Message, "role" | "message">[]>(
@@ -79,12 +82,25 @@ export default function Chat({
     ]);
     form.reset();
 
-    const answer = await sendMessageAction({
-      message,
-      chatbotId,
-      sessionId,
-      chatbotInstructions,
-    });
+    let answer = "";
+
+    if (isEmbed) {
+      const { message: chatbotAnswer } = await safePostChatbotMessage({
+        message,
+        chatbotId,
+        sessionId,
+        chatbotInstructions,
+      });
+
+      answer = chatbotAnswer;
+    } else {
+      answer = await sendMessageAction({
+        message,
+        chatbotId,
+        sessionId,
+        chatbotInstructions,
+      });
+    }
 
     if (answer) {
       setMessages((prev) => {
