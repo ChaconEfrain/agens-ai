@@ -74,8 +74,9 @@ export default function ChatbotContext({ chatbot }: Props) {
                 </span>
               </div>
               <div>
-                <span className="text-muted-foreground">Website: </span>
-                <span>{chatbot.business.website ?? "Not provided"}</span>
+                {/* TODO: format correctly in case we have more than one website */}
+                <span className="text-muted-foreground">Websites: </span>
+                <span>{chatbot.business.allowedWebsites.join(", ")}</span>
               </div>
               <div>
                 <span className="text-muted-foreground">Founded: </span>
