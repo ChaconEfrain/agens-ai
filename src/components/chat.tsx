@@ -36,6 +36,7 @@ export default function Chat({
   );
   const [loading, setLoading] = useState(false);
   const scrollDiv = useRef<HTMLDivElement>(null);
+  const formRef = useRef<HTMLFormElement>(null);
 
   useEffect(() => {
     setLoading(true);
@@ -65,6 +66,13 @@ export default function Chat({
     const target = e.target;
     target.style.height = "auto";
     target.style.height = `${target.scrollHeight}px`;
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      formRef.current?.requestSubmit();
+    }
   };
 
   const sendMessage = async (e: FormEvent<HTMLFormElement>) => {
@@ -170,6 +178,7 @@ export default function Chat({
       </CardContent>
       <CardFooter>
         <form
+          ref={formRef}
           onSubmit={sendMessage}
           className="relative border-primary/50 border-2 rounded-lg flex flex-col focus-within:border-primary/70 w-full"
         >
@@ -183,6 +192,7 @@ export default function Chat({
             rows={1}
             className="resize-none max-h-[150px] bg-transparent p-3 pb-1.5 text-sm outline-none ring-0 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-accent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-muted-foreground shadow-none border-none min-h-auto focus-visible:ring-[0px]"
             onInput={handleTextAreaResize}
+            onKeyDown={handleKeyDown}
           />
           <Button
             variant="ghost"
