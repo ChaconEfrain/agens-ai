@@ -1,14 +1,16 @@
 export async function safePostChatbotMessage({
-    message,
-    chatbotId,
-    chatbotInstructions,
-    sessionId,
-  }: {
-    message: string,
-    chatbotId: number,
-    chatbotInstructions: string,
-    sessionId: string,
-  }) {
+  message,
+  chatbotId,
+  chatbotInstructions,
+  sessionId,
+  origin,
+}: {
+  message: string;
+  chatbotId: number;
+  chatbotInstructions: string;
+  sessionId: string;
+  origin: string;
+}) {
   try {
     const res = await fetch("/api/chatbot-message", {
       method: "POST",
@@ -20,17 +22,20 @@ export async function safePostChatbotMessage({
         chatbotId,
         chatbotInstructions,
         sessionId,
+        origin,
       }),
     });
-    
-    if (!res.ok) return {message: 'error'};
-    
-    const data = await res.json() as {message: string};
-    
+
+    if (!res.ok) return { message: "error" };
+
+    const data = (await res.json()) as { message: string };
+
     return data;
   } catch (error) {
-    console.error('Something went wrong posting the chatbot message', error instanceof Error ? error.message : error)
-    return {message: 'error'};
+    console.error(
+      "Something went wrong posting the chatbot message",
+      error instanceof Error ? error.message : error
+    );
+    return { message: "error" };
   }
-
 }

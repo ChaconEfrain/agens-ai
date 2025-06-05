@@ -60,7 +60,10 @@
   wrapper.style.display = "none"; // Oculto al inicio
 
   const iframe = document.createElement("iframe");
-  iframe.src = `https://agens-ai.vercel.app/embed/${chatbotSlug}`;
+  const chatbotOrigin = window.location.hostname;
+  iframe.src = `https://agens-ai.vercel.app/embed/${chatbotSlug}?origin=${encodeURIComponent(
+    chatbotOrigin
+  )}`;
   iframe.width = "100%";
   iframe.height = "100%";
   iframe.style.border = "none";

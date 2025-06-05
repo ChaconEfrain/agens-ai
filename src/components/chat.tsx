@@ -21,7 +21,7 @@ interface Props {
   chatbotSlug: string;
   chatbotInstructions: string;
   chatbotStyles?: ChatbotStyles;
-  isEmbed?: boolean;
+  origin?: string;
 }
 
 export default function Chat({
@@ -29,7 +29,7 @@ export default function Chat({
   chatbotSlug,
   chatbotInstructions,
   chatbotStyles,
-  isEmbed,
+  origin,
 }: Props) {
   const sessionId = useChatSession(chatbotSlug);
   const [messages, setMessages] = useState<Pick<Message, "role" | "message">[]>(
@@ -84,12 +84,13 @@ export default function Chat({
 
     let answer = "";
 
-    if (isEmbed) {
+    if (origin) {
       const { message: chatbotAnswer } = await safePostChatbotMessage({
         message,
         chatbotId,
         sessionId,
         chatbotInstructions,
+        origin,
       });
 
       answer = chatbotAnswer;

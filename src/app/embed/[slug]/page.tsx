@@ -5,9 +5,9 @@ import { notFound } from "next/navigation";
 export default async function EmbedPage({
   params,
 }: {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ slug: string; origin: string }>;
 }) {
-  const { slug } = await params;
+  const { slug, origin } = await params;
   const chatbot = await getChatbotBySlugEmbed({ slug });
 
   if (!chatbot) return notFound();
@@ -31,7 +31,7 @@ export default async function EmbedPage({
         chatbotInstructions={chatbot.instructions}
         chatbotSlug={chatbot.slug}
         chatbotStyles={chatbot.styles}
-        isEmbed
+        origin={origin}
       />
     </div>
   );
