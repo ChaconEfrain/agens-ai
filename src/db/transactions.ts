@@ -7,6 +7,7 @@ import { createEmbeddings } from "@/services/openai";
 import type { UploadFileResult } from "uploadthing/types";
 import { extractTextFromPdf } from "@/services/utils";
 import { chunkText } from "@/lib/utils";
+import { defaultStyles } from "@/consts/chatbot";
 
 interface CreateChatbotTransactionParams {
   form: FormWizardData;
@@ -86,6 +87,7 @@ export async function createChatbotTransaction({
         instructions,
         businessId: businessInsert[0].id,
         allowedDomains,
+        styles: defaultStyles,
         slug,
       })
       .returning({ id: chatbots.id });

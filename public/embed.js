@@ -19,7 +19,7 @@
   }
 
   const position = styles.position ?? "bottom-right";
-  const themeColor = styles.button.bgColor ?? "oklch(0.21 0.006 285.885)";
+  const themeColor = styles.button.bgColor ?? "#2b2233";
   const buttonWidth = styles.button.width ?? "50px";
   const buttonHeight = styles.button.height ?? "50px";
   const borderRadius = styles.button.borderRadius ?? "30px";

@@ -7,7 +7,7 @@ import { ChatbotStyles } from "@/types/embedded-chatbot";
 interface ChatMessageProps {
   role: string;
   message: string;
-  styles?: ChatbotStyles | null;
+  styles?: ChatbotStyles;
 }
 
 export default function ChatMessage({

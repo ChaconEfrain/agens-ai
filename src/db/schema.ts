@@ -123,7 +123,7 @@ export const chatbots = pgTable(
     allowedDomains: json("allowed_domains").$type<string[]>().notNull(),
     instructions: text("instructions").notNull(),
     slug: varchar("slug", { length: 255 }).notNull().unique(),
-    styles: json("styles").$type<ChatbotStyles>(),
+    styles: json("styles").$type<ChatbotStyles>().notNull(),
     createdAt: timestamp("created_at").notNull().defaultNow(),
     updatedAt: timestamp("updated_at").$onUpdate(() => new Date()),
   },

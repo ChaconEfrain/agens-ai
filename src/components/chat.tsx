@@ -20,7 +20,7 @@ interface Props {
   chatbotId: number;
   chatbotSlug: string;
   chatbotInstructions: string;
-  chatbotStyles?: ChatbotStyles | null;
+  chatbotStyles?: ChatbotStyles;
   isEmbed?: boolean;
 }
 
