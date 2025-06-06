@@ -10,28 +10,38 @@ import {
 } from "@/db/messages";
 import { chatCompletions, createEmbeddings } from "@/services/openai";
 import { ChatCompletionMessageParam } from "openai/resources/index.mjs";
+import jwt from "jsonwebtoken";
+
+const JWT_SECRET = process.env.JWT_SECRET!;
+const IS_DEV = process.env.NODE_ENV === "development";
 
 export async function sendMessageAction({
   message,
   chatbotId,
   chatbotInstructions,
   sessionId,
-  origin,
+  token,
 }: {
   message: string;
   chatbotId: number;
   chatbotInstructions: string;
   sessionId: string;
-  origin?: string;
+  token: string;
 }) {
   try {
-    if (origin) {
+    if (!IS_DEV) {
+      const { domain } = jwt.verify(token, JWT_SECRET) as {
+        chatbotId: number;
+        domain: string;
+        slug: string;
+      };
       const allowedDomains = await getChatbotAllowedDomainsEmbed({
         id: chatbotId,
       });
-      const isAllowed = allowedDomains.some((d: string) => origin === d);
 
-      if (!isAllowed) throw new Error("Domain not allowed");
+      if (!allowedDomains.includes(domain)) {
+        throw new Error(`Access from domain '${domain}' is not allowed`);
+      }
     }
 
     const [{ embedding: userEmbedding }] = await createEmbeddings([message]);

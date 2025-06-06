@@ -20,7 +20,6 @@ interface Props {
   chatbotSlug: string;
   chatbotInstructions: string;
   chatbotStyles?: ChatbotStyles;
-  origin?: string;
 }
 
 export default function Chat({
@@ -28,15 +27,29 @@ export default function Chat({
   chatbotSlug,
   chatbotInstructions,
   chatbotStyles,
-  origin,
 }: Props) {
   const sessionId = useChatSession(chatbotSlug);
   const [messages, setMessages] = useState<Pick<Message, "role" | "message">[]>(
     []
   );
   const [loading, setLoading] = useState(false);
+  const [token, setToken] = useState("");
   const scrollDiv = useRef<HTMLDivElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
+
+  useEffect(() => {
+    window.parent.postMessage({ type: "request-token" }, "*");
+
+    const handler = (event: MessageEvent) => {
+      if (event.data?.token) {
+        setToken(event.data.token);
+      }
+    };
+
+    window.addEventListener("message", handler);
+
+    return () => window.removeEventListener("message", handler);
+  }, [])
 
   useEffect(() => {
     setLoading(true);
@@ -45,8 +58,6 @@ export default function Chat({
         chatbotId,
         sessionId,
       });
-
-      console.log("Latest messages:", latestMessages);
 
       setMessages(
         latestMessages.map(({ role, message }) => ({
@@ -88,13 +99,12 @@ export default function Chat({
       { role: "assistant", message: "" },
     ]);
     form.reset();
-
     const answer = await sendMessageAction({
       message,
       chatbotId,
       sessionId,
       chatbotInstructions,
-      origin,
+      token,
     });
 
     if (answer) {

@@ -2,12 +2,8 @@ import Chat from "@/components/chat";
 import { getChatbotBySlugEmbed } from "@/db/chatbot-embed";
 import { notFound } from "next/navigation";
 
-export default async function EmbedPage({
-  params,
-}: {
-  params: Promise<{ slug: string; origin: string }>;
-}) {
-  const { slug, origin } = await params;
+export default async function EmbedPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
   const chatbot = await getChatbotBySlugEmbed({ slug });
 
   if (!chatbot) return notFound();
@@ -31,7 +27,6 @@ export default async function EmbedPage({
         chatbotInstructions={chatbot.instructions}
         chatbotSlug={chatbot.slug}
         chatbotStyles={chatbot.styles}
-        origin={origin}
       />
     </div>
   );

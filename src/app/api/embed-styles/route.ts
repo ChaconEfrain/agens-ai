@@ -1,10 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getChatbotBySlugEmbed } from "@/db/chatbot-embed";
+import jwt from "jsonwebtoken";
 
 const DEFAULT_HEADERS = {
   "Access-Control-Allow-Methods": "GET, OPTIONS",
   "Access-Control-Allow-Headers": "Content-Type",
 };
+
+const JWT_SECRET = process.env.JWT_SECRET!;
+const IS_DEV = process.env.NODE_ENV === "development";
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
@@ -46,7 +50,7 @@ export async function GET(req: NextRequest) {
     );
   }
 
-  if (!chatbot.allowedDomains.includes(originDomain)) {
+  if (!chatbot.allowedDomains.includes(originDomain) && !IS_DEV) {
     return NextResponse.json(
       { error: `Access from domain '${originDomain}' is not allowed` },
       {
@@ -56,15 +60,27 @@ export async function GET(req: NextRequest) {
     );
   }
 
+  const token = jwt.sign(
+    {
+      chatbotId: chatbot.id,
+      domain: originDomain,
+      slug,
+    },
+    JWT_SECRET
+  );
+
   const corsHeaders = {
     ...DEFAULT_HEADERS,
     "Access-Control-Allow-Origin": `https://${originDomain}`,
   };
 
-  return NextResponse.json(chatbot.styles, {
-    status: 200,
-    headers: corsHeaders,
-  });
+  return NextResponse.json(
+    { styles: chatbot.styles, token },
+    {
+      status: 200,
+      headers: corsHeaders,
+    }
+  );
 }
 
 export async function OPTIONS(req: NextRequest) {

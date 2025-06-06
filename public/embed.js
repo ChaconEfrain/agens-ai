@@ -4,18 +4,24 @@
   const chatbotSlug = script.dataset.chatbotSlug;
 
   let styles;
+  let token;
   try {
     const res = await fetch(
-      `https://agens-ai.vercel.app/api/embed-styles?slug=${chatbotSlug}`
+      `http://localhost:3000/api/embed-styles?slug=${chatbotSlug}`
     );
 
     if (!res.ok) {
       console.error("Error fetching embed configuration:", res.statusText);
+      return;
     }
 
-    styles = await res.json();
+    const data = await res.json();
+
+    styles = data.styles;
+    token = data.token;
   } catch (error) {
     console.error("Error fetching embed styles:", error);
+    return;
   }
 
   const position = styles.position ?? "bottom-right";
@@ -60,10 +66,7 @@
   wrapper.style.display = "none"; // Oculto al inicio
 
   const iframe = document.createElement("iframe");
-  const chatbotOrigin = window.location.hostname;
-  iframe.src = `https://agens-ai.vercel.app/embed/${chatbotSlug}?origin=${encodeURIComponent(
-    chatbotOrigin
-  )}`;
+  iframe.src = `http://localhost:3000/embed/${chatbotSlug}`;
   iframe.width = "100%";
   iframe.height = "100%";
   iframe.style.border = "none";
@@ -97,6 +100,12 @@
     ) {
       isOpen = false;
       wrapper.style.display = "none";
+    }
+  });
+  window.addEventListener("message", (event) => {
+    if (event.data?.type === "request-token") {
+      const targetOrigin = new URL(iframe.src).origin;
+      iframe.contentWindow.postMessage({ type: "token", token }, targetOrigin);
     }
   });
 })();
