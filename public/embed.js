@@ -7,7 +7,7 @@
   let token;
   try {
     const res = await fetch(
-      `http://localhost:3000/api/embed-styles?slug=${chatbotSlug}`
+      `https://agens-ai.vercel.app/api/embed-styles?slug=${chatbotSlug}`
     );
 
     if (!res.ok) {
@@ -66,7 +66,7 @@
   wrapper.style.display = "none"; // Oculto al inicio
 
   const iframe = document.createElement("iframe");
-  iframe.src = `http://localhost:3000/embed/${chatbotSlug}`;
+  iframe.src = `https://agens-ai.vercel.app/embed/${chatbotSlug}`;
   iframe.width = "100%";
   iframe.height = "100%";
   iframe.style.border = "none";
