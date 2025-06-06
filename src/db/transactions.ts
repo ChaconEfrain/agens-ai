@@ -1,4 +1,4 @@
-import { FormWizardData } from "@/app/(auth)/create-chatbot/_components/form-wizard";
+import { FormWizardData } from "@/app/create-chatbot/_components/form-wizard";
 import { businesses, chatbots, embeddings, files } from "./schema";
 import { getUserByClerkId } from "./user";
 import { auth } from "@clerk/nextjs/server";

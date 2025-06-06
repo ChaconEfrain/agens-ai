@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
 import { Outfit } from "next/font/google";
 import "./globals.css";
+import { ClerkProvider } from "@clerk/nextjs";
+import Nav from "@/components/nav";
+import { Toaster } from "@/components/ui/sonner";
+import AppWrapper from "@/components/app-wrapper";
 
 const outfit = Outfit({
   variable: "--font-outfit",
@@ -18,10 +22,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={`${outfit.variable} antialiased bg-transparent`}>
-        {children}
-      </body>
-    </html>
+    <ClerkProvider>
+      <html lang="en">
+        <body className={`${outfit.variable} antialiased bg-transparent`}>
+          <AppWrapper>
+            <Nav />
+            {children}
+          </AppWrapper>
+          <Toaster position="bottom-right" />
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }
