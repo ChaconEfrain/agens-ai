@@ -14,6 +14,7 @@ import {
 import type { Message } from "@/db/schema";
 import { useChatSession } from "@/hooks/use-chat-session";
 import { ChatbotStyles } from "@/types/embedded-chatbot";
+import { usePathname } from "next/navigation";
 
 interface Props {
   chatbotId: number;
@@ -36,6 +37,7 @@ export default function Chat({
   const [token, setToken] = useState("");
   const scrollDiv = useRef<HTMLDivElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
+  const pathname = usePathname();
 
   useEffect(() => {
     window.parent.postMessage({ type: "request-token" }, "*");
@@ -49,7 +51,7 @@ export default function Chat({
     window.addEventListener("message", handler);
 
     return () => window.removeEventListener("message", handler);
-  }, [])
+  }, []);
 
   useEffect(() => {
     setLoading(true);
@@ -105,6 +107,7 @@ export default function Chat({
       sessionId,
       chatbotInstructions,
       token,
+      pathname,
     });
 
     if (answer) {

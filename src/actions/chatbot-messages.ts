@@ -21,15 +21,17 @@ export async function sendMessageAction({
   chatbotInstructions,
   sessionId,
   token,
+  pathname,
 }: {
   message: string;
   chatbotId: number;
   chatbotInstructions: string;
   sessionId: string;
   token: string;
+  pathname: string;
 }) {
   try {
-    if (!IS_DEV) {
+    if (!IS_DEV && pathname.startsWith("/embed")) {
       const { domain } = jwt.verify(token, JWT_SECRET) as {
         chatbotId: number;
         domain: string;
