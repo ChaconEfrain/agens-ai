@@ -86,8 +86,8 @@ function normalizeFormChunks(form: FormWizardData) {
   chunks.push(
     `The business is called ${businessName} and was founded in ${foundedYear}.`,
     allowedWebsites.length > 1
-      ? `Its websites are ${allowedWebsites.join(", ")}.`
-      : "Its website is " + allowedWebsites[0],
+      ? `Its websites are ${allowedWebsites.map(({ url }) => url).join(", ")}.`
+      : "Its website is " + allowedWebsites[0].url,
     description ? `Business description: ${description}` : ""
   );
 
