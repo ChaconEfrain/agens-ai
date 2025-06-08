@@ -178,9 +178,9 @@ export default function Chat({
             />
           </div>
         ) : (
-          messages.map(({ message, role }, i) => (
+          messages.map(({ message, role }) => (
             <ChatMessage
-              key={i}
+              key={`${role}-${message}`}
               message={message}
               role={role}
               styles={chatbotStyles}
