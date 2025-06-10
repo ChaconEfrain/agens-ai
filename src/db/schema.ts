@@ -120,6 +120,10 @@ export const chatbots = pgTable(
     userId: integer("user_id")
       .references(() => users.id, { onDelete: "cascade" })
       .notNull(),
+    subscriptionId: integer("subscription_id").references(
+      () => subscriptions.id,
+      { onDelete: "cascade" }
+    ),
     allowedDomains: json("allowed_domains").$type<string[]>().notNull(),
     instructions: text("instructions").notNull(),
     slug: varchar("slug", { length: 255 }).notNull().unique(),
@@ -178,6 +182,35 @@ export const messages = pgTable(
   ]
 );
 
+export const subscriptionPlanEnum = pgEnum("subscription_plan", [
+  "basic",
+  "pro",
+]);
+export const subscriptionStatusEnum = pgEnum("subscription_status", [
+  "active",
+  "canceled",
+  "incomplete",
+  "incomplete_expired",
+]);
+
+export const subscriptions = pgTable("subscriptions", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  userId: integer("user_id")
+    .references(() => users.id)
+    .notNull(),
+  stripeSubscriptionId: varchar("stripe_subscription_id", {
+    length: 255,
+  }).notNull(),
+  stripeCustomerId: varchar("stripe_customer_id", { length: 255 }).notNull(),
+  plan: subscriptionPlanEnum("plan").notNull(),
+  messageCount: integer("message_count").notNull().default(0),
+  periodStart: timestamp("period_start").notNull(),
+  periodEnd: timestamp("period_end").notNull(),
+  status: subscriptionStatusEnum("status").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").$onUpdate(() => new Date()),
+});
+
 //Relations
 export const usersRelations = relations(users, ({ many }) => ({
   businesses: many(businesses),
@@ -213,6 +246,10 @@ export const chatbotsRelations = relations(chatbots, ({ one, many }) => ({
   }),
   user: one(users, { fields: [chatbots.userId], references: [users.id] }),
   files: many(files),
+  subscription: one(subscriptions, {
+    fields: [chatbots.subscriptionId],
+    references: [subscriptions.id],
+  }),
 }));
 
 export const embeddingsRelations = relations(embeddings, ({ one }) => ({
@@ -229,9 +266,22 @@ export const messagesRelations = relations(messages, ({ one }) => ({
   }),
 }));
 
+export const subscriptionsRelations = relations(
+  subscriptions,
+  ({ many, one }) => ({
+    chatbots: many(chatbots),
+    businesses: many(businesses),
+    user: one(users, {
+      fields: [subscriptions.userId],
+      references: [users.id],
+    }),
+  })
+);
+
 //Types
 export type User = typeof users.$inferSelect;
 export type Chatbot = typeof chatbots.$inferSelect;
 export type Business = typeof businesses.$inferSelect;
 export type File = typeof files.$inferSelect;
 export type Message = typeof messages.$inferSelect;
+export type Subscription = typeof subscriptions.$inferSelect;
