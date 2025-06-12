@@ -20,7 +20,7 @@ export default function Nav() {
   if (pathname.startsWith("/embed")) return null;
 
   return (
-    <nav className="flex justify-between items-center py-4 mb-16">
+    <nav className="flex justify-between items-center py-4">
       <div className="text-xl flex items-center gap-1">
         <div>
           <span>Agens</span>
