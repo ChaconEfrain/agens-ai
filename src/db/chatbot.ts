@@ -5,6 +5,7 @@ import { and, eq } from "drizzle-orm";
 import { auth } from "@clerk/nextjs/server";
 import { getUserByClerkId } from "./user";
 import { getBusinessByUserId } from "./business";
+import { Transaction } from "@/types/db-transaction";
 
 export async function getChatbotBySlug({ slug }: { slug: string }) {
   const chatbot = await db.query.chatbots.findFirst({
@@ -46,4 +47,22 @@ export async function updateChatbotStyles({
     .returning({ styles: chatbots.styles });
 
   return updatedStyles;
+}
+
+export async function updateChatbotsSubscription(
+  {
+    subscriptionId,
+    userId,
+  }: {
+    subscriptionId: number;
+    userId: number;
+  },
+  trx: Transaction
+) {
+  await trx
+    .update(chatbots)
+    .set({
+      subscriptionId,
+    })
+    .where(eq(chatbots.userId, userId));
 }

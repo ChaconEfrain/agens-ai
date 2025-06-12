@@ -122,7 +122,7 @@ export const chatbots = pgTable(
       .notNull(),
     subscriptionId: integer("subscription_id").references(
       () => subscriptions.id,
-      { onDelete: "cascade" }
+      { onDelete: "set null" }
     ),
     allowedDomains: json("allowed_domains").$type<string[]>().notNull(),
     instructions: text("instructions").notNull(),
@@ -285,3 +285,4 @@ export type Business = typeof businesses.$inferSelect;
 export type File = typeof files.$inferSelect;
 export type Message = typeof messages.$inferSelect;
 export type Subscription = typeof subscriptions.$inferSelect;
+export type SubscriptionInsert = typeof subscriptions.$inferInsert;

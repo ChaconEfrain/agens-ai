@@ -8,6 +8,9 @@ import type { UploadFileResult } from "uploadthing/types";
 import { extractTextFromPdf } from "@/services/utils";
 import { chunkText } from "@/lib/utils";
 import { defaultStyles } from "@/consts/chatbot";
+import { createSubscription } from "./stripe";
+import { updateChatbotsSubscription } from "./chatbot";
+import Stripe from "stripe";
 
 interface CreateChatbotTransactionParams {
   form: FormWizardData;
@@ -109,20 +112,22 @@ export async function createChatbotTransaction({
 
     if (!formEmbeddingsInsert) tx.rollback();
 
-    const filesInsert = await tx
-      .insert(files)
-      .values(
-        filesResult.map(({ data }) => ({
-          userId: user.id,
-          businessId: businessInsert[0].id,
-          chatbotId: chatbotInsert[0].id,
-          fileUrl: data?.ufsUrl ?? "",
-          title: data?.name ?? "",
-        }))
-      )
-      .returning({ id: files.id });
+    if (filesResult.length > 0) {
+      const filesInsert = await tx
+        .insert(files)
+        .values(
+          filesResult.map(({ data }) => ({
+            userId: user.id,
+            businessId: businessInsert[0].id,
+            chatbotId: chatbotInsert[0].id,
+            fileUrl: data?.ufsUrl ?? "",
+            title: data?.name ?? "",
+          }))
+        )
+        .returning({ id: files.id });
 
-    if (!filesInsert) tx.rollback();
+      if (!filesInsert) tx.rollback();
+    }
 
     for (const { data } of filesResult) {
       if (!data) continue;
@@ -144,5 +149,41 @@ export async function createChatbotTransaction({
 
       if (!fileEmbeddingsInsert) tx.rollback();
     }
+  });
+}
+
+export async function createSubscriptionTransaction({
+  subscription,
+  session,
+}: {
+  subscription: Stripe.Response<Stripe.Subscription>;
+  session: Stripe.Checkout.Session;
+}) {
+  await db.transaction(async (trx) => {
+    const [{ id: subscriptionId }] = await createSubscription(
+      {
+        periodEnd: new Date(
+          subscription.items.data[0].current_period_end * 1000
+        ),
+        periodStart: new Date(
+          subscription.items.data[0].current_period_start * 1000
+        ),
+        plan: subscription.items.data[0].price.lookup_key as "basic" | "pro",
+        status: subscription.status as
+          | "active"
+          | "canceled"
+          | "incomplete"
+          | "incomplete_expired",
+        stripeCustomerId: subscription.customer as string,
+        stripeSubscriptionId: subscription.id,
+        userId: Number(session.metadata?.userId),
+      },
+      trx
+    );
+
+    await updateChatbotsSubscription(
+      { subscriptionId, userId: Number(session.metadata?.userId) },
+      trx
+    );
   });
 }
