@@ -6,11 +6,15 @@ import {
   createMessages,
   disableMessagesByChatbotId,
   getActiveMessagesByChatbotId,
+  getAllMessagesCountByChatbotId,
   getLatestMessagesByChatbotId,
 } from "@/db/messages";
 import { chatCompletions, createEmbeddings } from "@/services/openai";
 import { ChatCompletionMessageParam } from "openai/resources/index.mjs";
 import jwt from "jsonwebtoken";
+import { getSubscriptionByChatbotId } from "@/db/subscriptions";
+import { ALLOWED_MESSAGE_QUANTITY } from "@/consts/messages";
+import { createMessagesTransaction } from "@/db/transactions";
 
 const JWT_SECRET = process.env.JWT_SECRET!;
 const IS_DEV = process.env.NODE_ENV === "development";
@@ -46,6 +50,27 @@ export async function sendMessageAction({
       }
     }
 
+    const subscription = await getSubscriptionByChatbotId({
+      chatbotId,
+    });
+
+    const basicLimitReached =
+      subscription?.plan === "basic" &&
+      subscription?.messageCount >= ALLOWED_MESSAGE_QUANTITY.BASIC;
+    const proLimitReached =
+      subscription?.plan === "pro" &&
+      subscription?.messageCount >= ALLOWED_MESSAGE_QUANTITY.PRO;
+
+    if (!subscription || subscription.status === "canceled") {
+      const freeMessages = await getAllMessagesCountByChatbotId({ chatbotId });
+
+      if (freeMessages >= ALLOWED_MESSAGE_QUANTITY.FREE) {
+        return "limit reached";
+      }
+    } else if (basicLimitReached || proLimitReached) {
+      return "limit reached";
+    }
+
     const [{ embedding: userEmbedding }] = await createEmbeddings([message]);
     const contextChunks = await getRelatedEmbeddings({
       userEmbedding,
@@ -72,21 +97,26 @@ export async function sendMessageAction({
     ] as ChatCompletionMessageParam[];
 
     const answer = await chatCompletions({ messages });
-
-    await createMessages([
+    const dbMessages = [
       {
         chatbotId,
         sessionId,
-        role: "user",
+        role: "user" as "user",
         message,
       },
       {
         chatbotId,
         sessionId,
-        role: "assistant",
+        role: "assistant" as "assistant",
         message: answer ?? "",
       },
-    ]);
+    ];
+
+    await createMessagesTransaction({
+      messages: dbMessages,
+      messageCount: (subscription?.messageCount as number) + 2,
+      stripeSubscriptionId: subscription?.stripeSubscriptionId,
+    });
 
     return answer ?? "error";
   } catch (error) {

@@ -27,7 +27,7 @@ export default function ChatMessage({
           "text-white": role === "user",
           "bg-gray-100 text-gray-800": role === "assistant",
           "p-3": message !== "",
-          "bg-red-200": message === "error",
+          "bg-red-200": message === "error" || message === "limit reached",
         })}
         style={{
           backgroundColor:
@@ -43,6 +43,8 @@ export default function ChatMessage({
         {message !== "" ? (
           message === "error" ? (
             "⚠️ Something went wrong, please try again."
+          ) : message === "limit reached" ? (
+            "⚠️ Message limit reached."
           ) : (
             message
           )

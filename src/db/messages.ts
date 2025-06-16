@@ -1,3 +1,4 @@
+import { Transaction } from "@/types/db-transaction";
 import { db } from ".";
 import { messages } from "./schema";
 import { and, asc, desc, eq } from "drizzle-orm";
@@ -8,9 +9,10 @@ export async function createMessages(
     sessionId: string;
     role: "user" | "assistant";
     message: string;
-  }[]
+  }[],
+  trx: Transaction
 ) {
-  await db.insert(messages).values(
+  await trx.insert(messages).values(
     messagesArr.map(({ chatbotId, role, message, sessionId }) => ({
       chatbotId,
       sessionId,
@@ -61,6 +63,19 @@ export async function getActiveMessagesByChatbotId({
     .orderBy(asc(messages.createdAt));
 
   return messagesList;
+}
+
+export async function getAllMessagesCountByChatbotId({
+  chatbotId,
+}: {
+  chatbotId: number;
+}) {
+  const messagesList = await db
+    .select()
+    .from(messages)
+    .where(eq(messages.chatbotId, chatbotId));
+
+  return messagesList.length;
 }
 
 export async function disableMessagesByChatbotId({

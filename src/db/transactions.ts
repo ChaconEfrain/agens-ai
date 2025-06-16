@@ -8,9 +8,14 @@ import type { UploadFileResult } from "uploadthing/types";
 import { extractTextFromPdf } from "@/services/utils";
 import { chunkText } from "@/lib/utils";
 import { defaultStyles } from "@/consts/chatbot";
-import { createSubscription } from "./stripe";
+import {
+  createSubscription,
+  updateSubscription,
+  updateSubscriptionMessageCount,
+} from "./subscriptions";
 import { updateChatbotsSubscription } from "./chatbot";
 import Stripe from "stripe";
+import { createMessages } from "./messages";
 
 interface CreateChatbotTransactionParams {
   form: FormWizardData;
@@ -176,6 +181,7 @@ export async function createSubscriptionTransaction({
           | "incomplete_expired",
         stripeCustomerId: subscription.customer as string,
         stripeSubscriptionId: subscription.id,
+        stripeItemId: subscription.items.data[0].id,
         userId: Number(session.metadata?.userId),
       },
       trx
@@ -185,5 +191,33 @@ export async function createSubscriptionTransaction({
       { subscriptionId, userId: Number(session.metadata?.userId) },
       trx
     );
+  });
+}
+
+interface MessagesTransactionProps {
+  messages: {
+    chatbotId: number;
+    sessionId: string;
+    role: "user" | "assistant";
+    message: string;
+  }[];
+  stripeSubscriptionId: string | undefined;
+  messageCount: number | undefined;
+}
+
+export async function createMessagesTransaction({
+  messages,
+  stripeSubscriptionId,
+  messageCount,
+}: MessagesTransactionProps) {
+  await db.transaction(async (trx) => {
+    await createMessages(messages, trx);
+
+    if (stripeSubscriptionId && messageCount) {
+      await updateSubscriptionMessageCount(
+        { stripeSubscriptionId, messageCount },
+        trx
+      );
+    }
   });
 }
