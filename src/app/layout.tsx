@@ -5,6 +5,7 @@ import { ClerkProvider } from "@clerk/nextjs";
 import Nav from "@/components/nav";
 import { Toaster } from "@/components/ui/sonner";
 import AppWrapper from "@/components/app-wrapper";
+import SubscriptionContextProvider from "@/context/subscription-context";
 
 const outfit = Outfit({
   variable: "--font-outfit",
@@ -23,15 +24,17 @@ export default function RootLayout({
 }>) {
   return (
     <ClerkProvider>
-      <html lang="en">
-        <body className={`${outfit.variable} antialiased bg-transparent`}>
-          <AppWrapper>
-            <Nav />
-            {children}
-          </AppWrapper>
-          <Toaster position="bottom-right" />
-        </body>
-      </html>
+      <SubscriptionContextProvider>
+        <html lang="en">
+          <body className={`${outfit.variable} antialiased bg-transparent`}>
+            <AppWrapper>
+              <Nav />
+              {children}
+            </AppWrapper>
+            <Toaster position="bottom-right" />
+          </body>
+        </html>
+      </SubscriptionContextProvider>
     </ClerkProvider>
   );
 }

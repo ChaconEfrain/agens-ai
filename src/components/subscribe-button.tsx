@@ -8,7 +8,6 @@ import {
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { LoaderCircle } from "lucide-react";
-import { Subscription } from "@/db/schema";
 import {
   Dialog,
   DialogContent,
@@ -17,26 +16,26 @@ import {
   DialogHeader,
   DialogTitle,
 } from "./ui/dialog";
+import { useSubscriptionContext } from "@/hooks/use-subscription-context";
 
 interface Props {
   plan: string;
-  existingSub: Subscription | undefined;
-  checkingSub: boolean;
 }
 
-export default function SubscribeButton({
-  plan,
-  existingSub,
-  checkingSub,
-}: Props) {
+export default function SubscribeButton({ plan }: Props) {
   const router = useRouter();
+  const {
+    subscription,
+    setSubscription,
+    loading: checkingSub,
+  } = useSubscriptionContext();
   const [loadingCheckout, setLoadingCheckout] = useState(false);
   const [loadingUpdate, setLoadingUpdate] = useState(false);
   const [openModal, setOpenModal] = useState(false);
 
   const redirectToStripeCheckout = async () => {
     setLoadingCheckout(true);
-    if (existingSub?.plan === plan && existingSub.status === "active") return;
+    if (subscription?.plan === plan && subscription.status === "active") return;
     const fromPage = window.location.href;
     const origin = window.location.origin;
     const result = await createStripeSessionAction({ fromPage, origin, plan });
@@ -52,15 +51,18 @@ export default function SubscribeButton({
 
   const updateSubscription = async () => {
     setLoadingUpdate(true);
-    if (existingSub) {
+    if (subscription) {
       const result = await updateSubscriptionAction({
         newPlan: plan.toLowerCase(),
-        subscriptionId: existingSub.stripeSubscriptionId,
-        subscriptionItemId: existingSub.stripeItemId,
+        subscriptionId: subscription.stripeSubscriptionId,
+        subscriptionItemId: subscription.stripeItemId,
       });
 
-      if (result.success) {
+      if (result.success && result.newSubPlan) {
         toast.success(result.message);
+        const newSub = { ...subscription };
+        newSub.plan = result.newSubPlan;
+        setSubscription(newSub);
       } else {
         toast.error(result.message);
       }
@@ -91,8 +93,8 @@ export default function SubscribeButton({
   }
 
   if (
-    existingSub?.plan === plan.toLowerCase() &&
-    existingSub.status === "active"
+    subscription?.plan === plan.toLowerCase() &&
+    subscription.status === "active"
   ) {
     return (
       <Button className="w-full" disabled>
@@ -102,8 +104,8 @@ export default function SubscribeButton({
   }
 
   if (
-    existingSub?.plan !== plan.toLowerCase() &&
-    existingSub?.status === "active"
+    subscription?.plan !== plan.toLowerCase() &&
+    subscription?.status === "active"
   ) {
     return (
       <Dialog open={openModal}>
@@ -111,19 +113,19 @@ export default function SubscribeButton({
           className="w-full cursor-pointer"
           onClick={() => setOpenModal(true)}
         >
-          {existingSub.plan === "basic"
+          {subscription.plan === "basic"
             ? "Upgrade Subscription"
             : "Downgrade Subscription"}
         </Button>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {existingSub.plan === "basic"
+              {subscription.plan === "basic"
                 ? "Upgrade to Pro"
                 : "Downgrade to Basic"}
             </DialogTitle>
             <DialogDescription>
-              {existingSub.plan === "basic"
+              {subscription.plan === "basic"
                 ? "Pay a prorated charge for the remaining days of the month"
                 : "Pay a prorated charge for the remaining days of the month (any credit will be applied to your next invoice)"}
             </DialogDescription>
@@ -141,7 +143,7 @@ export default function SubscribeButton({
               onClick={updateSubscription}
               disabled={loadingUpdate}
             >
-              {existingSub.plan === "basic" ? (
+              {subscription.plan === "basic" ? (
                 loadingUpdate ? (
                   <>
                     Confirm Update <LoaderCircle className="animate-spin" />

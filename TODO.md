@@ -6,6 +6,9 @@
 [ ] Control chatbot usage based on subscription's message count
 [ ] In checkout.session.completed event check if the user already has a subscription in the DB (canceled) and update record
 
+# Bugs
+[ ] A user can go to /embed/[slug] page and it's public, this needs restriction
+
 # Tech debt
 [ ] Improve error handling
 [ ] Move createChatbotTransaction logic to separate functions and pass transaction as argument (see subscription transaction)

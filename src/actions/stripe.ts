@@ -83,7 +83,7 @@ export async function updateSubscriptionAction({
   console.log("newPlan --> ", newPlan);
   try {
     const current = await stripe.subscriptions.retrieve(subscriptionId);
-    await stripe.subscriptions.update(subscriptionId, {
+    const newSub = await stripe.subscriptions.update(subscriptionId, {
       items: [
         {
           id: current.items.data[0].id,
@@ -99,6 +99,7 @@ export async function updateSubscriptionAction({
 
     return {
       success: true,
+      newSubPlan: newSub.items.data[0].price.lookup_key as "basic" | "pro",
       message: `Subscription ${
         newPlan === "pro" ? "upgraded" : "downgraded"
       } successfully`,

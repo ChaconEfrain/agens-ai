@@ -25,8 +25,6 @@ interface Props {
   Icon: ForwardRefExoticComponent<
     Omit<LucideProps, "ref"> & RefAttributes<SVGSVGElement>
   >;
-  existingSub: Subscription | undefined;
-  checkingSub: boolean;
 }
 
 export default function PricingCard({
@@ -36,8 +34,6 @@ export default function PricingCard({
   label,
   plan,
   price,
-  existingSub,
-  checkingSub,
 }: Props) {
   return (
     <Card
@@ -98,11 +94,7 @@ export default function PricingCard({
             *$1 per extra 1,000 messages
           </p>
         )}
-        <SubscribeButton
-          plan={plan}
-          existingSub={existingSub}
-          checkingSub={checkingSub}
-        />
+        <SubscribeButton plan={plan} />
       </CardFooter>
     </Card>
   );
