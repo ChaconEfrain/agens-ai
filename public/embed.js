@@ -51,6 +51,8 @@
   button.style.display = "flex";
   button.style.alignItems = "center";
   button.style.justifyContent = "center";
+  button.style.padding = "0";
+  button.style.margin = "0";
 
   // iframe wrapper
   const wrapper = document.createElement("div");
@@ -63,7 +65,7 @@
   wrapper.style.overflow = "hidden";
   wrapper.style.boxShadow = "0 0 12px rgba(0,0,0,0.15)";
   wrapper.style.zIndex = "999999";
-  wrapper.style.display = "none"; // Oculto al inicio
+  wrapper.style.display = "none";
 
   const iframe = document.createElement("iframe");
   iframe.src = `https://agens-ai.vercel.app/embed/${chatbotSlug}`;
