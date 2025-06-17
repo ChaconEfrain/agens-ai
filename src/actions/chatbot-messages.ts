@@ -15,6 +15,7 @@ import jwt from "jsonwebtoken";
 import { getSubscriptionByChatbotId } from "@/db/subscriptions";
 import { ALLOWED_MESSAGE_QUANTITY } from "@/consts/messages";
 import { createMessagesTransaction } from "@/db/transactions";
+import { getChatbotTestMessageCount } from "@/db/chatbot";
 
 const JWT_SECRET = process.env.JWT_SECRET!;
 const IS_DEV = process.env.NODE_ENV === "development";
@@ -34,6 +35,7 @@ export async function sendMessageAction({
   token: string;
   pathname: string;
 }) {
+  let subscription;
   try {
     if (!IS_DEV && pathname.startsWith("/embed")) {
       const { domain } = jwt.verify(token, JWT_SECRET) as {
@@ -48,27 +50,36 @@ export async function sendMessageAction({
       if (!allowedDomains.includes(domain)) {
         throw new Error(`Access from domain '${domain}' is not allowed`);
       }
-    }
+      subscription = await getSubscriptionByChatbotId({
+        chatbotId,
+      });
 
-    const subscription = await getSubscriptionByChatbotId({
-      chatbotId,
-    });
+      const basicLimitReached =
+        subscription?.plan === "basic" &&
+        subscription?.messageCount >= ALLOWED_MESSAGE_QUANTITY.BASIC;
+      const proLimitReached =
+        subscription?.plan === "pro" &&
+        subscription?.messageCount >= ALLOWED_MESSAGE_QUANTITY.PRO;
 
-    const basicLimitReached =
-      subscription?.plan === "basic" &&
-      subscription?.messageCount >= ALLOWED_MESSAGE_QUANTITY.BASIC;
-    const proLimitReached =
-      subscription?.plan === "pro" &&
-      subscription?.messageCount >= ALLOWED_MESSAGE_QUANTITY.PRO;
+      if (!subscription || subscription.status === "canceled") {
+        const freeMessages = await getAllMessagesCountByChatbotId({
+          chatbotId,
+        });
 
-    if (!subscription || subscription.status === "canceled") {
-      const freeMessages = await getAllMessagesCountByChatbotId({ chatbotId });
-
-      if (freeMessages >= ALLOWED_MESSAGE_QUANTITY.FREE) {
+        if (freeMessages >= ALLOWED_MESSAGE_QUANTITY.FREE) {
+          return "limit reached";
+        }
+      } else if (basicLimitReached || proLimitReached) {
         return "limit reached";
       }
-    } else if (basicLimitReached || proLimitReached) {
-      return "limit reached";
+    }
+
+    let testMessageCount;
+    if (pathname.startsWith("/test-chatbot")) {
+      testMessageCount = await getChatbotTestMessageCount({ chatbotId });
+      if (testMessageCount >= ALLOWED_MESSAGE_QUANTITY.TEST) {
+        return "limit reached";
+      }
     }
 
     const [{ embedding: userEmbedding }] = await createEmbeddings([message]);
@@ -116,11 +127,13 @@ export async function sendMessageAction({
       messages: dbMessages,
       messageCount: (subscription?.messageCount as number) + 2,
       stripeSubscriptionId: subscription?.stripeSubscriptionId,
+      pathname,
+      testMessageCount,
     });
 
     return answer ?? "error";
   } catch (error) {
-    console.error(error);
+    console.error("Send message action error --> ", error);
     return "error";
   }
 }
@@ -163,5 +176,19 @@ export async function getActiveMessagesAction({
   } catch (error) {
     console.error("Error fetching active messages:", error);
     return [];
+  }
+}
+
+export async function getChatbotTestMessageCountAction({
+  chatbotId,
+}: {
+  chatbotId: number;
+}) {
+  try {
+    const count = await getChatbotTestMessageCount({ chatbotId });
+    return count;
+  } catch (error) {
+    console.error(error);
+    return 0;
   }
 }

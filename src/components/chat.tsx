@@ -9,12 +9,14 @@ import ChatMessage from "./chat-message";
 import {
   deleteMessagesAction,
   getActiveMessagesAction,
+  getChatbotTestMessageCountAction,
   sendMessageAction,
 } from "@/actions/chatbot-messages";
 import type { Message } from "@/db/schema";
 import { useChatSession } from "@/hooks/use-chat-session";
 import { ChatbotStyles } from "@/types/embedded-chatbot";
 import { usePathname } from "next/navigation";
+import { ALLOWED_MESSAGE_QUANTITY } from "@/consts/messages";
 
 interface Props {
   chatbotId: number;
@@ -35,6 +37,7 @@ export default function Chat({
   );
   const [loading, setLoading] = useState(false);
   const [token, setToken] = useState("");
+  const [testMessageCount, setTestMessageCount] = useState(0);
   const scrollDiv = useRef<HTMLDivElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
   const pathname = usePathname();
@@ -56,10 +59,15 @@ export default function Chat({
   useEffect(() => {
     setLoading(true);
     (async () => {
-      const latestMessages = await getActiveMessagesAction({
-        chatbotId,
-        sessionId,
-      });
+      const [latestMessages, testMessageCount] = await Promise.all([
+        getActiveMessagesAction({
+          chatbotId,
+          sessionId,
+        }),
+        getChatbotTestMessageCountAction({
+          chatbotId,
+        }),
+      ]);
 
       setMessages(
         latestMessages.map(({ role, message }) => ({
@@ -67,6 +75,7 @@ export default function Chat({
           message,
         }))
       );
+      setTestMessageCount(testMessageCount);
       setLoading(false);
     })();
   }, [sessionId, chatbotId]);
@@ -119,6 +128,19 @@ export default function Chat({
 
         return updated;
       });
+      if (answer === "limit reached" && formRef.current) {
+        (
+          formRef.current.elements.namedItem(
+            "chat-prompt"
+          ) as HTMLTextAreaElement
+        ).disabled = true;
+      }
+    }
+    if (pathname.startsWith("/test-chatbot")) {
+      const testMessageCount = await getChatbotTestMessageCountAction({
+        chatbotId,
+      });
+      setTestMessageCount(testMessageCount);
     }
   };
 
@@ -144,6 +166,11 @@ export default function Chat({
             AgensAI
           </a>
         </p>
+      )}
+      {pathname.startsWith("/test-chatbot") && (
+        <span className="absolute top-2 right-4 text-xs text-muted-foreground">
+          {testMessageCount}/{ALLOWED_MESSAGE_QUANTITY.TEST} Test messages
+        </span>
       )}
       <Button
         className="absolute top-0 left-2 px-0 has-[>svg]:px-0 hover:bg-transparent"

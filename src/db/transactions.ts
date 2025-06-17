@@ -10,7 +10,11 @@ import {
   createSubscription,
   updateSubscriptionMessageCount,
 } from "./subscriptions";
-import { createChatbot, updateChatbotsSubscription } from "./chatbot";
+import {
+  createChatbot,
+  updateChatbotsSubscription,
+  updateChatbotTestMessageCount,
+} from "./chatbot";
 import Stripe from "stripe";
 import { createMessages } from "./messages";
 import { createBusiness } from "./business";
@@ -53,6 +57,7 @@ export async function createChatbotTransaction({
         slug,
         styles: defaultStyles,
         userId: user.id,
+        testMessagesCount: 0,
       },
       trx
     );
@@ -129,15 +134,27 @@ interface MessagesTransactionProps {
   }[];
   stripeSubscriptionId: string | undefined;
   messageCount: number | undefined;
+  pathname: string;
+  testMessageCount: number | undefined;
 }
 
 export async function createMessagesTransaction({
   messages,
   stripeSubscriptionId,
   messageCount,
+  pathname,
+  testMessageCount,
 }: MessagesTransactionProps) {
   await db.transaction(async (trx) => {
+    const [{ chatbotId }] = messages;
     await createMessages(messages, trx);
+
+    if (pathname.startsWith("/test-chatbot") && testMessageCount != null) {
+      await updateChatbotTestMessageCount(
+        { chatbotId, testMessagesCount: testMessageCount + 2 },
+        trx
+      );
+    }
 
     if (stripeSubscriptionId && messageCount) {
       await updateSubscriptionMessageCount(

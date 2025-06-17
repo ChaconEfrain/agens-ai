@@ -15,6 +15,7 @@ export async function createChatbot(
     allowedDomains,
     styles,
     slug,
+    testMessagesCount,
   }: ChatbotInsert,
   trx: Transaction
 ) {
@@ -27,6 +28,7 @@ export async function createChatbot(
       allowedDomains,
       styles,
       slug,
+      testMessagesCount,
     })
     .returning({ id: chatbots.id });
 }
@@ -89,4 +91,39 @@ export async function updateChatbotsSubscription(
       subscriptionId,
     })
     .where(eq(chatbots.userId, userId));
+}
+
+export async function updateChatbotTestMessageCount(
+  {
+    chatbotId,
+    testMessagesCount,
+  }: {
+    chatbotId: number;
+    testMessagesCount: number;
+  },
+  trx: Transaction
+) {
+  await trx
+    .update(chatbots)
+    .set({
+      testMessagesCount,
+    })
+    .where(eq(chatbots.id, chatbotId));
+}
+
+export async function getChatbotTestMessageCount({
+  chatbotId,
+}: {
+  chatbotId: number;
+}) {
+  const messageCount = await db.query.chatbots.findFirst({
+    where: eq(chatbots.id, chatbotId),
+    columns: {
+      testMessagesCount: true,
+    },
+  });
+
+  if (!messageCount) throw new Error("Chatbot not found");
+
+  return messageCount.testMessagesCount;
 }

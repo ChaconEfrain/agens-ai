@@ -26,7 +26,8 @@ export default async function TestChatbot({
       <header className="my-4">
         <h1 className="text-3xl font-bold">{chatbot.business.name} Chatbot</h1>
         <p className="text-muted-foreground">
-          Test your chatbot before deploying it to your website
+          Test your chatbot before deploying it to your website. These messages
+          won't count to your plan limit.
         </p>
       </header>
       <main>
