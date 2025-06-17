@@ -34,17 +34,21 @@ export async function createChatbot(
 }
 
 export async function getChatbotBySlug({ slug }: { slug: string }) {
-  const chatbot = await db.query.chatbots.findFirst({
-    where: eq(chatbots.slug, slug),
-    with: {
-      business: true,
-      files: true,
-    },
-  });
+  try {
+    const chatbot = await db.query.chatbots.findFirst({
+      where: eq(chatbots.slug, slug),
+      with: {
+        business: true,
+        files: true,
+      },
+    });
 
-  if (!chatbot) throw new Error("Chatbot not found");
+    if (!chatbot) throw new Error("Chatbot not found");
 
-  return chatbot;
+    return chatbot;
+  } catch (error) {
+    console.error(error);
+  }
 }
 
 export async function updateChatbotStyles({
