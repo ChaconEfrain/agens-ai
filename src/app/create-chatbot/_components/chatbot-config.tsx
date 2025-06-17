@@ -1,7 +1,5 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import React from 'react'
-import { UseFormReturn } from 'react-hook-form';
-import { FormWizardData } from "./form-wizard";
+import React from "react";
 import {
   FormControl,
   FormField,
@@ -12,12 +10,9 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Input } from "@/components/ui/input";
+import { WizardStepProps } from "@/types/form-wizard";
 
-interface ChatbotConfigProps {
-  form: UseFormReturn<FormWizardData>;
-}
-
-export default function ChatbotConfig({ form }: ChatbotConfigProps) {
+export default function ChatbotConfig({ form }: WizardStepProps) {
   return (
     <Card>
       <CardHeader>
@@ -50,10 +45,7 @@ export default function ChatbotConfig({ form }: ChatbotConfigProps) {
           control={form.control}
           name="chatbotConfig.tone"
           render={({ field }) => (
-            <RadioGroup
-              {...field}
-              onValueChange={field.onChange}
-            >
+            <RadioGroup {...field} onValueChange={field.onChange}>
               <FormLabel>Tone of voice*</FormLabel>
               <FormItem className="flex items-center gap-2">
                 <FormControl>
@@ -117,5 +109,5 @@ export default function ChatbotConfig({ form }: ChatbotConfigProps) {
         />
       </CardContent>
     </Card>
-  )
+  );
 }

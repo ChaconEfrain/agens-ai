@@ -1,7 +1,6 @@
 import React, { useEffect, type ChangeEvent } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { useFieldArray, type UseFormReturn } from 'react-hook-form';
-import { FormWizardData } from "./form-wizard";
+import { useFieldArray } from "react-hook-form";
 import {
   FormControl,
   FormField,
@@ -14,31 +13,30 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Trash } from "lucide-react";
+import { WizardStepProps } from "@/types/form-wizard";
 
-interface ProductsAndServicesProps {
-  form: UseFormReturn<FormWizardData>;
-}
-
-export default function ProductsAndServices({ form }: ProductsAndServicesProps) {
-
+export default function ProductsAndServices({ form }: WizardStepProps) {
   const { fields, append, remove } = useFieldArray({
     control: form.control,
     name: "productsServices.items",
-  })
+  });
 
-  const watchedValues = form.watch() // observa todos los campos
+  const watchedValues = form.watch(); // observa todos los campos
 
   useEffect(() => {
-    console.log("Form changed:", watchedValues)
-  }, [watchedValues])
+    console.log("Form changed:", watchedValues);
+  }, [watchedValues]);
 
-  const type = form.watch("productsServices.type")
+  const type = form.watch("productsServices.type");
 
   const handleRadioChange = (e: ChangeEvent<HTMLInputElement>) => {
-    if (e.target.value === 'services' && form.getValues('hasPhysicalProducts')) {
-      form.setValue('hasPhysicalProducts', false);
+    if (
+      e.target.value === "services" &&
+      form.getValues("hasPhysicalProducts")
+    ) {
+      form.setValue("hasPhysicalProducts", false);
     }
-  }
+  };
 
   const addNewItem = () => {
     const newItem = form.getValues("productsServices.newItem");

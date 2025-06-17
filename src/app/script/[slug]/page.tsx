@@ -2,11 +2,15 @@ import React from 'react'
 import { getChatbotBySlug } from '@/db/chatbot';
 import { auth } from '@clerk/nextjs/server';
 import { notFound, redirect } from 'next/navigation';
-import PageContainer from "./_components/page-container";
+import ScriptContainer from "./_components/page-container";
 
-export default async function ScriptPage({ params }: { params: Promise<{ slug: string }> }) {
+export default async function ScriptPage({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
   const { userId } = await auth();
-  
+
   if (!userId) {
     redirect("/");
   }
@@ -26,7 +30,7 @@ export default async function ScriptPage({ params }: { params: Promise<{ slug: s
         </p>
       </header>
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-6">
-        <PageContainer slug={slug} styles={chatbot.styles} />
+        <ScriptContainer slug={slug} styles={chatbot.styles} />
       </div>
     </div>
   );

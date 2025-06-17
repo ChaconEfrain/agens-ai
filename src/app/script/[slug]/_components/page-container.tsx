@@ -12,7 +12,10 @@ interface Props {
   styles: ChatbotStyles;
 }
 
-export default function PageContainer({ slug, styles: chatbotStyles }: Props) {
+export default function ScriptContainer({
+  slug,
+  styles: chatbotStyles,
+}: Props) {
   const [styles, setStyles] = useState<ChatbotStyles>(chatbotStyles);
 
   const updateStyles = (updates: Partial<ChatbotStyles>) => {

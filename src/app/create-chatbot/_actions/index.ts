@@ -5,6 +5,12 @@ import { utapi } from "@/app/api/uploadthing/core";
 import type { UploadFileResult } from "uploadthing/types";
 import { createChatbotTransaction } from "@/db/transactions";
 import { UploadThingError } from "uploadthing/server";
+import {
+  loadWizardProgress,
+  saveWizardProgress,
+} from "@/db/form-wizard-progress";
+import { auth } from "@clerk/nextjs/server";
+import { getUserByClerkId } from "@/db/user";
 
 export async function processDataAction(form: FormWizardData) {
   const chunks = normalizeFormChunks(form);
@@ -74,6 +80,47 @@ export async function processDataAction(form: FormWizardData) {
       message: "Something went wrong, please try again.",
       slug: uniqueSlug,
     };
+  }
+}
+
+export async function saveWizardProgressAction({
+  data,
+  step,
+  wizardId,
+}: {
+  step: number;
+  data: Partial<FormWizardData>;
+  wizardId: string;
+}) {
+  try {
+    const { userId } = await auth();
+
+    if (!userId) throw new Error("No session detected");
+
+    const user = await getUserByClerkId({ clerkId: userId });
+    await saveWizardProgress({ data, step, userId: user.id, wizardId });
+    return { success: true, message: "Progress saved correctly" };
+  } catch (error) {
+    console.error(error);
+    return {
+      success: false,
+      message: "Something went wrong saving your progress",
+    };
+  }
+}
+
+export async function loadWizardProgressAction() {
+  try {
+    const { userId } = await auth();
+
+    if (!userId) throw new Error("No session detected");
+
+    const user = await getUserByClerkId({ clerkId: userId });
+    const progress = await loadWizardProgress({ userId: user.id });
+
+    return progress;
+  } catch (error) {
+    console.error(error);
   }
 }
 

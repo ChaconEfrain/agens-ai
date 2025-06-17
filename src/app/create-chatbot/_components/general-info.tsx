@@ -1,5 +1,4 @@
 import React from "react";
-import { FormWizardData } from "./form-wizard";
 import {
   Card,
   CardContent,
@@ -14,7 +13,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { useFieldArray, UseFormReturn } from "react-hook-form";
+import { useFieldArray } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -26,12 +25,9 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
+import { WizardStepProps } from "@/types/form-wizard";
 
-interface GeneralInfoProps {
-  form: UseFormReturn<FormWizardData>;
-}
-
-export default function GeneralInfo({ form }: GeneralInfoProps) {
+export default function GeneralInfo({ form }: WizardStepProps) {
   const currentYear = new Date().getFullYear();
   const years = Array.from({ length: 100 }, (_, i) => currentYear - i);
 
@@ -42,6 +38,11 @@ export default function GeneralInfo({ form }: GeneralInfoProps) {
 
   const addWebsite = () => {
     const website = form.getValues("generalInfo.website");
+    try {
+      new URL(website);
+    } catch (error) {
+      return;
+    }
     const included = fields.some(({ url }) => url === website);
 
     if (included) {
@@ -106,7 +107,7 @@ export default function GeneralInfo({ form }: GeneralInfoProps) {
             name="generalInfo.website"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Websites that will use the chatbot</FormLabel>
+                <FormLabel>Websites that will use the chatbot*</FormLabel>
                 <div className="flex gap-2 items-center">
                   <FormControl>
                     <Input placeholder="https://yourbusiness.com" {...field} />
@@ -132,7 +133,14 @@ export default function GeneralInfo({ form }: GeneralInfoProps) {
                 key={url}
                 className="bg-muted px-2 py-1 relative rounded w-fit flex items-center justify-center"
               >
-                <span className="text-sm">{url}</span>
+                <a
+                  href={url}
+                  target="_blank"
+                  rel="noopener noreferer"
+                  className="text-sm hover:underline"
+                >
+                  {url}
+                </a>
                 <button
                   className="absolute cursor-pointer -top-2 -right-2"
                   type="button"

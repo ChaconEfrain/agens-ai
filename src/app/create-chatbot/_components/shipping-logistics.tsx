@@ -1,16 +1,17 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import React from 'react'
-import { UseFormReturn } from 'react-hook-form'
-import { FormWizardData } from './form-wizard'
-import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
-import { Textarea } from '@/components/ui/textarea'
-import { Switch } from '@/components/ui/switch'
+import React from "react";
+import {
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
+import { WizardStepProps } from "@/types/form-wizard";
 
-interface ShippingLogisticsProps {
-  form: UseFormReturn<FormWizardData>;
-}
-
-export default function ShippingLogistics({ form }: ShippingLogisticsProps) {
+export default function ShippingLogistics({ form }: WizardStepProps) {
   return (
     <Card>
       <CardHeader>
@@ -33,65 +34,81 @@ export default function ShippingLogistics({ form }: ShippingLogisticsProps) {
                   onCheckedChange={field.onChange}
                 />
               </FormControl>
-              <FormLabel>
-                We offer international shipping
-              </FormLabel>
+              <FormLabel>We offer international shipping</FormLabel>
             </FormItem>
           )}
         />
         <FormField
           control={form.control}
-          name='shippingLogistics.shippingMethods'
-          render={({field}) => (
+          name="shippingLogistics.shippingMethods"
+          render={({ field }) => (
             <FormItem>
               <FormLabel>Shipping Methods*</FormLabel>
               <FormControl>
-                <Textarea {...field} placeholder='e.g., Standard shipping, international shipping, free shipping and express shipping' className='resize-none' />
+                <Textarea
+                  {...field}
+                  placeholder="e.g., Standard shipping, international shipping, free shipping and express shipping"
+                  className="resize-none"
+                />
               </FormControl>
-              <FormMessage/>
+              <FormMessage />
             </FormItem>
-          )}  
+          )}
         />
         <FormField
           control={form.control}
-          name='shippingLogistics.deliveryTimeframes'
-          render={({field}) => (
+          name="shippingLogistics.deliveryTimeframes"
+          render={({ field }) => (
             <FormItem>
               <FormLabel>Delivery Timeframes*</FormLabel>
               <FormControl>
-                <Textarea {...field} placeholder='e.g., Standard: 3-5 business days, Express: 1-2 business days' className='resize-none' />
+                <Textarea
+                  {...field}
+                  placeholder="e.g., Standard: 3-5 business days, Express: 1-2 business days"
+                  className="resize-none"
+                />
               </FormControl>
-              <FormMessage/>
+              <FormMessage />
             </FormItem>
-          )}  
+          )}
         />
         <FormField
           control={form.control}
-          name='shippingLogistics.returnPolicy'
-          render={({field}) => (
+          name="shippingLogistics.returnPolicy"
+          render={({ field }) => (
             <FormItem>
               <FormLabel>Return Policies*</FormLabel>
               <FormControl>
-                <Textarea {...field} placeholder='Describe your return and refund policies' className='resize-none' />
+                <Textarea
+                  {...field}
+                  placeholder="Describe your return and refund policies"
+                  className="resize-none"
+                />
               </FormControl>
-              <FormMessage/>
+              <FormMessage />
             </FormItem>
-          )}  
+          )}
         />
         <FormField
           control={form.control}
-          name='shippingLogistics.shippingRestrictions'
-          render={({field}) => (
+          name="shippingLogistics.shippingRestrictions"
+          render={({ field }) => (
             <FormItem>
-              <FormLabel>Shipping Rerstrictions or Special Conditions</FormLabel>
+              <FormLabel>
+                Shipping Rerstrictions or Special Conditions
+              </FormLabel>
               <FormControl>
-                <Textarea {...field} placeholder="e.g., We don't ship to P.O. boxes, certain countries, or have restrictions on specific products" className='resize-none' />
+                <Textarea
+                  {...field}
+                  placeholder="e.g., We don't ship to P.O. boxes, certain countries, or have restrictions on specific products"
+                  className="resize-none"
+                />
               </FormControl>
-              <FormMessage/>
+              <FormMessage />
             </FormItem>
-          )}  
+          )}
         />
       </CardContent>
     </Card>
-  )
+  );
 }

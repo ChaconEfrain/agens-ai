@@ -1,3 +1,4 @@
+import { FormWizardData } from "@/app/create-chatbot/_components/form-wizard";
 import { ChatbotStyles } from "@/types/embedded-chatbot";
 import { relations } from "drizzle-orm";
 import {
@@ -9,6 +10,7 @@ import {
   pgTable,
   text,
   timestamp,
+  unique,
   varchar,
   vector,
 } from "drizzle-orm/pg-core";
@@ -84,6 +86,25 @@ export const businesses = pgTable(
     updatedAt: timestamp("updated_at").$onUpdate(() => new Date()),
   },
   (table) => [index("businesses_user_id_idx").on(table.userId)]
+);
+
+export const formWizardsProgress = pgTable(
+  "form_wizards_progress",
+  {
+    id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+    userId: integer("user_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    wizardId: text("wizard_id").notNull(),
+    step: integer("step").notNull(),
+    data: json("data").$type<Partial<FormWizardData>>().notNull(),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at").$onUpdate(() => new Date()),
+  },
+  (table) => [
+    unique().on(table.wizardId),
+    index("wizardsProgress_wizard_id_idx").on(table.wizardId),
+  ]
 );
 
 export const files = pgTable(
@@ -193,30 +214,38 @@ export const subscriptionStatusEnum = pgEnum("subscription_status", [
   "incomplete_expired",
 ]);
 
-export const subscriptions = pgTable("subscriptions", {
-  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
-  userId: integer("user_id")
-    .references(() => users.id)
-    .notNull(),
-  stripeSubscriptionId: varchar("stripe_subscription_id", {
-    length: 255,
-  }).notNull(),
-  stripeCustomerId: varchar("stripe_customer_id", { length: 255 }).notNull(),
-  stripeItemId: varchar("stripe_item_id", { length: 255 }).notNull(),
-  plan: subscriptionPlanEnum("plan").notNull(),
-  messageCount: integer("message_count").notNull().default(0),
-  periodStart: timestamp("period_start").notNull(),
-  periodEnd: timestamp("period_end").notNull(),
-  status: subscriptionStatusEnum("status").notNull(),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").$onUpdate(() => new Date()),
-});
+export const subscriptions = pgTable(
+  "subscriptions",
+  {
+    id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+    userId: integer("user_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    stripeSubscriptionId: varchar("stripe_subscription_id", {
+      length: 255,
+    }).notNull(),
+    stripeCustomerId: varchar("stripe_customer_id", { length: 255 }).notNull(),
+    stripeItemId: varchar("stripe_item_id", { length: 255 }).notNull(),
+    plan: subscriptionPlanEnum("plan").notNull(),
+    messageCount: integer("message_count").notNull().default(0),
+    periodStart: timestamp("period_start").notNull(),
+    periodEnd: timestamp("period_end").notNull(),
+    status: subscriptionStatusEnum("status").notNull(),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at").$onUpdate(() => new Date()),
+  },
+  (table) => [
+    index("subscriptions_user_id_idx").on(table.userId),
+    index("subscriptions_stripe_sub_id_idx").on(table.stripeSubscriptionId),
+  ]
+);
 
 //Relations
 export const usersRelations = relations(users, ({ many }) => ({
   businesses: many(businesses),
   chatbots: many(chatbots),
   files: many(files),
+  formWizardsProgress: many(formWizardsProgress),
 }));
 
 export const businessesRelations = relations(businesses, ({ one, many }) => ({
@@ -224,6 +253,16 @@ export const businessesRelations = relations(businesses, ({ one, many }) => ({
   chatbots: many(chatbots),
   files: many(files),
 }));
+
+export const formWizardsProgressRelations = relations(
+  formWizardsProgress,
+  ({ one }) => ({
+    user: one(users, {
+      fields: [formWizardsProgress.userId],
+      references: [users.id],
+    }),
+  })
+);
 
 export const filesRelations = relations(files, ({ one }) => ({
   business: one(businesses, {
@@ -289,3 +328,4 @@ export type FileInsert = typeof files.$inferInsert;
 export type Message = typeof messages.$inferSelect;
 export type Subscription = typeof subscriptions.$inferSelect;
 export type SubscriptionInsert = typeof subscriptions.$inferInsert;
+export type FormWizardProgress = typeof formWizardsProgress.$inferSelect;

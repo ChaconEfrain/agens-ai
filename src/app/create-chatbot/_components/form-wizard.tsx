@@ -1,24 +1,39 @@
 'use client'
 
-import React, { useState } from 'react'
-import GeneralInfo from './general-info'
-import { Bot, Box, ChevronLeft, ChevronRight, FileIcon, Info, ListChecks, Smile, Truck } from 'lucide-react'
-import { cn } from '@/lib/utils'
-import { Progress } from '@/components/ui/progress'
-import { z } from 'zod'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { Form } from '@/components/ui/form'
-import { useForm, UseFormReturn } from 'react-hook-form'
-import { Button } from '@/components/ui/button'
+import React, { useEffect, useState } from "react";
+import GeneralInfo from "./general-info";
+import {
+  Bot,
+  Box,
+  ChevronLeft,
+  ChevronRight,
+  FileIcon,
+  Info,
+  ListChecks,
+  Smile,
+  Truck,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Progress } from "@/components/ui/progress";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Form } from "@/components/ui/form";
+import { useForm, UseFormReturn } from "react-hook-form";
+import { Button } from "@/components/ui/button";
 import ProductsAndServices from "./products-services";
 import CustomerService from "./customer-service";
 import ChatbotConfig from "./chatbot-config";
 import DocumentsStep from "./documents";
 import ShippingLogistics from "./shipping-logistics";
 import Summary from "./summary";
-import { processDataAction } from "../_actions";
+import {
+  loadWizardProgressAction,
+  processDataAction,
+  saveWizardProgressAction,
+} from "../_actions";
 import { toast } from "sonner";
 import { redirect } from "next/navigation";
+import { FormWizardProgress } from "@/db/schema";
 
 export interface BusinessData {
   generalInfo: {
@@ -209,13 +224,28 @@ export type FormWizardData = z.infer<typeof formSchema>;
 
 export default function FormWizard() {
   //TODO: Save step on url and form info on localStorage
-  const [currentStep, setCurrentStep] = useState(0);
+  const [progress, setProgress] = useState<FormWizardProgress>();
+  const [currentStep, setCurrentStep] = useState(progress?.step ?? 0);
 
   const form = useForm<FormWizardData>({
     resolver: zodResolver(formSchema),
     defaultValues: initialData,
     mode: "onChange",
   });
+
+  useEffect(() => {
+    const wizardId = localStorage.getItem("wizardId") ?? crypto.randomUUID();
+    localStorage.setItem("wizardId", wizardId);
+
+    (async () => {
+      const progress = await loadWizardProgressAction();
+      if (progress) {
+        form.reset(progress.data);
+        setCurrentStep(progress.step);
+        setProgress(progress);
+      }
+    })();
+  }, []);
 
   const steps = [
     {
@@ -298,6 +328,17 @@ export default function FormWizard() {
       }
       if (isValid && !hasErrors && currentStep < steps.length - 1) {
         setCurrentStep(currentStep + 1);
+        saveWizardProgressAction({
+          step: currentStep + 1,
+          data: form.getValues(),
+          wizardId: localStorage.getItem("wizardId") ?? "",
+        }).then((res) => {
+          if (res.success) {
+            toast.success(res.message);
+          } else {
+            toast.error(res.message);
+          }
+        });
       }
     });
   };

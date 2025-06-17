@@ -6,15 +6,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { UseFormReturn } from "react-hook-form";
-import { FormWizardData } from "./form-wizard";
 import DragAndDrop from "@/components/drag-and-drop";
+import { WizardStepProps } from "@/types/form-wizard";
 
-interface DocumentsProps {
-  form: UseFormReturn<FormWizardData>;
-}
-
-export default function DocumentsStep({ form }: DocumentsProps) {
+export default function DocumentsStep({ form }: WizardStepProps) {
   const handleFiles = (files: FileList) => {
     const validFiles = Array.from(files).filter(
       (file) => file.type === "application/pdf"

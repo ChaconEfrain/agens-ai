@@ -1,7 +1,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import React, { useEffect } from 'react'
-import { useFieldArray, UseFormReturn } from 'react-hook-form';
-import { FormWizardData } from "./form-wizard";
+import { useFieldArray } from "react-hook-form";
 import {
   FormControl,
   FormField,
@@ -14,31 +13,28 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Trash } from "lucide-react";
-
-interface CustomerServiceProps {
-  form: UseFormReturn<FormWizardData>;
-}
+import { WizardStepProps } from "@/types/form-wizard";
 
 const contactMethods = [
-  { value: 'email', label: 'Email' },
-  { value: 'phone', label: 'Phone' },
-  { value: 'socialMedia', label: 'Social Media' },
-  { value: 'whatsapp', label: 'WhatsApp' },
-]
+  { value: "email", label: "Email" },
+  { value: "phone", label: "Phone" },
+  { value: "socialMedia", label: "Social Media" },
+  { value: "whatsapp", label: "WhatsApp" },
+];
 
-export default function CustomerService({ form }: CustomerServiceProps) {
-  const contactMethodsSelected = form.watch('customerService.contactMethods') // observa todos los campos
-  const customerService = form.watch('customerService.commonQuestions') // observa todos los campos
-  
+export default function CustomerService({ form }: WizardStepProps) {
+  const contactMethodsSelected = form.watch("customerService.contactMethods"); // observa todos los campos
+  const customerService = form.watch("customerService.commonQuestions"); // observa todos los campos
+
   useEffect(() => {
-    console.log("Form changed:", contactMethodsSelected)
-    console.log("Customer Service:", customerService)
-  }, [contactMethodsSelected, customerService])
+    console.log("Form changed:", contactMethodsSelected);
+    console.log("Customer Service:", customerService);
+  }, [contactMethodsSelected, customerService]);
 
   const { fields, append, remove } = useFieldArray({
     control: form.control,
     name: "customerService.commonQuestions",
-  })
+  });
 
   const addNewQuestion = () => {
     const newQuestion = form.getValues("customerService.newQuestion");
