@@ -2,18 +2,23 @@ import { createEmbeddings } from "@/services/openai";
 import { db } from ".";
 import { embeddings } from "./schema";
 import { cosineDistance, eq } from "drizzle-orm";
+import { Transaction } from "@/types/db-transaction";
 
-export async function saveEmbeddings({
-  chunks,
-  chatbotId,
-}: {
-  chunks: string[];
-  chatbotId: number;
-}) {
+export async function saveEmbeddings(
+  {
+    chunks,
+    chatbotId,
+  }: {
+    chunks: string[];
+    chatbotId: number;
+  },
+  trx?: Transaction
+) {
   try {
     const openAIEmbeddings = await createEmbeddings(chunks);
+    const database = trx ?? db;
 
-    return await db
+    return await database
       .insert(embeddings)
       .values(
         openAIEmbeddings.map(({ content, embedding }) => ({
@@ -22,7 +27,7 @@ export async function saveEmbeddings({
           chatbotId,
         }))
       )
-      .returning();
+      .returning({ id: embeddings.id });
   } catch (error) {
     if (error instanceof Error) {
       throw new Error("Embeddings", {

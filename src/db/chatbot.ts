@@ -1,11 +1,35 @@
 import { ChatbotStyles } from "@/types/embedded-chatbot";
 import { db } from ".";
-import { chatbots } from "./schema";
+import { ChatbotInsert, chatbots } from "./schema";
 import { and, eq } from "drizzle-orm";
 import { auth } from "@clerk/nextjs/server";
 import { getUserByClerkId } from "./user";
 import { getBusinessByUserId } from "./business";
 import { Transaction } from "@/types/db-transaction";
+
+export async function createChatbot(
+  {
+    userId,
+    instructions,
+    businessId,
+    allowedDomains,
+    styles,
+    slug,
+  }: ChatbotInsert,
+  trx: Transaction
+) {
+  return await trx
+    .insert(chatbots)
+    .values({
+      userId,
+      instructions,
+      businessId,
+      allowedDomains,
+      styles,
+      slug,
+    })
+    .returning({ id: chatbots.id });
+}
 
 export async function getChatbotBySlug({ slug }: { slug: string }) {
   const chatbot = await db.query.chatbots.findFirst({

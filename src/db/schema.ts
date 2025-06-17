@@ -282,8 +282,10 @@ export const subscriptionsRelations = relations(
 //Types
 export type User = typeof users.$inferSelect;
 export type Chatbot = typeof chatbots.$inferSelect;
+export type ChatbotInsert = typeof chatbots.$inferInsert;
 export type Business = typeof businesses.$inferSelect;
 export type File = typeof files.$inferSelect;
+export type FileInsert = typeof files.$inferInsert;
 export type Message = typeof messages.$inferSelect;
 export type Subscription = typeof subscriptions.$inferSelect;
 export type SubscriptionInsert = typeof subscriptions.$inferInsert;

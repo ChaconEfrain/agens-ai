@@ -1,21 +1,21 @@
 import { FormWizardData } from "@/app/create-chatbot/_components/form-wizard";
-import { businesses, chatbots, embeddings, files } from "./schema";
 import { getUserByClerkId } from "./user";
 import { auth } from "@clerk/nextjs/server";
 import { db } from ".";
-import { createEmbeddings } from "@/services/openai";
 import type { UploadFileResult } from "uploadthing/types";
 import { extractTextFromPdf } from "@/services/utils";
 import { chunkText } from "@/lib/utils";
 import { defaultStyles } from "@/consts/chatbot";
 import {
   createSubscription,
-  updateSubscription,
   updateSubscriptionMessageCount,
 } from "./subscriptions";
-import { updateChatbotsSubscription } from "./chatbot";
+import { createChatbot, updateChatbotsSubscription } from "./chatbot";
 import Stripe from "stripe";
 import { createMessages } from "./messages";
+import { createBusiness } from "./business";
+import { saveEmbeddings } from "./embeddings";
+import { createFile } from "./files";
 
 interface CreateChatbotTransactionParams {
   form: FormWizardData;
@@ -38,122 +38,48 @@ export async function createChatbotTransaction({
 
   const user = await getUserByClerkId({ clerkId: userId });
 
-  return await db.transaction(async (tx) => {
-    const businessInsert = await tx
-      .insert(businesses)
-      .values({
-        userId: user.id,
-        chatbotObjective: form.chatbotConfig.objective,
-        chatbotPersonality: form.chatbotConfig.personality,
-        chatbotStyle: form.chatbotConfig.style,
-        chatbotTone: form.chatbotConfig.tone,
-        description: form.generalInfo.description,
-        name: form.generalInfo.businessName,
-        productsOrServices: form.productsServices.type,
-        commonQuestions:
-          form.customerService.commonQuestions?.map((q) => ({
-            question: q.question || "",
-            answer: q.answer || "",
-          })) ?? [],
-        contactMethods: form.customerService.contactMethods,
-        deliveryTimeframes: form.shippingLogistics?.deliveryTimeframes,
-        email: form.customerService.email,
-        foundedYear: form.generalInfo.foundedYear,
-        hasPhysicalProducts: form.hasPhysicalProducts,
-        internationalShipping: form.shippingLogistics?.internationalShipping,
-        items:
-          form.productsServices.items?.map((item) => ({
-            name: item.name || "",
-            description: item.description || "",
-            price: item.price || "",
-          })) ?? [],
-        phone: form.customerService.phone,
-        responseTime: form.customerService.responseTime,
-        returnPolicy: form.shippingLogistics?.returnPolicy,
-        shippingMethods: form.shippingLogistics?.shippingMethods,
-        shippingRestrictions: form.shippingLogistics?.shippingRestrictions,
-        socialMedia: form.customerService.socialMedia,
-        supportHours: form.customerService.supportHours,
-        allowedWebsites: form.generalInfo.allowedWebsites.map(({ url }) => url),
-        whatsapp: form.customerService.whatsapp,
-      })
-      .returning({
-        id: businesses.id,
-        allowedDomains: businesses.allowedWebsites,
-      });
+  return await db.transaction(async (trx) => {
+    const [businessInsert] = await createBusiness({ form, user }, trx);
 
-    if (!businessInsert) tx.rollback();
-
-    const allowedDomains = businessInsert[0].allowedDomains.map((url) =>
+    const allowedDomains = businessInsert.allowedDomains.map((url) =>
       new URL(url).hostname.replace(/^www\./, "")
     );
 
-    const chatbotInsert = await tx
-      .insert(chatbots)
-      .values({
-        userId: user.id,
-        instructions,
-        businessId: businessInsert[0].id,
+    const [chatbotInsert] = await createChatbot(
+      {
         allowedDomains,
-        styles: defaultStyles,
+        businessId: businessInsert.id,
+        instructions,
         slug,
-      })
-      .returning({ id: chatbots.id });
+        styles: defaultStyles,
+        userId: user.id,
+      },
+      trx
+    );
 
-    if (!chatbotInsert) tx.rollback();
-
-    const openAIFormEmbeddings = await createEmbeddings(chunks);
-
-    const formEmbeddingsInsert = await tx
-      .insert(embeddings)
-      .values(
-        openAIFormEmbeddings.map(({ content, embedding }) => ({
-          content,
-          embedding,
-          chatbotId: chatbotInsert[0].id,
-        }))
-      )
-      .returning({ id: embeddings.id });
-
-    if (!formEmbeddingsInsert) tx.rollback();
+    await saveEmbeddings({ chatbotId: chatbotInsert.id, chunks }, trx);
 
     if (filesResult.length > 0) {
-      const filesInsert = await tx
-        .insert(files)
-        .values(
-          filesResult.map(({ data }) => ({
-            userId: user.id,
-            businessId: businessInsert[0].id,
-            chatbotId: chatbotInsert[0].id,
-            fileUrl: data?.ufsUrl ?? "",
-            title: data?.name ?? "",
-          }))
-        )
-        .returning({ id: files.id });
-
-      if (!filesInsert) tx.rollback();
+      const files = filesResult.map(({ data }) => ({
+        userId: user.id,
+        businessId: businessInsert.id,
+        chatbotId: chatbotInsert.id,
+        fileUrl: data?.ufsUrl ?? "",
+        title: data?.name ?? "",
+      }));
+      await createFile({ filesResult: files }, trx);
     }
 
-    for (const { data } of filesResult) {
-      if (!data) continue;
+    await Promise.all(
+      filesResult.map(async ({ data }) => {
+        if (!data) return;
 
-      const fullText = await extractTextFromPdf({ fileUrl: data.ufsUrl });
-      const chunks = chunkText(fullText);
-      const openAIFileEmbeddings = await createEmbeddings(chunks);
+        const fullText = await extractTextFromPdf({ fileUrl: data.ufsUrl });
+        const chunks = chunkText(fullText);
 
-      const fileEmbeddingsInsert = await tx
-        .insert(embeddings)
-        .values(
-          openAIFileEmbeddings.map(({ content, embedding }) => ({
-            content,
-            embedding,
-            chatbotId: chatbotInsert[0].id,
-          }))
-        )
-        .returning({ id: embeddings.id });
-
-      if (!fileEmbeddingsInsert) tx.rollback();
-    }
+        await saveEmbeddings({ chatbotId: chatbotInsert.id, chunks }, trx);
+      })
+    );
   });
 }
 
