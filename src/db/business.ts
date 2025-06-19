@@ -51,13 +51,3 @@ export async function createBusiness(
       allowedDomains: businesses.allowedWebsites,
     });
 }
-
-export async function getBusinessByUserId({ userId }: { userId: number }) {
-  const business = await db.query.businesses.findFirst({
-    where: eq(businesses.userId, userId),
-  });
-
-  if (!business) throw new Error("Business not found");
-
-  return business;
-}
