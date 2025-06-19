@@ -40,9 +40,7 @@ export async function updateChatbotFilesAction({
 
         const fullText = await extractTextFromPdf({ fileUrl: data.ufsUrl });
         const chunks = chunkText(fullText);
-        const embeddings = await saveEmbeddings({ chunks, chatbotId });
-
-        if (!embeddings) throw new Error("embedding");
+        await saveEmbeddings({ chunks, chatbotId });
       })
     );
     return {
@@ -51,13 +49,9 @@ export async function updateChatbotFilesAction({
     };
   } catch (error) {
     console.error("Error processing file:", error);
-    let message = "Something went wrong";
-    if (error instanceof Error) {
-      if (error.message === "embedding") {
-        message = "Something went wrong updating the chatbot context";
-      } else if (error.message === "file") {
-        message = "Something went wrong processing the file";
-      }
+    let message = "Something went wrong updating the chatbot context";
+    if (error instanceof Error && error.message === "file") {
+      message = "Something went wrong processing the file";
     }
     return { success: false, message };
   }
