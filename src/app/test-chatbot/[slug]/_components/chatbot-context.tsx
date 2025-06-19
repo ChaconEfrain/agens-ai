@@ -65,7 +65,9 @@ export default function ChatbotContext({ chatbot }: Props) {
                 <span>{chatbot.business.name}</span>
               </div>
               <div className="flex gap-1">
-                <span className="text-muted-foreground">Description: </span>
+                <span className="text-muted-foreground whitespace-nowrap">
+                  Description:{" "}
+                </span>
                 <span
                   title={chatbot.business.description}
                   className="line-clamp-1"
@@ -117,13 +119,15 @@ export default function ChatbotContext({ chatbot }: Props) {
                     </AccordionTrigger>
                     <AccordionContent className="flex flex-col gap-1">
                       <div className="flex gap-1">
-                        <span className="text-muted-foreground">Price: </span>
+                        <span className="text-muted-foreground whitespace-nowrap">
+                          Price:{" "}
+                        </span>
                         <span className="line-clamp-1" title={item.price}>
                           {item.price}
                         </span>
                       </div>
                       <div className="flex gap-1">
-                        <span className="text-muted-foreground">
+                        <span className="text-muted-foreground whitespace-nowrap">
                           Description:{" "}
                         </span>
                         <span className="line-clamp-1" title={item.description}>
@@ -154,7 +158,7 @@ export default function ChatbotContext({ chatbot }: Props) {
                   </span>
                 </div>
                 <div className="flex gap-1">
-                  <span className="text-muted-foreground">
+                  <span className="text-muted-foreground whitespace-nowrap">
                     Shipping methods:{" "}
                   </span>
                   <span
@@ -165,7 +169,7 @@ export default function ChatbotContext({ chatbot }: Props) {
                   </span>
                 </div>
                 <div className="flex gap-1">
-                  <span className="text-muted-foreground">
+                  <span className="text-muted-foreground whitespace-nowrap">
                     Delivery timeframes:{" "}
                   </span>
                   <span
@@ -176,7 +180,7 @@ export default function ChatbotContext({ chatbot }: Props) {
                   </span>
                 </div>
                 <div className="flex gap-1">
-                  <span className="text-muted-foreground">
+                  <span className="text-muted-foreground whitespace-nowrap">
                     Return policies:{" "}
                   </span>
                   <span
@@ -187,7 +191,9 @@ export default function ChatbotContext({ chatbot }: Props) {
                   </span>
                 </div>
                 <div className="flex gap-1">
-                  <span className="text-muted-foreground">Restrictions: </span>
+                  <span className="text-muted-foreground whitespace-nowrap">
+                    Restrictions:{" "}
+                  </span>
                   <span
                     title={chatbot.business.shippingRestrictions ?? ""}
                     className="line-clamp-1"
@@ -207,7 +213,9 @@ export default function ChatbotContext({ chatbot }: Props) {
             </AccordionTrigger>
             <AccordionContent className="flex flex-col gap-1">
               <div className="flex gap-1">
-                <span className="text-muted-foreground">Support:</span>
+                <span className="text-muted-foreground whitespace-nowrap">
+                  Support:
+                </span>
                 <span
                   title={chatbot.business.supportHours ?? ""}
                   className="line-clamp-1"
@@ -224,7 +232,9 @@ export default function ChatbotContext({ chatbot }: Props) {
                     </AccordionTrigger>
                     <AccordionContent className="flex flex-col gap-1">
                       <div className="flex gap-1">
-                        <span className="text-muted-foreground">Value: </span>
+                        <span className="text-muted-foreground whitespace-nowrap">
+                          Value:{" "}
+                        </span>
                         <span
                           className="line-clamp-1"
                           title={chatbot.business.email}
@@ -242,7 +252,9 @@ export default function ChatbotContext({ chatbot }: Props) {
                     </AccordionTrigger>
                     <AccordionContent className="flex flex-col gap-1">
                       <div className="flex gap-1">
-                        <span className="text-muted-foreground">Value: </span>
+                        <span className="text-muted-foreground whitespace-nowrap">
+                          Value:{" "}
+                        </span>
                         <span
                           className="line-clamp-1"
                           title={chatbot.business.whatsapp}
@@ -268,7 +280,9 @@ export default function ChatbotContext({ chatbot }: Props) {
             </AccordionTrigger>
             <AccordionContent className="flex flex-col gap-1">
               <div className="flex gap-1">
-                <span className="text-muted-foreground">Objective:</span>
+                <span className="text-muted-foreground whitespace-nowrap">
+                  Objective:
+                </span>
                 <span
                   title={chatbot.business.chatbotObjective}
                   className="line-clamp-1"
@@ -277,11 +291,15 @@ export default function ChatbotContext({ chatbot }: Props) {
                 </span>
               </div>
               <div className="flex gap-1">
-                <span className="text-muted-foreground">Tone:</span>
+                <span className="text-muted-foreground whitespace-nowrap">
+                  Tone:
+                </span>
                 <span>{chatbot.business.chatbotTone}</span>
               </div>
               <div className="flex gap-1">
-                <span className="text-muted-foreground">Style:</span>
+                <span className="text-muted-foreground whitespace-nowrap">
+                  Style:
+                </span>
                 <span
                   title={chatbot.business.chatbotStyle}
                   className="line-clamp-1"
@@ -290,7 +308,9 @@ export default function ChatbotContext({ chatbot }: Props) {
                 </span>
               </div>
               <div className="flex gap-1">
-                <span className="text-muted-foreground">Personality:</span>
+                <span className="text-muted-foreground whitespace-nowrap">
+                  Personality:
+                </span>
                 <span
                   title={chatbot.business.chatbotPersonality}
                   className="line-clamp-1"
