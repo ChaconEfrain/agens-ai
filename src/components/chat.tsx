@@ -38,6 +38,7 @@ export default function Chat({
   const [loading, setLoading] = useState(false);
   const [token, setToken] = useState("");
   const [testMessageCount, setTestMessageCount] = useState(0);
+  const [isError, setIsError] = useState(false);
   const scrollDiv = useRef<HTMLDivElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
   const pathname = usePathname();
@@ -134,6 +135,8 @@ export default function Chat({
             "chat-prompt"
           ) as HTMLTextAreaElement
         ).disabled = true;
+      } else if (answer === "error") {
+        setIsError(true);
       }
     }
     if (pathname.startsWith("/test-chatbot")) {
@@ -142,6 +145,21 @@ export default function Chat({
       });
       setTestMessageCount(testMessageCount);
     }
+  };
+
+  const handleResendMessage = async () => {
+    const { message } = messages[messages.length - 2];
+    setMessages((prev) => prev.slice(0, -2));
+    if (formRef.current) {
+      const textarea = formRef.current.elements.namedItem(
+        "chat-prompt"
+      ) as HTMLTextAreaElement | null;
+      if (textarea) {
+        textarea.value = message;
+      }
+    }
+    formRef.current?.requestSubmit();
+    setIsError(false);
   };
 
   const clearChat = async () => {
@@ -234,13 +252,27 @@ export default function Chat({
             onInput={handleTextAreaResize}
             onKeyDown={handleKeyDown}
           />
-          <Button
-            variant="ghost"
-            title="Send prompt"
-            className="cursor-pointer self-end"
-          >
-            <Send />
-          </Button>
+          <div className="self-end flex items-center gap-2">
+            {isError && (
+              <Button
+                size="sm"
+                title="Send prompt"
+                className="cursor-pointer"
+                type="button"
+                onClick={handleResendMessage}
+              >
+                Resend Message
+              </Button>
+            )}
+            <Button
+              variant="ghost"
+              title="Send prompt"
+              className="cursor-pointer"
+              type="submit"
+            >
+              <Send />
+            </Button>
+          </div>
         </form>
       </CardFooter>
     </Card>
