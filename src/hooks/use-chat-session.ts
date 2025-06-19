@@ -12,8 +12,6 @@ export function useChatSession(chatbotSlug: string) {
       localStorage.setItem(key, id);
     }
 
-    console.log("Chat session ID:", id);
-
     setSessionId(id);
   }, [chatbotSlug]);
 
