@@ -100,6 +100,10 @@ export default function Chat({
 
   const sendMessage = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (isError) {
+      setMessages((prev) => prev.slice(0, -2));
+      setIsError(false);
+    }
     const form = e.target as HTMLFormElement;
     const formData = new FormData(form);
     const message = formData.get("chat-prompt")?.toString();
@@ -158,8 +162,8 @@ export default function Chat({
         textarea.value = message;
       }
     }
-    formRef.current?.requestSubmit();
     setIsError(false);
+    formRef.current?.requestSubmit();
   };
 
   const clearChat = async () => {
