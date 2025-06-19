@@ -26,7 +26,8 @@ export async function processDataAction(form: FormWizardData) {
   - If the user asks about a product or service, provide information based on the provided data, but do not engage in sales or financial discussions.
   - If the user asks about shipping, provide the information based on the provided data, but do not engage in financial discussions.
   - If the user asks anything related to the mentioned above, advise them to contact customer support via the provided channels.
-  - If the user asks something that is not related to the business, politely inform them that you can only assist with questions related to the business.
+  - If the user asks something that's not in your context but it's related to the business' subject go ahead and answer.
+  - If the user asks something that is not related to the business, politely inform them that you can only assist with questions related to the business or the business' subject.
   - If the user asks for personal information, such as your name or location, politely decline to answer.
   - Be respectful, concise, and efficient in all your responses, only providing the information requested and nothing more.
   - Never explain your reasoning or thought process—just provide the direct answer.
@@ -64,20 +65,37 @@ export async function processDataAction(form: FormWizardData) {
     return {
       success: true,
       message: "Your chatbot was created successfully.",
+      cause: null,
       slug: uniqueSlug,
     };
   } catch (error) {
-    console.error(error);
+    console.error("processDataAction error --> ", error);
     if (error instanceof UploadThingError) {
       return {
         success: false,
         message: "File upload failed",
+        cause: error.cause,
+        slug: uniqueSlug,
+      };
+    } else if (error instanceof Error && error.cause === "chatbot limit") {
+      return {
+        success: false,
+        message: "Chatbot limit reached for your plan.",
+        cause: error.cause,
+        slug: uniqueSlug,
+      };
+    } else if (error instanceof Error) {
+      return {
+        success: false,
+        message: "Something went wrong, please try again.",
+        cause: error.cause,
         slug: uniqueSlug,
       };
     }
     return {
       success: false,
       message: "Something went wrong, please try again.",
+      cause: null,
       slug: uniqueSlug,
     };
   }
@@ -98,25 +116,30 @@ export async function saveWizardProgressAction({
     if (!userId) throw new Error("No session detected");
 
     const user = await getUserByClerkId({ clerkId: userId });
-    await saveWizardProgress({ data, step, userId: user.id, wizardId });
-    return { success: true, message: "Progress saved correctly" };
+    const [newProgress] = await saveWizardProgress({
+      data,
+      step,
+      userId: user.id,
+      wizardId,
+    });
+    return { success: true, message: "Progress saved correctly", newProgress };
   } catch (error) {
     console.error(error);
     return {
       success: false,
       message: "Something went wrong saving your progress",
+      newProgress: null,
     };
   }
 }
 
-export async function loadWizardProgressAction() {
+export async function loadWizardProgressAction({
+  wizardId,
+}: {
+  wizardId: string;
+}) {
   try {
-    const { userId } = await auth();
-
-    if (!userId) throw new Error("No session detected");
-
-    const user = await getUserByClerkId({ clerkId: userId });
-    const progress = await loadWizardProgress({ userId: user.id });
+    const progress = await loadWizardProgress({ wizardId });
 
     return progress;
   } catch (error) {

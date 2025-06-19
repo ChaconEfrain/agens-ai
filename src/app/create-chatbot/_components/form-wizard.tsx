@@ -32,8 +32,16 @@ import {
   saveWizardProgressAction,
 } from "../_actions";
 import { toast } from "sonner";
-import { redirect } from "next/navigation";
+import { redirect, useRouter } from "next/navigation";
 import { FormWizardProgress } from "@/db/schema";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+} from "@/components/ui/card";
+import FormLoader from "./form-loader";
+import ChatbotLimitMessage from "./chatbot-limit-message";
 
 export interface BusinessData {
   generalInfo: {
@@ -222,10 +230,15 @@ export const formSchema = z.object({
 
 export type FormWizardData = z.infer<typeof formSchema>;
 
-export default function FormWizard() {
-  //TODO: Save step on url and form info on localStorage
+export default function FormWizard({
+  limitReached,
+}: {
+  limitReached: boolean;
+}) {
   const [progress, setProgress] = useState<FormWizardProgress>();
   const [currentStep, setCurrentStep] = useState(progress?.step ?? 0);
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
   const form = useForm<FormWizardData>({
     resolver: zodResolver(formSchema),
@@ -238,11 +251,15 @@ export default function FormWizard() {
     localStorage.setItem("wizardId", wizardId);
 
     (async () => {
-      const progress = await loadWizardProgressAction();
-      if (progress) {
-        form.reset(progress.data);
-        setCurrentStep(progress.step);
-        setProgress(progress);
+      if (!limitReached) {
+        setLoading(true);
+        const progress = await loadWizardProgressAction({ wizardId });
+        if (progress) {
+          form.reset(progress.data);
+          setCurrentStep(progress.step);
+          setProgress(progress);
+        }
+        setLoading(false);
       }
     })();
   }, []);
@@ -326,94 +343,143 @@ export default function FormWizard() {
           }
         });
       }
-      if (isValid && !hasErrors && currentStep < steps.length - 1) {
+      if (
+        isValid &&
+        !hasErrors &&
+        currentStep < steps.length - 1 &&
+        !limitReached
+      ) {
         setCurrentStep(currentStep + 1);
-        saveWizardProgressAction({
-          step: currentStep + 1,
-          data: form.getValues(),
-          wizardId: localStorage.getItem("wizardId") ?? "",
-        }).then((res) => {
-          if (res.success) {
-            toast.success(res.message);
-          } else {
-            toast.error(res.message);
-          }
-        });
+        if (
+          JSON.stringify(form.getValues()) !== JSON.stringify(progress?.data)
+        ) {
+          saveWizardProgressAction({
+            step: currentStep + 1,
+            data: form.getValues(),
+            wizardId: localStorage.getItem("wizardId") ?? "",
+          }).then((res) => {
+            if (res.success) {
+              toast.success(res.message);
+              setProgress(res.newProgress ?? undefined);
+            } else {
+              toast.error(res.message);
+            }
+          });
+        }
       }
     });
   };
 
   const handlePreviousStep = () => {
-    if (currentStep > 0) {
+    if (currentStep > 0 && !limitReached) {
       setCurrentStep(currentStep - 1);
     }
   };
 
   const processData = async (form: FormWizardData) => {
-    const { message, success, slug } = await processDataAction(form);
+    const { message, success, slug, cause } = await processDataAction(form);
 
     if (success) {
       toast.success(message);
-      redirect(`/test-chatbot/${slug}`);
+      localStorage.removeItem("wizardId");
+      router.push(`/test-chatbot/${slug}`);
     } else {
+      if (cause === "chatbot limit") {
+        toast.error(message, {
+          action: {
+            label: "Manage",
+            onClick: () => router.push("/pricing"),
+          },
+        });
+
+        return;
+      }
       toast.error(message);
     }
   };
 
   return (
-    <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-md p-6 flex flex-col gap-6">
-      <h1 className="text-3xl font-bold">Configure your chatbot</h1>
-      <div>
-        <div className="flex justify-between items-center mb-4 gap-2">
-          {steps.map((step, index) => (
-            <div
-              key={index}
-              className={cn(
-                "flex flex-col items-center antialiased bg-white z-10",
-                {
-                  "text-muted-foreground": index !== currentStep,
-                  "text-primary font-bold": index === currentStep,
-                  "self-start": step.label === "Summary",
-                }
-              )}
-            >
-              <div className="flex items-center justify-center w-8 h-8">
-                {step.Icon}
+    <Card className="flex flex-col gap-6 max-h-[80vh]">
+      <CardHeader>
+        <h1 className="text-3xl font-bold">Configure your chatbot</h1>
+        <div>
+          <div className="flex justify-between items-center mb-4 gap-2">
+            {steps.map((step, index) => (
+              <div
+                key={index}
+                className={cn(
+                  "flex flex-col items-center antialiased bg-white z-10",
+                  {
+                    "text-muted-foreground": index !== currentStep,
+                    "text-primary font-bold": index === currentStep,
+                    "self-start": step.label === "Summary",
+                  }
+                )}
+              >
+                <div className="flex items-center justify-center w-8 h-8">
+                  {step.Icon}
+                </div>
+                <span className="text-center text-sm">{step.label}</span>
               </div>
-              <span className="text-center text-sm">{step.label}</span>
-            </div>
-          ))}
+            ))}
+          </div>
+          <Progress
+            value={((currentStep + 1) / steps.length) * 100}
+            className="w-full"
+          />
         </div>
-        <Progress
-          value={((currentStep + 1) / steps.length) * 100}
-          className="w-full"
-        />
-      </div>
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(processData)}>
-          <FormWizardStep step={currentStep} form={form} />
-        </form>
-      </Form>
-      <div className="flex justify-between items-center mt-4">
-        <Button
-          variant="secondary"
-          className="cursor-pointer"
-          onClick={handlePreviousStep}
-          disabled={currentStep === 0}
-        >
-          <ChevronLeft />
-          Previous
-        </Button>
-        <Button
-          className="cursor-pointer"
-          onClick={handleNextStep}
-          disabled={currentStep === steps.length - 1}
-        >
-          Next
-          <ChevronRight />
-        </Button>
-      </div>
-    </div>
+      </CardHeader>
+      <CardContent
+        className={cn({
+          "overflow-y-scroll [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-accent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-muted-foreground":
+            !limitReached,
+          relative: limitReached,
+        })}
+      >
+        {limitReached ? (
+          <>
+            <Form {...form}>
+              <form
+                onSubmit={form.handleSubmit(processData)}
+                className="blur-sm"
+              >
+                <FormWizardStep step={currentStep} form={form} />
+              </form>
+            </Form>
+            <ChatbotLimitMessage />
+          </>
+        ) : loading ? (
+          <FormLoader />
+        ) : (
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(processData)}>
+              <FormWizardStep step={currentStep} form={form} />
+            </form>
+          </Form>
+        )}
+      </CardContent>
+      <CardFooter>
+        <div className="flex justify-between items-center mt-4 w-full">
+          <Button
+            variant="secondary"
+            className="cursor-pointer"
+            onClick={handlePreviousStep}
+            disabled={currentStep === 0 || limitReached}
+          >
+            <ChevronLeft />
+            Previous
+          </Button>
+          <Button
+            className="cursor-pointer"
+            onClick={handleNextStep}
+            disabled={currentStep === steps.length - 1 || limitReached}
+          >
+            Next
+            <ChevronRight />
+          </Button>
+        </div>
+      </CardFooter>
+    </Card>
   );
 }
 

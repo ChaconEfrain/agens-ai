@@ -4,3 +4,9 @@ export const ALLOWED_MESSAGE_QUANTITY = {
   BASIC: 3000,
   PRO: 10000,
 } as const;
+
+export const ALLOWED_CHATBOTS = {
+  FREE: 1,
+  BASIC: 1,
+  PRO: 3,
+} as const;

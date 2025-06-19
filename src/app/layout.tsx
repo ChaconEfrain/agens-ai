@@ -31,7 +31,7 @@ export default function RootLayout({
               <Nav />
               {children}
             </AppWrapper>
-            <Toaster position="bottom-right" />
+            <Toaster position="bottom-right" duration={8000} />
           </body>
         </html>
       </SubscriptionContextProvider>

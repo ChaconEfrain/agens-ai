@@ -1,6 +1,6 @@
 "use client";
 
-import { susbcriptionPlans } from "@/consts/pricing";
+import { SUBSCRIPTION_PLANS } from "@/consts/pricing";
 import PricingCard from "./pricing-card";
 
 export default function Pricing() {
@@ -15,7 +15,7 @@ export default function Pricing() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mx-auto w-full">
-        {susbcriptionPlans.map((plan) => (
+        {SUBSCRIPTION_PLANS.map((plan) => (
           <PricingCard
             key={plan.plan}
             Icon={plan.Icon}

@@ -7,24 +7,25 @@ export async function saveWizardProgress({
   userId,
   step,
   data,
-  wizardId
+  wizardId,
 }: {
   userId: number;
   step: number;
   data: Partial<FormWizardData>;
   wizardId: string;
 }) {
-  await db
+  return await db
     .insert(formWizardsProgress)
     .values({ userId, step, data, wizardId })
     .onConflictDoUpdate({
       target: formWizardsProgress.wizardId,
       set: { step, data },
-    });
+    })
+    .returning();
 }
 
-export async function loadWizardProgress({userId}: {userId: number}) {
+export async function loadWizardProgress({ wizardId }: { wizardId: string }) {
   return await db.query.formWizardsProgress.findFirst({
-    where: eq(formWizardsProgress.userId, userId),
+    where: eq(formWizardsProgress.wizardId, wizardId),
   });
 }

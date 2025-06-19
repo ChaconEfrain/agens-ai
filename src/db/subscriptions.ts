@@ -1,7 +1,7 @@
 import { eq, sql } from "drizzle-orm";
 import { db } from ".";
 import { chatbots, SubscriptionInsert, subscriptions } from "./schema";
-import { Transaction } from "@/types/db-transaction";
+import { Transaction } from "@/types/db-types";
 
 export async function createSubscription(
   {

@@ -2,7 +2,7 @@ import { FormWizardData } from "@/app/create-chatbot/_components/form-wizard";
 import { db } from ".";
 import { businesses, User } from "./schema";
 import { eq } from "drizzle-orm";
-import { Transaction } from "@/types/db-transaction";
+import { Transaction } from "@/types/db-types";
 
 export async function createBusiness(
   { form, user }: { form: FormWizardData; user: User },

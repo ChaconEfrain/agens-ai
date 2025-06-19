@@ -1,7 +1,7 @@
-import { Transaction } from "@/types/db-transaction";
+import { Transaction } from "@/types/db-types";
 import { db } from ".";
 import { messages } from "./schema";
-import { and, asc, desc, eq } from "drizzle-orm";
+import { and, asc, count, desc, eq } from "drizzle-orm";
 
 export async function createMessages(
   messagesArr: {
@@ -70,12 +70,14 @@ export async function getAllMessagesCountByChatbotId({
 }: {
   chatbotId: number;
 }) {
-  const messagesList = await db
-    .select()
+  const [{ count: messagesCount }] = await db
+    .select({
+      count: count(),
+    })
     .from(messages)
     .where(eq(messages.chatbotId, chatbotId));
 
-  return messagesList.length;
+  return messagesCount;
 }
 
 export async function disableMessagesByChatbotId({

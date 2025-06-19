@@ -16,7 +16,7 @@ import type { Message } from "@/db/schema";
 import { useChatSession } from "@/hooks/use-chat-session";
 import { ChatbotStyles } from "@/types/embedded-chatbot";
 import { usePathname } from "next/navigation";
-import { ALLOWED_MESSAGE_QUANTITY } from "@/consts/messages";
+import { ALLOWED_MESSAGE_QUANTITY } from "@/consts/subscription";
 
 interface Props {
   chatbotId: number;

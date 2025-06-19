@@ -3,7 +3,6 @@
 import { getChatbotAllowedDomainsEmbed } from "@/db/chatbot-embed";
 import { getRelatedEmbeddings } from "@/db/embeddings";
 import {
-  createMessages,
   disableMessagesByChatbotId,
   getActiveMessagesByChatbotId,
   getAllMessagesCountByChatbotId,
@@ -13,7 +12,7 @@ import { chatCompletions, createEmbeddings } from "@/services/openai";
 import { ChatCompletionMessageParam } from "openai/resources/index.mjs";
 import jwt from "jsonwebtoken";
 import { getSubscriptionByChatbotId } from "@/db/subscriptions";
-import { ALLOWED_MESSAGE_QUANTITY } from "@/consts/messages";
+import { ALLOWED_MESSAGE_QUANTITY } from "@/consts/subscription";
 import { createMessagesTransaction } from "@/db/transactions";
 import { getChatbotTestMessageCount } from "@/db/chatbot";
 
@@ -36,6 +35,7 @@ export async function sendMessageAction({
   pathname: string;
 }) {
   let subscription;
+  let testMessageCount;
   try {
     if (!IS_DEV && pathname.startsWith("/embed")) {
       const { domain } = jwt.verify(token, JWT_SECRET) as {
@@ -62,11 +62,12 @@ export async function sendMessageAction({
         subscription?.messageCount >= ALLOWED_MESSAGE_QUANTITY.PRO;
 
       if (!subscription || subscription.status === "canceled") {
-        const freeMessages = await getAllMessagesCountByChatbotId({
+        testMessageCount = await getChatbotTestMessageCount({ chatbotId });
+        const totalMessages = await getAllMessagesCountByChatbotId({
           chatbotId,
         });
 
-        if (freeMessages >= ALLOWED_MESSAGE_QUANTITY.FREE) {
+        if (totalMessages - testMessageCount >= ALLOWED_MESSAGE_QUANTITY.FREE) {
           return "limit reached";
         }
       } else if (basicLimitReached || proLimitReached) {
@@ -74,7 +75,6 @@ export async function sendMessageAction({
       }
     }
 
-    let testMessageCount;
     if (pathname.startsWith("/test-chatbot")) {
       testMessageCount = await getChatbotTestMessageCount({ chatbotId });
       if (testMessageCount >= ALLOWED_MESSAGE_QUANTITY.TEST) {

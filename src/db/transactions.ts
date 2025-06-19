@@ -5,9 +5,10 @@ import { db } from ".";
 import type { UploadFileResult } from "uploadthing/types";
 import { extractTextFromPdf } from "@/services/utils";
 import { chunkText } from "@/lib/utils";
-import { defaultStyles } from "@/consts/chatbot";
+import { DEFAULT_STYLES } from "@/consts/chatbot";
 import {
   createSubscription,
+  getSubscriptionByUserId,
   updateSubscriptionMessageCount,
 } from "./subscriptions";
 import {
@@ -20,6 +21,8 @@ import { createMessages } from "./messages";
 import { createBusiness } from "./business";
 import { saveEmbeddings } from "./embeddings";
 import { createFile } from "./files";
+import { Chatbot, User } from "./schema";
+import { ALLOWED_CHATBOTS } from "@/consts/subscription";
 
 interface CreateChatbotTransactionParams {
   form: FormWizardData;
@@ -40,7 +43,32 @@ export async function createChatbotTransaction({
 
   if (!userId) throw new Error("No session detected");
 
-  const user = await getUserByClerkId({ clerkId: userId });
+  const user = (await getUserByClerkId(
+    { clerkId: userId },
+    {
+      with: {
+        chatbots: true,
+      },
+    }
+  )) as User & { chatbots: Chatbot[] };
+  const sub = await getSubscriptionByUserId({ userId: user.id });
+
+  const hasChatbotButNoSub =
+    !sub && user.chatbots.length >= ALLOWED_CHATBOTS.FREE;
+  const hasSubButChatbotLimit =
+    !!sub &&
+    user.chatbots.length >=
+      ALLOWED_CHATBOTS[sub.plan.toUpperCase() as "BASIC" | "PRO"];
+  const hasChatbotAndCanceledSub =
+    !!sub &&
+    sub.status === "canceled" &&
+    user.chatbots.length >= ALLOWED_CHATBOTS.FREE;
+
+  if (hasChatbotButNoSub || hasSubButChatbotLimit || hasChatbotAndCanceledSub) {
+    throw new Error("Chatbot limit reached", {
+      cause: "chatbot limit",
+    });
+  }
 
   return await db.transaction(async (trx) => {
     const [businessInsert] = await createBusiness({ form, user }, trx);
@@ -55,35 +83,37 @@ export async function createChatbotTransaction({
         businessId: businessInsert.id,
         instructions,
         slug,
-        styles: defaultStyles,
+        styles: DEFAULT_STYLES,
         userId: user.id,
         testMessagesCount: 0,
       },
       trx
     );
 
-    await saveEmbeddings({ chatbotId: chatbotInsert.id, chunks }, trx);
-
+    let files;
     if (filesResult.length > 0) {
-      const files = filesResult.map(({ data }) => ({
+      files = filesResult.map(({ data }) => ({
         userId: user.id,
         businessId: businessInsert.id,
         chatbotId: chatbotInsert.id,
         fileUrl: data?.ufsUrl ?? "",
         title: data?.name ?? "",
       }));
-      await createFile({ filesResult: files }, trx);
     }
 
     await Promise.all(
-      filesResult.map(async ({ data }) => {
-        if (!data) return;
+      [
+        saveEmbeddings({ chatbotId: chatbotInsert.id, chunks }, trx),
+        files && createFile({ filesResult: files }, trx),
+        filesResult.map(async ({ data }) => {
+          if (!data) return;
 
-        const fullText = await extractTextFromPdf({ fileUrl: data.ufsUrl });
-        const chunks = chunkText(fullText);
+          const fullText = await extractTextFromPdf({ fileUrl: data.ufsUrl });
+          const chunks = chunkText(fullText);
 
-        await saveEmbeddings({ chatbotId: chatbotInsert.id, chunks }, trx);
-      })
+          await saveEmbeddings({ chatbotId: chatbotInsert.id, chunks }, trx);
+        }),
+      ].flat()
     );
   });
 }

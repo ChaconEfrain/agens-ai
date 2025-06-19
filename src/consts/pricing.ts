@@ -1,6 +1,6 @@
 import { Bot, Crown, Zap } from "lucide-react";
 
-export const susbcriptionPlans = [
+export const SUBSCRIPTION_PLANS = [
   {
     plan: "Free",
     label: "Starter",
@@ -20,7 +20,7 @@ export const susbcriptionPlans = [
     price: "$5",
     description: "Ideal for growing businesses with more needs",
     includes: [
-      "3 chatbots",
+      "1 chatbot",
       "3,000 messages per month",
       "3 PDF upload",
       "Remove AgensAI branding",
@@ -33,7 +33,7 @@ export const susbcriptionPlans = [
     price: "$15",
     description: "For businesses requiring advanced features and support",
     includes: [
-      "5 chatbots",
+      "3 chatbots",
       "15,000 messages per month",
       "Unlimited PDF upload",
       "Analytics",

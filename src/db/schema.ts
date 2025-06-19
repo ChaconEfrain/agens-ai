@@ -291,6 +291,7 @@ export const chatbotsRelations = relations(chatbots, ({ one, many }) => ({
     fields: [chatbots.subscriptionId],
     references: [subscriptions.id],
   }),
+  messages: many(messages),
 }));
 
 export const embeddingsRelations = relations(embeddings, ({ one }) => ({

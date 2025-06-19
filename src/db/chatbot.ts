@@ -1,11 +1,11 @@
 import { ChatbotStyles } from "@/types/embedded-chatbot";
 import { db } from ".";
-import { ChatbotInsert, chatbots } from "./schema";
+import { ChatbotInsert, chatbots, subscriptions } from "./schema";
 import { and, eq } from "drizzle-orm";
 import { auth } from "@clerk/nextjs/server";
 import { getUserByClerkId } from "./user";
 import { getBusinessByUserId } from "./business";
-import { Transaction } from "@/types/db-transaction";
+import { Transaction } from "@/types/db-types";
 
 export async function createChatbot(
   {
@@ -130,4 +130,31 @@ export async function getChatbotTestMessageCount({
   if (!messageCount) throw new Error("Chatbot not found");
 
   return messageCount.testMessagesCount;
+}
+
+export async function getChatbotsAndSubByClerkId({
+  clerkId,
+}: {
+  clerkId: string;
+}) {
+  try {
+    const user = await getUserByClerkId({ clerkId });
+    const [userChatbots, userSub] = await Promise.all([
+      db.query.chatbots.findMany({
+        where: eq(chatbots.userId, user.id),
+        with: {
+          business: true,
+          messages: true,
+        },
+      }),
+      db.query.subscriptions.findFirst({
+        where: eq(subscriptions.userId, user.id),
+      }),
+    ]);
+
+    return { userChatbots, userSub };
+  } catch (error) {
+    console.error("Error on getChatbotsAndSubByClerkId --> ", error);
+    return {};
+  }
 }

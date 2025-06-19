@@ -2,6 +2,7 @@ import { auth } from "@clerk/nextjs/server";
 import { db } from ".";
 import { users } from "./schema";
 import { eq } from "drizzle-orm";
+import { FindFirstUserOptions } from "@/types/db-types";
 
 export async function createUser({
   email,
@@ -25,9 +26,13 @@ export async function createUser({
   });
 }
 
-export async function getUserByClerkId({ clerkId }: { clerkId: string }) {
+export async function getUserByClerkId(
+  { clerkId }: { clerkId: string },
+  options?: FindFirstUserOptions
+) {
   const user = await db.query.users.findFirst({
     where: eq(users.clerkId, clerkId),
+    ...options,
   });
 
   if (!user) throw new Error("User not found");
