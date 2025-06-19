@@ -167,11 +167,15 @@ export default function Chat({
   };
 
   const clearChat = async () => {
+    const current = messages;
     setMessages([]);
-    await deleteMessagesAction({
+    const { success } = await deleteMessagesAction({
       chatbotId,
       sessionId,
     });
+    if (!success) {
+      setMessages(current);
+    }
   };
 
   return (
