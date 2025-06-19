@@ -32,7 +32,7 @@ import {
   saveWizardProgressAction,
 } from "../_actions";
 import { toast } from "sonner";
-import { redirect, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { FormWizardProgress } from "@/db/schema";
 import {
   Card,

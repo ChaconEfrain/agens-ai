@@ -1,14 +1,11 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
-import { ALLOWED_MESSAGE_QUANTITY } from '@/consts/subscription';
-import { getChatbotsAndSubByClerkId } from '@/db/chatbot';
-import { Business, Chatbot, Message, Subscription } from '@/db/schema';
-import { cn } from '@/lib/utils';
-import { auth } from '@clerk/nextjs/server'
-import { Bot, EllipsisVerticalIcon } from 'lucide-react';
-import Link from 'next/link';
-import { redirect } from 'next/navigation';
+import { ALLOWED_MESSAGE_QUANTITY } from "@/consts/subscription";
+import { Business, Chatbot, Message, Subscription } from "@/db/schema";
+import { cn } from "@/lib/utils";
+import { Bot, EllipsisVerticalIcon } from "lucide-react";
+import Link from "next/link";
 import React from 'react'
 
 interface Props {
