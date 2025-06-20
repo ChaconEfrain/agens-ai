@@ -51,3 +51,15 @@ export async function createBusiness(
       allowedDomains: businesses.allowedWebsites,
     });
 }
+
+export async function updateBusinessWithChatbotId(
+  { chatbotId, businessId }: { chatbotId: number; businessId: number },
+  trx?: Transaction
+) {
+  const database = trx ?? db;
+
+  await database
+    .update(businesses)
+    .set({ chatbotId })
+    .where(eq(businesses.id, businessId));
+}

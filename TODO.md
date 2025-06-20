@@ -17,6 +17,7 @@
 - [ ] Polish the status of the chatbot (active, inactive, canceled, etc)
 - [ ] Allow user to edit the business info after testing the chatbot
 - [ ] Properly manage wizardId in localStorage after chatbot creation
+- [x] Right now a business can have multiple chatbots, that's wrong, it should only have one chatbot.
 
 # Tech debt
 - [ ] Improve error handling
