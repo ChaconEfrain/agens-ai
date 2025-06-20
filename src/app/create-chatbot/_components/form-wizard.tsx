@@ -404,7 +404,7 @@ export default function FormWizard({
   };
 
   return (
-    <Card className="flex flex-col gap-6 max-h-[80vh]">
+    <Card className="flex flex-col gap-6 h-full max-h-[720px]">
       <CardHeader>
         <h1 className="text-3xl font-bold">Configure your chatbot</h1>
         <div>

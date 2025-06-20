@@ -27,8 +27,8 @@ export default async function CreateChatbotPage() {
     userSub.status === "canceled" &&
     (userChatbots?.length ?? 0) >= ALLOWED_CHATBOTS.FREE;
   return (
-    <main className="mt-10">
-      <div className="grid grid-cols-[70fr_30fr] gap-6 max-h-[80vh]">
+    <main className="my-10">
+      <div className="grid grid-cols-[70fr_30fr] gap-6">
         <FormWizard
           limitReached={
             hasChatbotButNoSub ||
