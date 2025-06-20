@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { LoaderCircle } from "lucide-react";
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogDescription,
   DialogFooter,
@@ -108,7 +109,7 @@ export default function SubscribeButton({ plan }: Props) {
     subscription?.status === "active"
   ) {
     return (
-      <Dialog open={openModal}>
+      <Dialog open={openModal} onOpenChange={setOpenModal}>
         <Button
           className="w-full cursor-pointer"
           onClick={() => setOpenModal(true)}
@@ -131,12 +132,8 @@ export default function SubscribeButton({ plan }: Props) {
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="w-full flex gap-2">
-            <Button
-              variant="outline"
-              className="w-1/2"
-              onClick={() => setOpenModal(false)}
-            >
-              Cancel
+            <Button variant="outline" className="w-1/2" asChild>
+              <DialogClose>Cancel</DialogClose>
             </Button>
             <Button
               className="w-1/2"
