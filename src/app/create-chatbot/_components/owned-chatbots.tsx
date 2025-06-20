@@ -1,6 +1,12 @@
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
+import ChatbotCard from "@/components/chatbot-card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+} from "@/components/ui/card";
 import { ALLOWED_MESSAGE_QUANTITY } from "@/consts/subscription";
 import { Business, Chatbot, Message, Subscription } from "@/db/schema";
 import { cn } from "@/lib/utils";
@@ -17,7 +23,7 @@ interface Props {
 
 export default async function OwnedChatbots({ userChatbots, userSub }: Props) {
   return (
-    <Card className="max-h-screen relative">
+    <Card className="h-full max-h-[720px] relative">
       <div className="absolute top-2 right-2 flex items-center gap-2">
         <span className="text-sm text-muted-foreground">
           {userSub
@@ -45,36 +51,7 @@ export default async function OwnedChatbots({ userChatbots, userSub }: Props) {
       </CardHeader>
       <CardContent className="overflow-y-scroll [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-accent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-muted-foreground flex flex-col gap-2">
         {(userChatbots?.length ?? 0) > 0 ? (
-          userChatbots?.map((bot) => (
-            <Card key={bot.id} className="relative">
-              <CardContent>
-                <button className="absolute top-2 right-2 cursor-pointer">
-                  <EllipsisVerticalIcon className="size-5" />
-                </button>
-                <h3 className="text-xl font-semibold">{bot.business.name}</h3>
-                <div>
-                  {bot.business.allowedWebsites.map((website, i, arr) => (
-                    <a
-                      key={website}
-                      href={website}
-                      target="_blank"
-                      rel="noopener noreferer"
-                      className="hover:underline text-sm"
-                    >
-                      {new URL(website).hostname.replace(/^www\./, "")}
-                      {i === arr.length - 1 ? "" : ", "}
-                    </a>
-                  ))}
-                </div>
-              </CardContent>
-              <CardFooter>
-                <span className="text-sm text-muted-foreground">
-                  Updated at{" "}
-                  {new Date(bot.updatedAt ?? bot.createdAt).toLocaleString()}
-                </span>
-              </CardFooter>
-            </Card>
-          ))
+          userChatbots?.map((bot) => <ChatbotCard key={bot.id} bot={bot} />)
         ) : (
           <div className="flex flex-col gap-2 items-center justify-center py-12">
             <Bot className="size-12" />

@@ -145,3 +145,7 @@ export async function getChatbotsAndSubByClerkId({
     return {};
   }
 }
+
+export async function deleteChatbot({ chatbotId }: { chatbotId: number }) {
+  await db.delete(chatbots).where(eq(chatbots.id, chatbotId));
+}
