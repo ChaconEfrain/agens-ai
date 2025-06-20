@@ -266,23 +266,6 @@ export default function Summary({ form }: SummaryProps) {
           </p>
         </div>
       </CardContent>
-      <CardFooter>
-        <Button
-          className={cn("w-full cursor-pointer", {
-            "pointer-events-none": form.formState.isSubmitting,
-          })}
-          type="submit"
-          disabled={form.formState.isSubmitting}
-        >
-          {form.formState.isSubmitting ? (
-            <>
-              Creating Chatbot <LoaderCircle className="animate-spin" />
-            </>
-          ) : (
-            "Create Chatbot"
-          )}
-        </Button>
-      </CardFooter>
     </Card>
   );
 }

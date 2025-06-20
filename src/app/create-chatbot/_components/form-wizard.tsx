@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useId, useState } from "react";
 import GeneralInfo from "./general-info";
 import {
   Bot,
@@ -10,6 +10,7 @@ import {
   FileIcon,
   Info,
   ListChecks,
+  LoaderCircle,
   Smile,
   Truck,
 } from "lucide-react";
@@ -239,6 +240,7 @@ export default function FormWizard({
   const [currentStep, setCurrentStep] = useState(progress?.step ?? 0);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const wizardId = useId();
 
   const form = useForm<FormWizardData>({
     resolver: zodResolver(formSchema),
@@ -452,7 +454,7 @@ export default function FormWizard({
           <FormLoader />
         ) : (
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(processData)}>
+            <form onSubmit={form.handleSubmit(processData)} id={wizardId}>
               <FormWizardStep step={currentStep} form={form} />
             </form>
           </Form>
@@ -469,14 +471,34 @@ export default function FormWizard({
             <ChevronLeft />
             Previous
           </Button>
-          <Button
-            className="cursor-pointer"
-            onClick={handleNextStep}
-            disabled={currentStep === steps.length - 1 || limitReached}
-          >
-            Next
-            <ChevronRight />
-          </Button>
+          {currentStep === steps.length - 1 && (
+            <Button
+              className="cursor-pointer"
+              type="submit"
+              disabled={form.formState.isSubmitting || limitReached}
+              form={wizardId}
+            >
+              {form.formState.isSubmitting ? (
+                <>
+                  Creating Chatbot <LoaderCircle className="animate-spin" />
+                </>
+              ) : (
+                <>
+                  Create Chatbot <ChevronRight />
+                </>
+              )}
+            </Button>
+          )}
+          {currentStep < steps.length - 1 && (
+            <Button
+              className="cursor-pointer"
+              onClick={handleNextStep}
+              disabled={limitReached}
+              type="button"
+            >
+              Next <ChevronRight />
+            </Button>
+          )}
         </div>
       </CardFooter>
     </Card>
