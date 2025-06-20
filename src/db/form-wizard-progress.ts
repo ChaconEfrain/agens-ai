@@ -29,3 +29,9 @@ export async function loadWizardProgress({ wizardId }: { wizardId: string }) {
     where: eq(formWizardsProgress.wizardId, wizardId),
   });
 }
+
+export async function deleteWizardProgress({ wizardId }: { wizardId: string }) {
+  await db
+    .delete(formWizardsProgress)
+    .where(eq(formWizardsProgress.wizardId, wizardId));
+}

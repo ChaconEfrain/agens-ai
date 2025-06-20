@@ -28,6 +28,7 @@ import DocumentsStep from "./documents";
 import ShippingLogistics from "./shipping-logistics";
 import Summary from "./summary";
 import {
+  deleteWizardProgressAction,
   loadWizardProgressAction,
   processDataAction,
   saveWizardProgressAction,
@@ -240,7 +241,7 @@ export default function FormWizard({
   const [currentStep, setCurrentStep] = useState(progress?.step ?? 0);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-  const wizardId = useId();
+  const wizardFormId = useId();
 
   const form = useForm<FormWizardData>({
     resolver: zodResolver(formSchema),
@@ -383,7 +384,9 @@ export default function FormWizard({
 
     if (success) {
       toast.success(message);
+      const wizardId = localStorage.getItem("wizardId") ?? "";
       localStorage.removeItem("wizardId");
+      deleteWizardProgressAction({ wizardId });
       router.push(`/test-chatbot/${slug}`);
     } else {
       if (cause === "chatbot limit") {
@@ -454,7 +457,7 @@ export default function FormWizard({
           <FormLoader />
         ) : (
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(processData)} id={wizardId}>
+            <form onSubmit={form.handleSubmit(processData)} id={wizardFormId}>
               <FormWizardStep step={currentStep} form={form} />
             </form>
           </Form>
@@ -476,7 +479,7 @@ export default function FormWizard({
               className="cursor-pointer"
               type="submit"
               disabled={form.formState.isSubmitting || limitReached}
-              form={wizardId}
+              form={wizardFormId}
             >
               {form.formState.isSubmitting ? (
                 <>

@@ -6,6 +6,7 @@ import type { UploadFileResult } from "uploadthing/types";
 import { createChatbotTransaction } from "@/db/transactions";
 import { UploadThingError } from "uploadthing/server";
 import {
+  deleteWizardProgress,
   loadWizardProgress,
   saveWizardProgress,
 } from "@/db/form-wizard-progress";
@@ -142,6 +143,18 @@ export async function loadWizardProgressAction({
     const progress = await loadWizardProgress({ wizardId });
 
     return progress;
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+export async function deleteWizardProgressAction({
+  wizardId,
+}: {
+  wizardId: string;
+}) {
+  try {
+    await deleteWizardProgress({ wizardId });
   } catch (error) {
     console.error(error);
   }
