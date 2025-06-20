@@ -86,6 +86,7 @@ export async function createChatbotTransaction({
         styles: DEFAULT_STYLES,
         userId: user.id,
         testMessagesCount: 0,
+        subscriptionId: sub?.id ?? null,
       },
       trx
     );

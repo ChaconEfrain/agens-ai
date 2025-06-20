@@ -15,6 +15,7 @@ export async function createChatbot(
     styles,
     slug,
     testMessagesCount,
+    subscriptionId,
   }: ChatbotInsert,
   trx: Transaction
 ) {
@@ -28,6 +29,7 @@ export async function createChatbot(
       styles,
       slug,
       testMessagesCount,
+      subscriptionId,
     })
     .returning({ id: chatbots.id });
 }
