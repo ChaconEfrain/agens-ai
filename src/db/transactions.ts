@@ -18,7 +18,7 @@ import {
 } from "./chatbot";
 import Stripe from "stripe";
 import { createMessages } from "./messages";
-import { createBusiness, updateBusinessWithChatbotId } from "./business";
+import { createBusiness } from "./business";
 import { saveEmbeddings } from "./embeddings";
 import { createFile } from "./files";
 import { Chatbot, User } from "./schema";
@@ -104,10 +104,6 @@ export async function createChatbotTransaction({
 
     await Promise.all(
       [
-        updateBusinessWithChatbotId(
-          { chatbotId: chatbotInsert.id, businessId: businessInsert.id },
-          trx
-        ),
         saveEmbeddings({ chatbotId: chatbotInsert.id, chunks }, trx),
         files && createFile({ filesResult: files }, trx),
         filesResult.map(async ({ data }) => {

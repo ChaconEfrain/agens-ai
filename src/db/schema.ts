@@ -45,9 +45,6 @@ export const businesses = pgTable(
     userId: integer("user_id")
       .references(() => users.id, { onDelete: "cascade" })
       .notNull(),
-    chatbotId: integer("chatbot_id").references(() => users.id, {
-      onDelete: "set null",
-    }),
     name: varchar("name", { length: 255 }).notNull(),
     description: text("description").notNull(),
     allowedWebsites: json("allowed_websites").$type<string[]>().notNull(),
@@ -204,6 +201,7 @@ export const messages = pgTable(
     index("messages_chatbot_id_idx").on(table.chatbotId),
     index("messages_session_id_idx").on(table.sessionId),
     index("messages_is_active_idx").on(table.isActive),
+    index("messages_created_at_idx").on(table.createdAt),
   ]
 );
 
@@ -254,11 +252,8 @@ export const usersRelations = relations(users, ({ many }) => ({
 
 export const businessesRelations = relations(businesses, ({ one, many }) => ({
   user: one(users, { fields: [businesses.userId], references: [users.id] }),
-  chatbots: one(chatbots, {
-    fields: [businesses.chatbotId],
-    references: [chatbots.id],
-  }),
   files: many(files),
+  chatbots: many(chatbots),
 }));
 
 export const formWizardsProgressRelations = relations(

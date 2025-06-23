@@ -1,7 +1,5 @@
 import { FormWizardData } from "@/app/create-chatbot/_components/form-wizard";
-import { db } from ".";
 import { businesses, User } from "./schema";
-import { eq } from "drizzle-orm";
 import { Transaction } from "@/types/db-types";
 
 export async function createBusiness(
@@ -50,16 +48,4 @@ export async function createBusiness(
       id: businesses.id,
       allowedDomains: businesses.allowedWebsites,
     });
-}
-
-export async function updateBusinessWithChatbotId(
-  { chatbotId, businessId }: { chatbotId: number; businessId: number },
-  trx?: Transaction
-) {
-  const database = trx ?? db;
-
-  await database
-    .update(businesses)
-    .set({ chatbotId })
-    .where(eq(businesses.id, businessId));
 }
