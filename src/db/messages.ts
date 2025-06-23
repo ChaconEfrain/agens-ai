@@ -1,7 +1,7 @@
 import { Transaction } from "@/types/db-types";
 import { db } from ".";
 import { messages } from "./schema";
-import { and, asc, count, desc, eq } from "drizzle-orm";
+import { and, asc, count, desc, eq, gte, lte } from "drizzle-orm";
 
 export async function createMessages(
   messagesArr: {
@@ -93,4 +93,33 @@ export async function disableMessagesByChatbotId({
     .where(
       and(eq(messages.chatbotId, chatbotId), eq(messages.sessionId, sessionId))
     );
+}
+
+export async function getCurrentPeriodMessagesCount({
+  periodStart,
+  periodEnd,
+  chatbotId,
+}: {
+  periodStart: Date;
+  periodEnd: Date;
+  chatbotId: number;
+}) {
+  try {
+    const [{ count: messagesCount }] = await db
+      .select({
+        count: count(),
+      })
+      .from(messages)
+      .where(
+        and(
+          eq(messages.chatbotId, chatbotId),
+          gte(messages.createdAt, periodStart),
+          lte(messages.createdAt, periodEnd)
+        )
+      );
+
+    return messagesCount;
+  } catch (error) {
+    console.error(error);
+  }
 }
