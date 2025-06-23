@@ -1,14 +1,14 @@
 import React from 'react'
-import { Card, CardContent, CardFooter } from './ui/card'
-import { EllipsisVerticalIcon } from 'lucide-react'
-import { Business, Chatbot, Message } from '@/db/schema';
-import {ChatbotCardMenu} from './chatbot-card-menu';
+import { Card, CardContent } from "./ui/card";
+import { Business, Chatbot, Message } from "@/db/schema";
+import { ChatbotCardMenu } from "./chatbot-card-menu";
+import { Prettify } from "@/types/helpers";
 
 interface Props {
-  bot: Chatbot & { messages: Message[] } & { business: Business };
+  bot: Prettify<Chatbot & { messages: Message[] } & { business: Business }>;
 }
 
-export default function ChatbotCard({bot}: Props) {
+export default function ChatbotCard({ bot }: Props) {
   return (
     <Card className="relative">
       <CardContent>
@@ -31,12 +31,6 @@ export default function ChatbotCard({bot}: Props) {
           ))}
         </div>
       </CardContent>
-      <CardFooter>
-        <span className="text-sm text-muted-foreground">
-          Updated at{" "}
-          {new Date(bot.updatedAt ?? bot.createdAt).toLocaleString()}
-        </span>
-      </CardFooter>
     </Card>
-  )
+  );
 }

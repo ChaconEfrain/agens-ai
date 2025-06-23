@@ -10,13 +10,14 @@ import {
 import { ALLOWED_MESSAGE_QUANTITY } from "@/consts/subscription";
 import { Business, Chatbot, Message, Subscription } from "@/db/schema";
 import { cn } from "@/lib/utils";
-import { Bot, EllipsisVerticalIcon, Slash } from "lucide-react";
+import { Prettify } from "@/types/helpers";
+import { Bot, Slash } from "lucide-react";
 import Link from "next/link";
 import React from "react";
 
 interface Props {
   userChatbots:
-    | (Chatbot & { messages: Message[] } & { business: Business })[]
+    | Prettify<Chatbot & { messages: Message[] } & { business: Business }>[]
     | undefined;
   userSub: Subscription | undefined;
 }

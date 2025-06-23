@@ -57,7 +57,7 @@ interface ModalProps {
   chatbotId: number
 }
 
-export function DeleteChatbotModal({setOpenModal, openModal, chatbotId}: ModalProps) {
+function DeleteChatbotModal({setOpenModal, openModal, chatbotId}: ModalProps) {
 
   const [loading, setLoading] = useState(false);
 
