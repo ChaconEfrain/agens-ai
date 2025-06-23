@@ -13,6 +13,7 @@ import {
 } from "./subscriptions";
 import {
   createChatbot,
+  updateChatbotCurrentMessageCount,
   updateChatbotsSubscription,
   updateChatbotTestMessageCount,
 } from "./chatbot";
@@ -86,6 +87,7 @@ export async function createChatbotTransaction({
         styles: DEFAULT_STYLES,
         userId: user.id,
         testMessagesCount: 0,
+        currentPeriodMessagesCount: 0,
         subscriptionId: sub?.id ?? null,
       },
       trx
@@ -178,20 +180,23 @@ export async function createMessageTransaction({
 }: MessagesTransactionProps) {
   await db.transaction(async (trx) => {
     const { chatbotId } = message;
-    await createMessage(message, trx);
-
-    if (pathname.startsWith("/test-chatbot") && testMessageCount != null) {
-      await updateChatbotTestMessageCount(
-        { chatbotId, testMessagesCount: testMessageCount + 1 },
-        trx
-      );
-    }
-
-    if (stripeSubscriptionId && messageCount) {
-      await updateSubscriptionMessageCount(
-        { stripeSubscriptionId, messageCount },
-        trx
-      );
-    }
+    await Promise.all(
+      [
+        createMessage(message, trx),
+        updateChatbotCurrentMessageCount({ chatbotId }, trx),
+        pathname.startsWith("/test-chatbot") && testMessageCount != null
+          ? updateChatbotTestMessageCount(
+              { chatbotId, testMessagesCount: testMessageCount + 1 },
+              trx
+            )
+          : undefined,
+        stripeSubscriptionId && messageCount
+          ? updateSubscriptionMessageCount(
+              { stripeSubscriptionId, messageCount },
+              trx
+            )
+          : undefined,
+      ].filter(Boolean)
+    );
   });
 }

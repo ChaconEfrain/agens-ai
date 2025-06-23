@@ -1,7 +1,7 @@
 import { ChatbotStyles } from "@/types/embedded-chatbot";
 import { db } from ".";
 import { ChatbotInsert, chatbots, subscriptions } from "./schema";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { auth } from "@clerk/nextjs/server";
 import { getUserByClerkId } from "./user";
 import { Transaction } from "@/types/db-types";
@@ -82,6 +82,24 @@ export async function updateChatbotsSubscription(
       subscriptionId,
     })
     .where(eq(chatbots.userId, userId));
+}
+
+export async function updateChatbotCurrentMessageCount(
+  {
+    chatbotId,
+  }: {
+    chatbotId: number;
+  },
+  trx: Transaction
+) {
+  await trx
+    .update(chatbots)
+    .set({
+      currentPeriodMessagesCount: sql`${
+        chatbots.currentPeriodMessagesCount
+      } + ${1}`,
+    })
+    .where(eq(chatbots.id, chatbotId));
 }
 
 export async function updateChatbotTestMessageCount(

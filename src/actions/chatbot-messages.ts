@@ -134,7 +134,7 @@ export async function sendMessageAction({
       testMessageCount,
     });
 
-    return answer ?? "error";
+    return answer;
   } catch (error) {
     console.error("Send message action error --> ", error);
     return "error";
