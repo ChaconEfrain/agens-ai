@@ -1,25 +1,41 @@
 import { Transaction } from "@/types/db-types";
 import { db } from ".";
 import { messages } from "./schema";
-import { and, asc, count, desc, eq, gte, lte } from "drizzle-orm";
+import {
+  and,
+  asc,
+  between,
+  count,
+  desc,
+  eq,
+  gte,
+  inArray,
+  lte,
+  sql,
+} from "drizzle-orm";
+import { getSubscriptionByClerkId } from "./subscriptions";
+import { getChatbotsByClerkId } from "./chatbot";
 
-export async function createMessages(
-  messagesArr: {
+export async function createMessage(
+  {
+    chatbotId,
+    sessionId,
+    message,
+    response,
+  }: {
     chatbotId: number;
     sessionId: string;
-    role: "user" | "assistant";
     message: string;
-  }[],
+    response: string;
+  },
   trx: Transaction
 ) {
-  await trx.insert(messages).values(
-    messagesArr.map(({ chatbotId, role, message, sessionId }) => ({
-      chatbotId,
-      sessionId,
-      role,
-      message,
-    }))
-  );
+  await trx.insert(messages).values({
+    chatbotId,
+    sessionId,
+    response,
+    message,
+  });
 }
 
 export async function getLatestMessagesByChatbotId({
@@ -95,7 +111,7 @@ export async function disableMessagesByChatbotId({
     );
 }
 
-export async function getCurrentPeriodMessagesCount({
+export async function getCurrentPeriodMessagesCountByChatbotId({
   periodStart,
   periodEnd,
   chatbotId,
@@ -121,5 +137,51 @@ export async function getCurrentPeriodMessagesCount({
     return messagesCount;
   } catch (error) {
     console.error(error);
+  }
+}
+
+export async function getCurrentPeriodMessagesPerDayByClerkId({
+  clerkId,
+}: {
+  clerkId: string;
+}) {
+  try {
+    const sub = await getSubscriptionByClerkId({ clerkId });
+    const chatbots = await getChatbotsByClerkId({ clerkId });
+
+    if (!sub) throw new Error("No subscription found");
+    if (chatbots.length === 0) return [];
+
+    const chatbotIds = chatbots.map((bot) => bot.id);
+
+    const rows = await db
+      .select({
+        date: sql<string>`to_char(date_trunc('day', ${messages.createdAt}), 'YYYY-MM-DD')`,
+        messages: sql<number>`COUNT(*)`,
+      })
+      .from(messages)
+      .where(
+        and(
+          inArray(messages.chatbotId, chatbotIds),
+          between(messages.createdAt, sub.periodStart, sub.periodEnd)
+        )
+      )
+      .groupBy(sql`date_trunc('day', ${messages.createdAt})`)
+      .orderBy(sql`date_trunc('day', ${messages.createdAt}) ASC`);
+
+    return rows.map((row) => ({
+      date: new Date(row.date + "T00:00:00Z").toLocaleString("en-US", {
+        month: "short",
+        day: "numeric",
+        timeZone: "UTC",
+      }),
+      messages: row.messages,
+    }));
+  } catch (error) {
+    console.error(
+      "Error on getCurrentPeriodMessagesPerDayByClerkId --> ",
+      error
+    );
+    return [];
   }
 }

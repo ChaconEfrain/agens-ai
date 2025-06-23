@@ -32,9 +32,9 @@ export default function Chat({
   chatbotStyles,
 }: Props) {
   const sessionId = useChatSession(chatbotSlug);
-  const [messages, setMessages] = useState<Pick<Message, "role" | "message">[]>(
-    []
-  );
+  const [messages, setMessages] = useState<
+    Pick<Message, "response" | "message">[]
+  >([]);
   const [loading, setLoading] = useState(false);
   const [token, setToken] = useState("");
   const [testMessageCount, setTestMessageCount] = useState(0);
@@ -71,8 +71,8 @@ export default function Chat({
       ]);
 
       setMessages(
-        latestMessages.map(({ role, message }) => ({
-          role,
+        latestMessages.map(({ response, message }) => ({
+          response,
           message,
         }))
       );
@@ -109,11 +109,7 @@ export default function Chat({
     const message = formData.get("chat-prompt")?.toString();
     if (!message?.trim()) return;
 
-    setMessages((prev) => [
-      ...prev,
-      { role: "user", message },
-      { role: "assistant", message: "" },
-    ]);
+    setMessages((prev) => [...prev, { response: "", message }]);
     form.reset();
     const answer = await sendMessageAction({
       message,
@@ -129,7 +125,7 @@ export default function Chat({
         const updated = [...prev];
 
         const lastIndex = updated.length - 1;
-        updated[lastIndex] = { role: "assistant", message: answer };
+        updated[lastIndex] = { response: answer, message };
 
         return updated;
       });
@@ -231,11 +227,11 @@ export default function Chat({
             />
           </div>
         ) : (
-          messages.map(({ message, role }) => (
+          messages.map(({ message, response }) => (
             <ChatMessage
-              key={`${role}-${message}`}
+              key={`${response}-${message}`}
               message={message}
-              role={role}
+              response={response}
               styles={chatbotStyles}
             />
           ))

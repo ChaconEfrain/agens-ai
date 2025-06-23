@@ -181,8 +181,6 @@ export const embeddings = pgTable(
   ]
 );
 
-export const messageRoleEnum = pgEnum("message_role", ["user", "assistant"]);
-
 export const messages = pgTable(
   "messages",
   {
@@ -192,8 +190,8 @@ export const messages = pgTable(
       .notNull(),
     sessionId: varchar("session_id", { length: 255 }).notNull(),
     isActive: boolean("is_active").default(true).notNull(),
-    role: messageRoleEnum("role").notNull(),
     message: text("message").notNull(),
+    response: text("response").notNull(),
     createdAt: timestamp("created_at").notNull().defaultNow(),
     updatedAt: timestamp("updated_at").$onUpdate(() => new Date()),
   },

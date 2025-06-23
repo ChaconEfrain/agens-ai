@@ -88,20 +88,22 @@ function DeleteChatbotModal({setOpenModal, openModal, chatbotId}: ModalProps) {
     <Dialog open={openModal} onOpenChange={setOpenModal}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>
-            Delete chatbot
-          </DialogTitle>
+          <DialogTitle>Delete chatbot</DialogTitle>
           <DialogDescription>
-            This action will permanently delete the chatbot and all associated messages. This operation cannot be undone.
+            This action will permanently delete the chatbot and all associated
+            messages. This operation cannot be undone.
           </DialogDescription>
         </DialogHeader>
         <DialogFooter className="w-full flex gap-2">
-          <Button variant="outline" className="w-1/2" onClick={() => setOpenModal(false)}>
+          <Button
+            variant="outline"
+            className="w-1/2"
+            onClick={() => setOpenModal(false)}
+          >
             Cancel
           </Button>
           <Button
             className="w-1/2"
-            variant='destructive'
             disabled={loading}
             onClick={handleDeleteChatbot}
           >
@@ -110,11 +112,11 @@ function DeleteChatbotModal({setOpenModal, openModal, chatbotId}: ModalProps) {
                 Deleting Chatbot <LoaderCircle className="animate-spin" />
               </>
             ) : (
-              'Confirm Delete'
+              "Confirm Delete"
             )}
           </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

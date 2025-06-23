@@ -119,30 +119,21 @@ export async function getChatbotTestMessageCount({
   return messageCount.testMessagesCount;
 }
 
-export async function getChatbotsAndSubByClerkId({
-  clerkId,
-}: {
-  clerkId: string;
-}) {
+export async function getChatbotsByClerkId({ clerkId }: { clerkId: string }) {
   try {
     const user = await getUserByClerkId({ clerkId });
-    const [userChatbots, userSub] = await Promise.all([
-      db.query.chatbots.findMany({
-        where: eq(chatbots.userId, user.id),
-        with: {
-          business: true,
-          messages: true,
-        },
-      }),
-      db.query.subscriptions.findFirst({
-        where: eq(subscriptions.userId, user.id),
-      }),
-    ]);
+    const userChatbots = await db.query.chatbots.findMany({
+      where: eq(chatbots.userId, user.id),
+      with: {
+        business: true,
+        messages: true,
+      },
+    });
 
-    return { userChatbots, userSub };
+    return userChatbots;
   } catch (error) {
-    console.error("Error on getChatbotsAndSubByClerkId --> ", error);
-    return {};
+    console.error("Error on getChatbotsByClerkId --> ", error);
+    return [];
   }
 }
 

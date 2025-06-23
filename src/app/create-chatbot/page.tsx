@@ -3,8 +3,9 @@ import FormWizard from "./_components/form-wizard";
 import OwnedChatbots from "./_components/owned-chatbots";
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
-import { getChatbotsAndSubByClerkId } from "@/db/chatbot";
+import { getChatbotsByClerkId } from "@/db/chatbot";
 import { ALLOWED_CHATBOTS } from "@/consts/subscription";
+import { getSubscriptionByClerkId } from "@/db/subscriptions";
 
 export default async function CreateChatbotPage() {
   const { userId } = await auth();
@@ -13,9 +14,12 @@ export default async function CreateChatbotPage() {
     redirect("/");
   }
 
-  const { userChatbots, userSub } = await getChatbotsAndSubByClerkId({
-    clerkId: userId,
-  });
+  const [userChatbots, userSub] = await Promise.all([
+    getChatbotsByClerkId({
+      clerkId: userId,
+    }),
+    getSubscriptionByClerkId({ clerkId: userId }),
+  ]);
   const hasChatbotButNoSub =
     !userSub && (userChatbots?.length ?? 0) >= ALLOWED_CHATBOTS.FREE;
   const hasSubButChatbotLimit =

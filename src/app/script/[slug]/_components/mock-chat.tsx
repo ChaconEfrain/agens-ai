@@ -15,12 +15,9 @@ interface Props {
 export default function MockChat({styles}: Props) {
   const mockMessages = [
     {
-      role: "user",
       message: "Hello, do you have physical stores?",
-    },
-    {
-      role: "assistant",
-      message: "We are an online-only business in order to provide the best service possible, so we don't have physical stores.",
+      response:
+        "We are an online-only business in order to provide the best service possible, so we don't have physical stores.",
     },
   ];
 
@@ -33,19 +30,17 @@ export default function MockChat({styles}: Props) {
         <Trash />
       </Button>
       <CardContent className="flex-grow overflow-y-scroll h-full max-h-11/12 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-accent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-muted-foreground mask-b-from-[95%] pt-4">
-        {mockMessages.map(({ message, role }, i) => (
+        {mockMessages.map(({ message, response }, i) => (
           <ChatMessage
             key={i}
             message={message}
-            role={role}
+            response={response}
             styles={styles}
           />
         ))}
       </CardContent>
       <CardFooter>
-        <form
-          className="relative border-primary/50 border-2 rounded-lg flex flex-col focus-within:border-primary/70 w-full"
-        >
+        <form className="relative border-primary/50 border-2 rounded-lg flex flex-col focus-within:border-primary/70 w-full">
           <label htmlFor="chat-input" className="sr-only">
             Chat input
           </label>
@@ -60,7 +55,7 @@ export default function MockChat({styles}: Props) {
             variant="ghost"
             title="Send prompt"
             className="cursor-pointer self-end"
-            type='button'
+            type="button"
           >
             <Send />
           </Button>

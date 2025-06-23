@@ -1,7 +1,8 @@
-import { eq, sql } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { db } from ".";
 import { chatbots, SubscriptionInsert, subscriptions } from "./schema";
 import { Transaction } from "@/types/db-types";
+import { getUserByClerkId } from "./user";
 
 export async function createSubscription(
   {
@@ -69,7 +70,13 @@ export async function cancelSubscription({
     );
 }
 
-export async function updateSubscriptionMessageCount({stripeSubscriptionId, messageCount}: {stripeSubscriptionId: string, messageCount: number}, trx: Transaction) {
+export async function updateSubscriptionMessageCount(
+  {
+    stripeSubscriptionId,
+    messageCount,
+  }: { stripeSubscriptionId: string; messageCount: number },
+  trx: Transaction
+) {
   await trx
     .update(subscriptions)
     .set({
@@ -97,7 +104,7 @@ export async function getSubscriptionByChatbotId({
       messageCount: true,
       status: true,
       plan: true,
-      stripeSubscriptionId: true
+      stripeSubscriptionId: true,
     },
   });
 
@@ -112,4 +119,21 @@ export async function getSubscriptionByUserId({ userId }: { userId: number }) {
   });
 
   return subscription;
+}
+
+export async function getSubscriptionByClerkId({
+  clerkId,
+}: {
+  clerkId: string;
+}) {
+  try {
+    const user = await getUserByClerkId({ clerkId });
+    const subscription = await db.query.subscriptions.findFirst({
+      where: eq(subscriptions.userId, user.id),
+    });
+
+    return subscription;
+  } catch (error) {
+    console.error("error on getSubscriptionByUserId --> ", error);
+  }
 }

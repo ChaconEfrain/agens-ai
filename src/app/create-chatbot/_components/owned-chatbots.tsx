@@ -1,17 +1,12 @@
-import ChatbotCard from "@/components/chatbot-card";
+import ChatbotCards from "@/components/chatbot-cards";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-} from "@/components/ui/card";
+import { Card, CardFooter, CardHeader } from "@/components/ui/card";
 import { ALLOWED_MESSAGE_QUANTITY } from "@/consts/subscription";
 import { Business, Chatbot, Message, Subscription } from "@/db/schema";
 import { cn } from "@/lib/utils";
 import { Prettify } from "@/types/helpers";
-import { Bot, Slash } from "lucide-react";
+import { Slash } from "lucide-react";
 import Link from "next/link";
 import React from "react";
 
@@ -50,18 +45,7 @@ export default async function OwnedChatbots({ userChatbots, userSub }: Props) {
       <CardHeader>
         <h2 className="text-xl font-semibold">Your Chatbots</h2>
       </CardHeader>
-      <CardContent className="overflow-y-scroll [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-accent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-muted-foreground flex flex-col gap-2">
-        {(userChatbots?.length ?? 0) > 0 ? (
-          userChatbots?.map((bot) => <ChatbotCard key={bot.id} bot={bot} />)
-        ) : (
-          <div className="flex flex-col gap-2 items-center justify-center py-12">
-            <Bot className="size-12" />
-            <p className="text-lg text-muted-foreground font-medium">
-              You don't have any chatbots yet
-            </p>
-          </div>
-        )}
-      </CardContent>
+      <ChatbotCards userChatbots={userChatbots} />
       <CardFooter className="flex flex-col gap-2 mt-auto">
         {(userSub || (userChatbots && userChatbots?.length > 0)) && (
           <span className="self-end text-sm text-muted-foreground">

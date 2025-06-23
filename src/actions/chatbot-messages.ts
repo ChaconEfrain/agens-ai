@@ -13,7 +13,7 @@ import { ChatCompletionMessageParam } from "openai/resources/index.mjs";
 import jwt from "jsonwebtoken";
 import { getSubscriptionByChatbotId } from "@/db/subscriptions";
 import { ALLOWED_MESSAGE_QUANTITY } from "@/consts/subscription";
-import { createMessagesTransaction } from "@/db/transactions";
+import { createMessageTransaction } from "@/db/transactions";
 import { getChatbotTestMessageCount } from "@/db/chatbot";
 
 const JWT_SECRET = process.env.JWT_SECRET!;
@@ -93,10 +93,18 @@ export async function sendMessageAction({
       sessionId,
     });
 
-    const historyMessages = latestMessages.map(({ role, message }) => ({
-      role,
-      content: message,
-    }));
+    const historyMessages = latestMessages
+      .map(({ response, message }) => [
+        {
+          role: "user",
+          content: message,
+        },
+        {
+          role: "assistant",
+          content: response,
+        },
+      ])
+      .flat();
 
     const context = contextChunks.map((c) => c.content).join("\n");
 
@@ -108,24 +116,19 @@ export async function sendMessageAction({
     ] as ChatCompletionMessageParam[];
 
     const answer = await chatCompletions({ messages });
-    const dbMessages = [
-      {
-        chatbotId,
-        sessionId,
-        role: "user" as "user",
-        message,
-      },
-      {
-        chatbotId,
-        sessionId,
-        role: "assistant" as "assistant",
-        message: answer ?? "",
-      },
-    ];
 
-    await createMessagesTransaction({
-      messages: dbMessages,
-      messageCount: (subscription?.messageCount as number) + 2,
+    if (!answer) return "error";
+
+    const dbMessage = {
+      chatbotId,
+      sessionId,
+      message,
+      response: answer,
+    };
+
+    await createMessageTransaction({
+      message: dbMessage,
+      messageCount: (subscription?.messageCount as number) + 1,
       stripeSubscriptionId: subscription?.stripeSubscriptionId,
       pathname,
       testMessageCount,
