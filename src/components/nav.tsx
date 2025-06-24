@@ -21,22 +21,27 @@ export default function Nav() {
 
   return (
     <nav className="flex justify-between items-center py-4">
-      <div className="text-xl flex items-center gap-1">
+      <Link href="/" className="text-xl flex items-center gap-1">
         <div>
           <span>Agens</span>
           <span className="font-bold">AI</span>
         </div>
         <BotMessageSquare />
-      </div>
+      </Link>
       <div className="flex items-center gap-6">
         <ul className="flex gap-4">
           <li>Pricing</li>
           <li>About</li>
           <li>Contact</li>
           {isSignedIn && (
-            <li>
-              <Link href="/create-chatbot">Create chatbot</Link>
-            </li>
+            <>
+              <li>
+                <Link href="/create-chatbot">Create chatbot</Link>
+              </li>
+              <li>
+                <Link href="/dashboard">Dashboard</Link>
+              </li>
+            </>
           )}
         </ul>
         <SignedIn>
