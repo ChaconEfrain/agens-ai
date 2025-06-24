@@ -178,12 +178,14 @@ export async function createMessageTransaction({
   pathname,
   testMessageCount,
 }: MessagesTransactionProps) {
-  await db.transaction(async (trx) => {
+  return await db.transaction(async (trx) => {
     const { chatbotId } = message;
-    await Promise.all(
+    const [messageInsert] = await Promise.all(
       [
         createMessage(message, trx),
-        updateChatbotCurrentMessageCount({ chatbotId }, trx),
+        !pathname.startsWith("/test-chatbot")
+          ? updateChatbotCurrentMessageCount({ chatbotId }, trx)
+          : undefined,
         pathname.startsWith("/test-chatbot") && testMessageCount != null
           ? updateChatbotTestMessageCount(
               { chatbotId, testMessagesCount: testMessageCount + 1 },
@@ -198,5 +200,7 @@ export async function createMessageTransaction({
           : undefined,
       ].filter(Boolean)
     );
+
+    return messageInsert?.[0];
   });
 }

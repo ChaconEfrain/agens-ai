@@ -30,12 +30,15 @@ export async function createMessage(
   },
   trx: Transaction
 ) {
-  await trx.insert(messages).values({
-    chatbotId,
-    sessionId,
-    response,
-    message,
-  });
+  return await trx
+    .insert(messages)
+    .values({
+      chatbotId,
+      sessionId,
+      response,
+      message,
+    })
+    .returning();
 }
 
 export async function getLatestMessagesByChatbotId({
@@ -111,35 +114,6 @@ export async function disableMessagesByChatbotId({
     );
 }
 
-export async function getCurrentPeriodMessagesCountByChatbotId({
-  periodStart,
-  periodEnd,
-  chatbotId,
-}: {
-  periodStart: Date;
-  periodEnd: Date;
-  chatbotId: number;
-}) {
-  try {
-    const [{ count: messagesCount }] = await db
-      .select({
-        count: count(),
-      })
-      .from(messages)
-      .where(
-        and(
-          eq(messages.chatbotId, chatbotId),
-          gte(messages.createdAt, periodStart),
-          lte(messages.createdAt, periodEnd)
-        )
-      );
-
-    return messagesCount;
-  } catch (error) {
-    console.error(error);
-  }
-}
-
 export async function getCurrentPeriodMessagesPerDayByClerkId({
   clerkId,
 }: {
@@ -184,4 +158,19 @@ export async function getCurrentPeriodMessagesPerDayByClerkId({
     );
     return [];
   }
+}
+
+export async function updateMessageRating({
+  messageId,
+  rating,
+}: {
+  messageId: number;
+  rating: "like" | "dislike" | null;
+}) {
+  await db
+    .update(messages)
+    .set({
+      liked: rating === "like" ? true : rating === "dislike" ? false : null,
+    })
+    .where(eq(messages.id, messageId));
 }

@@ -14,16 +14,22 @@ import {
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "./ui/dialog"
 import { deleteChatbotAction } from "@/actions/chatbot"
 import { toast } from "sonner"
+import Link from "next/link";
 
-export function ChatbotCardMenu({chatbotId}: {chatbotId: number}) {
+interface Props {
+  chatbotId: number;
+  chatbotSlug: string;
+}
+
+export function ChatbotCardMenu({ chatbotId, chatbotSlug }: Props) {
   const [openModal, setOpenModal] = useState(false);
   const [openDropdown, setOpenDropdown] = useState(false);
 
   useEffect(() => {
     if (!openDropdown) {
-      document.body.style.pointerEvents = '';
+      document.body.style.pointerEvents = "";
     }
-  }, [openDropdown])
+  }, [openDropdown]);
 
   return (
     <>
@@ -33,22 +39,37 @@ export function ChatbotCardMenu({chatbotId}: {chatbotId: number}) {
             <EllipsisVertical />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-[200px]" onEscapeKeyDown={() => setOpenModal(false)}>
+        <DropdownMenuContent
+          align="end"
+          className="w-[200px]"
+          onEscapeKeyDown={() => setOpenModal(false)}
+        >
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
           <DropdownMenuGroup>
-            <DropdownMenuItem>Assign to...</DropdownMenuItem>
+            <DropdownMenuItem>
+              <Link href={`/test-chatbot/${chatbotSlug}`} className="w-full">
+                Test chatbot
+              </Link>
+            </DropdownMenuItem>
             <DropdownMenuItem>Set due date...</DropdownMenuItem>
             <DropdownMenuItem className="text-red-600">
-              <button className="flex items-center gap-1 w-full" onClick={() => setOpenModal(true)}>
+              <button
+                className="flex items-center gap-1 w-full"
+                onClick={() => setOpenModal(true)}
+              >
                 <Trash className="text-inherit" /> Delete
               </button>
             </DropdownMenuItem>
           </DropdownMenuGroup>
         </DropdownMenuContent>
       </DropdownMenu>
-      <DeleteChatbotModal openModal={openModal} setOpenModal={setOpenModal} chatbotId={chatbotId} />
+      <DeleteChatbotModal
+        openModal={openModal}
+        setOpenModal={setOpenModal}
+        chatbotId={chatbotId}
+      />
     </>
-  )
+  );
 }
 
 interface ModalProps {

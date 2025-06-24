@@ -7,6 +7,7 @@ import {
   getActiveMessagesByChatbotId,
   getAllMessagesCountByChatbotId,
   getLatestMessagesByChatbotId,
+  updateMessageRating,
 } from "@/db/messages";
 import { chatCompletions, createEmbeddings } from "@/services/openai";
 import { ChatCompletionMessageParam } from "openai/resources/index.mjs";
@@ -126,7 +127,7 @@ export async function sendMessageAction({
       response: answer,
     };
 
-    await createMessageTransaction({
+    const messageInsert = await createMessageTransaction({
       message: dbMessage,
       messageCount: (subscription?.messageCount as number) + 1,
       stripeSubscriptionId: subscription?.stripeSubscriptionId,
@@ -134,7 +135,7 @@ export async function sendMessageAction({
       testMessageCount,
     });
 
-    return answer;
+    return messageInsert ?? "error";
   } catch (error) {
     console.error("Send message action error --> ", error);
     return "error";
@@ -193,5 +194,21 @@ export async function getChatbotTestMessageCountAction({
   } catch (error) {
     console.error(error);
     return 0;
+  }
+}
+
+export async function rateMessageAction({
+  messageId,
+  rating,
+}: {
+  messageId: number;
+  rating: "like" | "dislike" | null;
+}) {
+  try {
+    await updateMessageRating({ messageId, rating });
+    return { success: true };
+  } catch (error) {
+    console.error("Error on rateMessageAction --> ", error);
+    return { success: false };
   }
 }

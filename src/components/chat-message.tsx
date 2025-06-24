@@ -1,20 +1,50 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { cn } from "@/lib/utils";
-import { Dot } from "lucide-react";
+import { Dot, ThumbsDown, ThumbsUp } from "lucide-react";
 import { ChatbotStyles } from "@/types/embedded-chatbot";
+import { rateMessageAction } from "@/actions/chatbot-messages";
 interface ChatMessageProps {
   response: string;
   message: string;
+  messageId: number;
+  liked: boolean | null;
   styles?: ChatbotStyles;
 }
 
 export default function ChatMessage({
   response,
   message,
+  messageId,
+  liked,
   styles,
 }: ChatMessageProps) {
+  const [rating, setRating] = useState<"like" | "dislike" | null>(
+    liked ? "like" : liked === false ? "dislike" : null
+  );
+
+  const handleClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    const id = e.currentTarget.id;
+    const current = rating;
+    if (!["like", "dislike"].includes(id)) return;
+
+    if (id === "like") {
+      setRating((prev) => (prev === "like" ? null : "like"));
+    } else if (id === "dislike") {
+      setRating((prev) => (prev === "dislike" ? null : "dislike"));
+    }
+
+    const { success } = await rateMessageAction({
+      messageId,
+      rating: id as "like" | "dislike" | null,
+    });
+
+    if (!success) {
+      setRating(current);
+    }
+  };
+
   return (
     <>
       <div className="flex mb-4 justify-end">
@@ -45,7 +75,7 @@ export default function ChatMessage({
           )}
         </p>
       </div>
-      <div className="flex mb-4 justify-start">
+      <div className="flex mb-4 justify-start relative">
         <p
           className={cn("max-w-[70%] rounded-lg text-sm font-outfit", {
             "p-3": response !== "",
@@ -75,6 +105,36 @@ export default function ChatMessage({
             </span>
           )}
         </p>
+        {response !== "" &&
+          response !== "error" &&
+          response !== "limit reached" && (
+            <div className="absolute left-2 -bottom-5 flex items-center gap-2">
+              <button
+                id="like"
+                className="cursor-pointer"
+                onClick={handleClick}
+              >
+                <ThumbsUp
+                  className={cn("size-[13px]", {
+                    "fill-primary": rating === "like",
+                  })}
+                  strokeWidth={rating === "like" ? 0 : 2}
+                />
+              </button>
+              <button
+                id="dislike"
+                className="cursor-pointer"
+                onClick={handleClick}
+              >
+                <ThumbsDown
+                  className={cn("size-[13px]", {
+                    "fill-primary": rating === "dislike",
+                  })}
+                  strokeWidth={rating === "dislike" ? 0 : 2}
+                />
+              </button>
+            </div>
+          )}
       </div>
     </>
   );

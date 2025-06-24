@@ -32,10 +32,9 @@ export default function Chat({
   chatbotStyles,
 }: Props) {
   const sessionId = useChatSession(chatbotSlug);
-  const [messages, setMessages] = useState<
-    Pick<Message, "response" | "message">[]
-  >([]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
+  const [isThinking, setIsThinking] = useState(false);
   const [token, setToken] = useState("");
   const [testMessageCount, setTestMessageCount] = useState(0);
   const [isError, setIsError] = useState(false);
@@ -70,12 +69,7 @@ export default function Chat({
         }),
       ]);
 
-      setMessages(
-        latestMessages.map(({ response, message }) => ({
-          response,
-          message,
-        }))
-      );
+      setMessages(latestMessages);
       setTestMessageCount(testMessageCount);
       setLoading(false);
     })();
@@ -99,6 +93,8 @@ export default function Chat({
   };
 
   const sendMessage = async (e: FormEvent<HTMLFormElement>) => {
+    if (isThinking) return;
+    setIsThinking(true);
     e.preventDefault();
     if (isError) {
       setMessages((prev) => prev.slice(0, -2));
@@ -109,7 +105,10 @@ export default function Chat({
     const message = formData.get("chat-prompt")?.toString();
     if (!message?.trim()) return;
 
-    setMessages((prev) => [...prev, { response: "", message }]);
+    setMessages((prev) => [
+      ...prev,
+      { ...prev[prev.length - 1], response: "", message, id: 0 },
+    ]);
     form.reset();
     const answer = await sendMessageAction({
       message,
@@ -121,22 +120,53 @@ export default function Chat({
     });
 
     if (answer) {
-      setMessages((prev) => {
-        const updated = [...prev];
-
-        const lastIndex = updated.length - 1;
-        updated[lastIndex] = { response: answer, message };
-
-        return updated;
-      });
       if (answer === "limit reached" && formRef.current) {
         (
           formRef.current.elements.namedItem(
             "chat-prompt"
           ) as HTMLTextAreaElement
         ).disabled = true;
+        setMessages((prev) => {
+          const updated = [...prev];
+
+          const lastIndex = updated.length - 1;
+          updated[lastIndex] = {
+            ...updated[lastIndex],
+            response: "limit reached",
+            message,
+            id: -1,
+          };
+
+          return updated;
+        });
       } else if (answer === "error") {
         setIsError(true);
+        setMessages((prev) => {
+          const updated = [...prev];
+
+          const lastIndex = updated.length - 1;
+          updated[lastIndex] = {
+            ...updated[lastIndex],
+            response: "error",
+            message,
+            id: -1,
+          };
+
+          return updated;
+        });
+      } else if (typeof answer === "object") {
+        setMessages((prev) => {
+          const updated = [...prev];
+
+          const lastIndex = updated.length - 1;
+          updated[lastIndex] = {
+            ...updated[lastIndex],
+            response: answer.response,
+            message,
+          };
+
+          return updated;
+        });
       }
     }
     if (pathname.startsWith("/test-chatbot")) {
@@ -145,6 +175,7 @@ export default function Chat({
       });
       setTestMessageCount(testMessageCount);
     }
+    setIsThinking(false);
   };
 
   const handleResendMessage = async () => {
@@ -202,7 +233,7 @@ export default function Chat({
       >
         <Trash />
       </Button>
-      <CardContent className="flex-grow overflow-y-scroll h-full max-h-11/12 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-accent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-muted-foreground mask-b-from-[95%] pt-4">
+      <CardContent className="flex-grow overflow-y-scroll h-full max-h-11/12 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-accent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-muted-foreground pt-4">
         {loading ? (
           <div aria-hidden className="animate-pulse flex flex-col space-y-4">
             <div
@@ -227,11 +258,13 @@ export default function Chat({
             />
           </div>
         ) : (
-          messages.map(({ message, response }) => (
+          messages.map(({ message, response, id, liked }) => (
             <ChatMessage
-              key={`${response}-${message}`}
+              key={id}
               message={message}
               response={response}
+              messageId={id}
+              liked={liked}
               styles={chatbotStyles}
             />
           ))
@@ -255,6 +288,7 @@ export default function Chat({
             className="resize-none max-h-[150px] bg-transparent p-3 pb-1.5 text-sm outline-none ring-0 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-accent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-muted-foreground shadow-none border-none min-h-auto focus-visible:ring-[0px]"
             onInput={handleTextAreaResize}
             onKeyDown={handleKeyDown}
+            disabled={loading || isThinking}
           />
           <div className="self-end flex items-center gap-2">
             {isError && (

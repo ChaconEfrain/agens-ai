@@ -195,6 +195,7 @@ export const messages = pgTable(
     isActive: boolean("is_active").default(true).notNull(),
     message: text("message").notNull(),
     response: text("response").notNull(),
+    liked: boolean("liked"),
     createdAt: timestamp("created_at").notNull().defaultNow(),
     updatedAt: timestamp("updated_at").$onUpdate(() => new Date()),
   },

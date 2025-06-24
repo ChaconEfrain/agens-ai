@@ -1,5 +1,5 @@
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
+import { Card, CardFooter, CardHeader } from "@/components/ui/card";
 import {
   Tooltip,
   TooltipContent,
@@ -48,7 +48,6 @@ export default async function UserPlan() {
               {sub.plan[0].toUpperCase() + sub.plan.slice(1)}
             </span>
           </CardHeader>
-          <CardContent></CardContent>
           <CardFooter className="flex mt-auto justify-end">
             <span className="flex items-center text-muted-foreground text-sm">
               {new Intl.NumberFormat().format(sub.messageCount)}

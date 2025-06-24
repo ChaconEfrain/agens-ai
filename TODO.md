@@ -4,8 +4,8 @@
 - [x] Stop user from going to checkout session of the same subscription they already have
 - [x] Update subscription when the user upgrades or downgrades
 - [x] Control chatbot usage based on subscription's message count
-- [ ] In checkout.session.completed event check if the user already has a subscription in the DB (canceled) and update record
 - [ ] Deactivate chatbots (add field to DB) when subscription status is canceled (warn user at cancel moment).
+- [ ] Reset chatbot currentPeriodMessagesCount on subscription renewal
 
 ## Dashboard
 - [ ] Show some graphics
