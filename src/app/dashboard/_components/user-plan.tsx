@@ -1,33 +1,37 @@
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
-import { ALLOWED_MESSAGE_QUANTITY } from '@/consts/subscription';
-import { getSubscriptionByClerkId } from '@/db/subscriptions';
-import { cn } from '@/lib/utils';
-import { auth } from '@clerk/nextjs/server'
-import { Slash } from 'lucide-react';
-import { redirect } from 'next/navigation';
-import React from 'react'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { ALLOWED_MESSAGE_QUANTITY } from "@/consts/subscription";
+import { getSubscriptionByClerkId } from "@/db/subscriptions";
+import { cn } from "@/lib/utils";
+import { auth } from "@clerk/nextjs/server";
+import { Info, Slash } from "lucide-react";
+import { redirect } from "next/navigation";
+import React from "react";
 
 export default async function UserPlan() {
-
-  const {userId} = await auth();
+  const { userId } = await auth();
 
   if (!userId) {
-    redirect('/')
+    redirect("/");
   }
 
-  const sub = await getSubscriptionByClerkId({clerkId: userId});
+  const sub = await getSubscriptionByClerkId({ clerkId: userId });
 
   if (!sub) {
-    redirect('/')
+    redirect("/");
   }
 
   return (
     <>
       <section>
-        <Card className='h-full relative'>
+        <Card className="h-full relative">
           <Badge
-            className={cn('absolute top-2 right-2', {
+            className={cn("absolute top-2 right-2", {
               "bg-green-50 text-green-700 border-green-200 ":
                 sub.status === "active",
               "bg-yellow-50 text-yellow-700 border-yellow-200 ":
@@ -39,16 +43,13 @@ export default async function UserPlan() {
             {sub.status[0].toUpperCase() + sub.status.slice(1)}
           </Badge>
           <CardHeader>
-            <h2 className="text-2xl font-semibold">
-              Current Plan
-            </h2>
-          </CardHeader>
-          <CardContent>
-            <span className='text-5xl font-bold'>
+            <h2 className="text-2xl font-semibold">Current Plan</h2>
+            <span className="text-5xl font-bold">
               {sub.plan[0].toUpperCase() + sub.plan.slice(1)}
             </span>
-          </CardContent>
-          <CardFooter className='flex mt-auto justify-end'>
+          </CardHeader>
+          <CardContent></CardContent>
+          <CardFooter className="flex mt-auto justify-end">
             <span className="flex items-center text-muted-foreground text-sm">
               {new Intl.NumberFormat().format(sub.messageCount)}
               <Slash className="size-4 -rotate-[24deg]" />
@@ -58,15 +59,24 @@ export default async function UserPlan() {
                 ]
               )}{" "}
               Messages
+              <Tooltip>
+                <TooltipTrigger className="ml-2">
+                  <Info />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <span>
+                    Message limit refreshes at the beginning of each billing
+                    cycle.
+                  </span>
+                </TooltipContent>
+              </Tooltip>
             </span>
           </CardFooter>
         </Card>
       </section>
       <section>
-        <Card className='h-full'>
-          PlanUsage
-        </Card>
+        <Card className="h-full">PlanUsage</Card>
       </section>
     </>
-  )
+  );
 }
