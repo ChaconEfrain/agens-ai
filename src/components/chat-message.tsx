@@ -11,6 +11,7 @@ interface ChatMessageProps {
   messageId: number;
   liked: boolean | null;
   styles?: ChatbotStyles;
+  isMock?: boolean;
 }
 
 export default function ChatMessage({
@@ -19,6 +20,7 @@ export default function ChatMessage({
   messageId,
   liked,
   styles,
+  isMock,
 }: ChatMessageProps) {
   const [rating, setRating] = useState<"like" | "dislike" | null>(
     liked ? "like" : liked === false ? "dislike" : null
@@ -34,6 +36,8 @@ export default function ChatMessage({
     } else if (id === "dislike") {
       setRating((prev) => (prev === "dislike" ? null : "dislike"));
     }
+
+    if (isMock) return;
 
     const { success } = await rateMessageAction({
       messageId,

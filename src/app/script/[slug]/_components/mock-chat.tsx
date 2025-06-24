@@ -36,6 +36,9 @@ export default function MockChat({styles}: Props) {
             message={message}
             response={response}
             styles={styles}
+            liked={null}
+            messageId={i + 1}
+            isMock
           />
         ))}
       </CardContent>
