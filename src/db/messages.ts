@@ -1,18 +1,7 @@
 import { Transaction } from "@/types/db-types";
 import { db } from ".";
 import { messages } from "./schema";
-import {
-  and,
-  asc,
-  between,
-  count,
-  desc,
-  eq,
-  gte,
-  inArray,
-  lte,
-  sql,
-} from "drizzle-orm";
+import { and, asc, between, count, desc, eq, inArray, sql } from "drizzle-orm";
 import { getSubscriptionByClerkId } from "./subscriptions";
 import { getChatbotsByClerkId } from "./chatbot";
 
@@ -22,11 +11,13 @@ export async function createMessage(
     sessionId,
     message,
     response,
+    isTest,
   }: {
     chatbotId: number;
     sessionId: string;
     message: string;
     response: string;
+    isTest: boolean;
   },
   trx: Transaction
 ) {
@@ -37,6 +28,7 @@ export async function createMessage(
       sessionId,
       response,
       message,
+      isTest,
     })
     .returning();
 }
@@ -137,7 +129,8 @@ export async function getCurrentPeriodMessagesPerDayByClerkId({
       .where(
         and(
           inArray(messages.chatbotId, chatbotIds),
-          between(messages.createdAt, sub.periodStart, sub.periodEnd)
+          between(messages.createdAt, sub.periodStart, sub.periodEnd),
+          eq(messages.isTest, false)
         )
       )
       .groupBy(sql`date_trunc('day', ${messages.createdAt})`)

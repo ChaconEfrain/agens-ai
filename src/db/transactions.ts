@@ -164,6 +164,7 @@ interface MessagesTransactionProps {
     sessionId: string;
     message: string;
     response: string;
+    isTest: boolean;
   };
   stripeSubscriptionId: string | undefined;
   messageCount: number | undefined;

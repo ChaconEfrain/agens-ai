@@ -125,6 +125,7 @@ export async function sendMessageAction({
       sessionId,
       message,
       response: answer,
+      isTest: pathname.startsWith("/test-chatbot"),
     };
 
     const messageInsert = await createMessageTransaction({
