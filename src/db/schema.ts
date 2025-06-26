@@ -264,7 +264,6 @@ export const usersRelations = relations(users, ({ many }) => ({
 export const businessesRelations = relations(businesses, ({ one, many }) => ({
   user: one(users, { fields: [businesses.userId], references: [users.id] }),
   files: many(files),
-  chatbots: many(chatbots),
 }));
 
 export const formWizardsProgressRelations = relations(

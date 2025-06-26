@@ -12,16 +12,16 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "./ui/dialog"
-import { deleteChatbotAction } from "@/actions/chatbot"
-import { toast } from "sonner"
+import { deleteChatbotAndBusinessAction } from "@/actions/chatbot";
+import { toast } from "sonner";
 import Link from "next/link";
 
 interface Props {
-  chatbotId: number;
+  businessId: number;
   chatbotSlug: string;
 }
 
-export function ChatbotCardMenu({ chatbotId, chatbotSlug }: Props) {
+export function ChatbotCardMenu({ businessId, chatbotSlug }: Props) {
   const [openModal, setOpenModal] = useState(false);
   const [openDropdown, setOpenDropdown] = useState(false);
 
@@ -54,7 +54,7 @@ export function ChatbotCardMenu({ chatbotId, chatbotSlug }: Props) {
             <DropdownMenuItem>Set due date...</DropdownMenuItem>
             <DropdownMenuItem className="text-red-600">
               <button
-                className="flex items-center gap-1 w-full"
+                className="flex items-center gap-1 w-full cursor-pointer"
                 onClick={() => setOpenModal(true)}
               >
                 <Trash className="text-inherit" /> Delete
@@ -66,44 +66,49 @@ export function ChatbotCardMenu({ chatbotId, chatbotSlug }: Props) {
       <DeleteChatbotModal
         openModal={openModal}
         setOpenModal={setOpenModal}
-        chatbotId={chatbotId}
+        businessId={businessId}
       />
     </>
   );
 }
 
 interface ModalProps {
-  setOpenModal: Dispatch<SetStateAction<boolean>>,
-  openModal: boolean,
-  chatbotId: number
+  setOpenModal: Dispatch<SetStateAction<boolean>>;
+  openModal: boolean;
+  businessId: number;
 }
 
-function DeleteChatbotModal({setOpenModal, openModal, chatbotId}: ModalProps) {
-
+function DeleteChatbotModal({
+  setOpenModal,
+  openModal,
+  businessId,
+}: ModalProps) {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (!openModal) {
-      document.body.style.pointerEvents = '';
+      document.body.style.pointerEvents = "";
     }
     return () => {
-      document.body.style.pointerEvents = '';
-    }
-  }, [openModal])
+      document.body.style.pointerEvents = "";
+    };
+  }, [openModal]);
 
   const handleDeleteChatbot = async () => {
     setLoading(true);
-    const { success, message } = await deleteChatbotAction({chatbotId});
+    const { success, message } = await deleteChatbotAndBusinessAction({
+      businessId,
+    });
 
     if (success) {
-      toast.success(message)
+      toast.success(message);
       setOpenModal(false);
     } else {
-      toast.error(message)
+      toast.error(message);
     }
 
     setLoading(false);
-  }
+  };
 
   return (
     <Dialog open={openModal} onOpenChange={setOpenModal}>

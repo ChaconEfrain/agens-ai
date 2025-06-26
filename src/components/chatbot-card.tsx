@@ -31,7 +31,7 @@ export default function ChatbotCard({ bot }: Props) {
       </CardHeader>
       <CardContent>
         <div className="absolute top-2 right-2">
-          <ChatbotCardMenu chatbotId={bot.id} chatbotSlug={bot.slug} />
+          <ChatbotCardMenu businessId={bot.businessId} chatbotSlug={bot.slug} />
         </div>
       </CardContent>
       <CardFooter className="flex justify-end mt-auto">

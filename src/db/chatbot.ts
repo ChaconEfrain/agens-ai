@@ -1,6 +1,6 @@
 import { ChatbotStyles } from "@/types/embedded-chatbot";
 import { db } from ".";
-import { ChatbotInsert, chatbots, subscriptions } from "./schema";
+import { businesses, ChatbotInsert, chatbots } from "./schema";
 import { eq, sql } from "drizzle-orm";
 import { auth } from "@clerk/nextjs/server";
 import { getUserByClerkId } from "./user";
@@ -155,6 +155,10 @@ export async function getChatbotsByClerkId({ clerkId }: { clerkId: string }) {
   }
 }
 
-export async function deleteChatbot({ chatbotId }: { chatbotId: number }) {
-  await db.delete(chatbots).where(eq(chatbots.id, chatbotId));
+export async function deleteChatbotAndBusiness({
+  businessId,
+}: {
+  businessId: number;
+}) {
+  await db.delete(businesses).where(eq(businesses.id, businessId));
 }

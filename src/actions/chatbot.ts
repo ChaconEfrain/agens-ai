@@ -1,16 +1,23 @@
 'use server'
 
-import { deleteChatbot } from "@/db/chatbot"
-import { revalidatePath } from "next/cache"
+import { deleteChatbotAndBusiness } from "@/db/chatbot";
+import { revalidatePath } from "next/cache";
 
-export async function deleteChatbotAction({chatbotId}: {chatbotId: number}) {
+export async function deleteChatbotAndBusinessAction({
+  businessId,
+}: {
+  businessId: number;
+}) {
   try {
-    await deleteChatbot({chatbotId})
+    await deleteChatbotAndBusiness({ businessId });
 
-    revalidatePath('/create-chatbot')
-    return {success: true, message: 'Chatbot deleted succesfully'}
+    revalidatePath("/create-chatbot");
+    return { success: true, message: "Chatbot deleted succesfully" };
   } catch (error) {
-    console.error('Error on deleteChatbotAction --> ', error)
-    return {success: false, message: 'Something went wrong deleting your chatbot'}
+    console.error("Error on deleteChatbotAction --> ", error);
+    return {
+      success: false,
+      message: "Something went wrong deleting your chatbot",
+    };
   }
 }
