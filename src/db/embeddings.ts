@@ -37,9 +37,11 @@ export async function saveEmbeddings(
 export async function getRelatedEmbeddings({
   userEmbedding,
   chatbotId,
+  limit = 5,
 }: {
   userEmbedding: number[];
   chatbotId: number;
+  limit?: number;
 }) {
   const contextChunks = await db
     .select({
@@ -48,7 +50,7 @@ export async function getRelatedEmbeddings({
     .from(embeddings)
     .where(eq(embeddings.chatbotId, chatbotId))
     .orderBy(cosineDistance(embeddings.embedding, userEmbedding))
-    .limit(5);
+    .limit(limit);
 
   return contextChunks;
 }

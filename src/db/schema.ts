@@ -3,6 +3,7 @@ import { ChatbotStyles } from "@/types/embedded-chatbot";
 import { relations } from "drizzle-orm";
 import {
   boolean,
+  doublePrecision,
   index,
   integer,
   json,
@@ -197,13 +198,20 @@ export const messages = pgTable(
     response: text("response").notNull(),
     liked: boolean("liked"),
     isTest: boolean("is_test").default(false).notNull(),
+    relevanceScore: doublePrecision("relevance_score").notNull(),
+    inputTokens: integer("input_tokens").notNull(),
+    outputTokens: integer("output_tokens").notNull(),
     createdAt: timestamp("created_at").notNull().defaultNow(),
     updatedAt: timestamp("updated_at").$onUpdate(() => new Date()),
   },
   (table) => [
+    index("messages_chatbot_session_active_created_idx").on(
+      table.chatbotId,
+      table.sessionId,
+      table.isActive,
+      table.createdAt
+    ),
     index("messages_chatbot_id_idx").on(table.chatbotId),
-    index("messages_session_id_idx").on(table.sessionId),
-    index("messages_is_active_idx").on(table.isActive),
     index("messages_created_at_idx").on(table.createdAt),
   ]
 );
@@ -332,6 +340,7 @@ export type Business = typeof businesses.$inferSelect;
 export type File = typeof files.$inferSelect;
 export type FileInsert = typeof files.$inferInsert;
 export type Message = typeof messages.$inferSelect;
+export type MessageInsert = typeof messages.$inferInsert;
 export type Subscription = typeof subscriptions.$inferSelect;
 export type SubscriptionInsert = typeof subscriptions.$inferInsert;
 export type FormWizardProgress = typeof formWizardsProgress.$inferSelect;

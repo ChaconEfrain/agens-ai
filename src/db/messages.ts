@@ -1,6 +1,6 @@
 import { Transaction } from "@/types/db-types";
 import { db } from ".";
-import { messages } from "./schema";
+import { MessageInsert, messages } from "./schema";
 import { and, asc, between, count, desc, eq, inArray, sql } from "drizzle-orm";
 import { getSubscriptionByClerkId } from "./subscriptions";
 import { getChatbotsByClerkId } from "./chatbot";
@@ -12,13 +12,13 @@ export async function createMessage(
     message,
     response,
     isTest,
-  }: {
-    chatbotId: number;
-    sessionId: string;
-    message: string;
-    response: string;
-    isTest: boolean;
-  },
+    relevanceScore,
+    inputTokens,
+    outputTokens,
+  }: Omit<
+    MessageInsert,
+    "id" | "liked" | "createdAt" | "isActive" | "updatedAt"
+  >,
   trx: Transaction
 ) {
   return await trx
@@ -29,6 +29,9 @@ export async function createMessage(
       response,
       message,
       isTest,
+      relevanceScore,
+      inputTokens,
+      outputTokens,
     })
     .returning();
 }
@@ -46,7 +49,11 @@ export async function getLatestMessagesByChatbotId({
     .select()
     .from(messages)
     .where(
-      and(eq(messages.chatbotId, chatbotId), eq(messages.sessionId, sessionId))
+      and(
+        eq(messages.chatbotId, chatbotId),
+        eq(messages.sessionId, sessionId),
+        eq(messages.isActive, true)
+      )
     )
     .orderBy(desc(messages.createdAt))
     .limit(limit);

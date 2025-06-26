@@ -4,9 +4,9 @@ import { utapi } from "@/app/api/uploadthing/core";
 import { saveEmbeddings } from "@/db/embeddings";
 import { createFile } from "@/db/files";
 import { extractTextFromPdf } from "@/services/utils";
-import { chunkText } from "@/lib/utils";
 import { auth } from "@clerk/nextjs/server";
 import { getUserByClerkId } from "@/db/user";
+import { getCoherentChunksFromPdf } from "@/services/openai";
 
 export async function updateChatbotFilesAction({
   files,
@@ -32,17 +32,17 @@ export async function updateChatbotFilesAction({
       fileUrl: data?.ufsUrl ?? "",
       title: data?.name ?? "",
     }));
-    await createFile({ filesResult });
 
-    await Promise.all(
-      result.map(async ({ data }) => {
+    await Promise.all([
+      createFile({ filesResult }),
+      ...result.map(async ({ data }) => {
         if (!data) return;
 
         const fullText = await extractTextFromPdf({ fileUrl: data.ufsUrl });
-        const chunks = chunkText(fullText);
+        const chunks = await getCoherentChunksFromPdf({ pdfText: fullText });
         await saveEmbeddings({ chunks, chatbotId });
-      })
-    );
+      }),
+    ]);
     return {
       success: true,
       message: "Chatbot context updated successfully",

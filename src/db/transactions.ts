@@ -4,7 +4,6 @@ import { auth } from "@clerk/nextjs/server";
 import { db } from ".";
 import type { UploadFileResult } from "uploadthing/types";
 import { extractTextFromPdf } from "@/services/utils";
-import { chunkText } from "@/lib/utils";
 import { DEFAULT_STYLES } from "@/consts/chatbot";
 import {
   createSubscription,
@@ -22,8 +21,9 @@ import { createMessage } from "./messages";
 import { createBusiness } from "./business";
 import { saveEmbeddings } from "./embeddings";
 import { createFile } from "./files";
-import { Chatbot, User } from "./schema";
+import { Chatbot, MessageInsert, User } from "./schema";
 import { ALLOWED_CHATBOTS } from "@/consts/subscription";
+import { getCoherentChunksFromPdf } from "@/services/openai";
 
 interface CreateChatbotTransactionParams {
   form: FormWizardData;
@@ -104,20 +104,18 @@ export async function createChatbotTransaction({
       }));
     }
 
-    await Promise.all(
-      [
-        saveEmbeddings({ chatbotId: chatbotInsert.id, chunks }, trx),
-        files && createFile({ filesResult: files }, trx),
-        filesResult.map(async ({ data }) => {
-          if (!data) return;
+    await Promise.all([
+      saveEmbeddings({ chatbotId: chatbotInsert.id, chunks }, trx),
+      files && createFile({ filesResult: files }, trx),
+      ...filesResult.map(async ({ data }) => {
+        if (!data) return;
 
-          const fullText = await extractTextFromPdf({ fileUrl: data.ufsUrl });
-          const chunks = chunkText(fullText);
+        const fullText = await extractTextFromPdf({ fileUrl: data.ufsUrl });
+        const chunks = await getCoherentChunksFromPdf({ pdfText: fullText });
 
-          await saveEmbeddings({ chatbotId: chatbotInsert.id, chunks }, trx);
-        }),
-      ].flat()
-    );
+        await saveEmbeddings({ chatbotId: chatbotInsert.id, chunks }, trx);
+      }),
+    ]);
   });
 }
 
@@ -159,13 +157,10 @@ export async function createSubscriptionTransaction({
 }
 
 interface MessagesTransactionProps {
-  message: {
-    chatbotId: number;
-    sessionId: string;
-    message: string;
-    response: string;
-    isTest: boolean;
-  };
+  message: Omit<
+    MessageInsert,
+    "id" | "liked" | "createdAt" | "isActive" | "updatedAt"
+  >;
   stripeSubscriptionId: string | undefined;
   messageCount: number | undefined;
   pathname: string;

@@ -9,7 +9,11 @@ import {
   getLatestMessagesByChatbotId,
   updateMessageRating,
 } from "@/db/messages";
-import { chatCompletions, createEmbeddings } from "@/services/openai";
+import {
+  chatCompletions,
+  createEmbeddings,
+  getMostRelevantChunk,
+} from "@/services/openai";
 import { ChatCompletionMessageParam } from "openai/resources/index.mjs";
 import jwt from "jsonwebtoken";
 import { getSubscriptionByChatbotId } from "@/db/subscriptions";
@@ -83,17 +87,10 @@ export async function sendMessageAction({
       }
     }
 
-    const [{ embedding: userEmbedding }] = await createEmbeddings([message]);
-    const contextChunks = await getRelatedEmbeddings({
-      userEmbedding,
-      chatbotId,
-    });
-
     const latestMessages = await getLatestMessagesByChatbotId({
       chatbotId,
       sessionId,
     });
-
     const historyMessages = latestMessages
       .map(({ response, message }) => [
         {
@@ -106,17 +103,36 @@ export async function sendMessageAction({
         },
       ])
       .flat();
-
-    const context = contextChunks.map((c) => c.content).join("\n");
+    const questionWithHistory = `question: ${message}, history: ${historyMessages
+      .slice(-2)
+      .map(({ role, content }) => `${role}: ${content}`)
+      .join(", ")}`;
+    const [{ embedding: userEmbedding }] = await createEmbeddings([
+      questionWithHistory,
+    ]);
+    const contextChunks = await getRelatedEmbeddings({
+      userEmbedding,
+      chatbotId,
+      limit: 10,
+    });
+    const { relevance: relevanceScore, content } = await getMostRelevantChunk({
+      question: message,
+      chunks: contextChunks,
+      historyMessages,
+    });
 
     const messages = [
       { role: "system", content: chatbotInstructions },
       ...historyMessages,
-      { role: "user", content: `Context:\n${context}` },
+      { role: "user", content: `Most relevant info: ${content}` },
       { role: "user", content: message },
     ] as ChatCompletionMessageParam[];
 
-    const answer = await chatCompletions({ messages });
+    const {
+      content: answer,
+      inputTokens,
+      outputTokens,
+    } = await chatCompletions({ messages });
 
     if (!answer) return "error";
 
@@ -126,6 +142,9 @@ export async function sendMessageAction({
       message,
       response: answer,
       isTest: pathname.startsWith("/test-chatbot"),
+      relevanceScore,
+      inputTokens,
+      outputTokens,
     };
 
     const messageInsert = await createMessageTransaction({
