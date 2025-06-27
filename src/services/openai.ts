@@ -97,7 +97,7 @@ export async function getMostRelevantChunk({
     - 0.00 means "not related"
 
 
-    Return the most relevant answer in JSON format with the following structure:
+    Return the most relevant answer in JSON format and in the same language as the user's question, with the following structure:
     {
       "result": {
         "content": // content of the most relevant text among the provided numbered information chunks,
