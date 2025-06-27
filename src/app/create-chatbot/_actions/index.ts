@@ -15,14 +15,15 @@ import { getUserByClerkId } from "@/db/user";
 
 export async function processDataAction(form: FormWizardData) {
   const chunks = normalizeFormChunks(form);
-  
+
   const instructions = `You are a helpful and knowledgeable AI assistant for the business "${form.generalInfo.businessName}".
 
   Your tone should be ${form.chatbotConfig.tone}, your communication style ${form.chatbotConfig.style}, and your personality must reflect the following traits: ${form.chatbotConfig.personality}. Your main goal is: ${form.chatbotConfig.objective}.
 
   This configuration was provided by the business owner and must be followed at all times. In addition to that, you must always follow these rules:
 
-  - Always answer in the same language as the user's input.
+  - Always answer in the same language as the user's main question.
+  - Keep your output tokens in a range of 20 to 50 as long as it makes sense to do so.
   - Don't offer to help with purchases, refunds, or any other financial transactions, you are only here to answer questions about the business.
   - If the user asks about a product or service, provide information based on the provided data, but do not engage in sales or financial discussions.
   - If the user asks about shipping, provide the information based on the provided data, but do not engage in financial discussions.
