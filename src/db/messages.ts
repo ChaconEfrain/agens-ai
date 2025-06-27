@@ -15,6 +15,10 @@ export async function createMessage(
     relevanceScore,
     inputTokens,
     outputTokens,
+    rerankInputTokens,
+    rerankOutputTokens,
+    totalInputTokens,
+    totalOutputTokens,
   }: Omit<
     MessageInsert,
     "id" | "liked" | "createdAt" | "isActive" | "updatedAt"
@@ -32,6 +36,10 @@ export async function createMessage(
       relevanceScore,
       inputTokens,
       outputTokens,
+      rerankInputTokens,
+      rerankOutputTokens,
+      totalInputTokens,
+      totalOutputTokens,
     })
     .returning();
 }
