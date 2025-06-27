@@ -154,6 +154,8 @@ export const chatbots = pgTable(
     currentPeriodMessagesCount: integer("current_period_messages_count")
       .notNull()
       .default(0),
+    pdfInputTokens: integer("pdf_input_tokens").default(0).notNull(),
+    pdfOutputTokens: integer("pdf_output_tokens").default(0).notNull(),
     createdAt: timestamp("created_at").notNull().defaultNow(),
     updatedAt: timestamp("updated_at").$onUpdate(() => new Date()),
   },
@@ -201,6 +203,10 @@ export const messages = pgTable(
     relevanceScore: doublePrecision("relevance_score").notNull(),
     inputTokens: integer("input_tokens").notNull(),
     outputTokens: integer("output_tokens").notNull(),
+    rerankInputTokens: integer("rerank_input_tokens").notNull(),
+    rerankOutputTokens: integer("rerank_output_tokens").notNull(),
+    totalInputTokens: integer("total_input_tokens").notNull(),
+    totalOutputTokens: integer("total_output_tokens").notNull(),
     createdAt: timestamp("created_at").notNull().defaultNow(),
     updatedAt: timestamp("updated_at").$onUpdate(() => new Date()),
   },

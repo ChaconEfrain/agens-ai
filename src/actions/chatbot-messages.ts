@@ -115,7 +115,12 @@ export async function sendMessageAction({
       chatbotId,
       limit: 10,
     });
-    const { relevance: relevanceScore, content } = await getMostRelevantChunk({
+    const {
+      relevance: relevanceScore,
+      content,
+      inputTokens: rerankInputTokens,
+      outputTokens: rerankOutputTokens,
+    } = await getMostRelevantChunk({
       question: message,
       chunks: contextChunks,
       historyMessages,
@@ -125,7 +130,7 @@ export async function sendMessageAction({
       { role: "system", content: chatbotInstructions },
       ...historyMessages,
       { role: "user", content: `Most relevant info: ${content}` },
-      { role: "user", content: message },
+      { role: "user", content: `Main question: ${message}` },
     ] as ChatCompletionMessageParam[];
 
     const {
@@ -145,6 +150,10 @@ export async function sendMessageAction({
       relevanceScore,
       inputTokens,
       outputTokens,
+      rerankInputTokens,
+      rerankOutputTokens,
+      totalInputTokens: inputTokens + rerankInputTokens,
+      totalOutputTokens: outputTokens + rerankOutputTokens,
     };
 
     const messageInsert = await createMessageTransaction({

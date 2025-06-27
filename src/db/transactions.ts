@@ -13,6 +13,7 @@ import {
 import {
   createChatbot,
   updateChatbotCurrentMessageCount,
+  updateChatbotPdfTokens,
   updateChatbotsSubscription,
   updateChatbotTestMessageCount,
 } from "./chatbot";
@@ -107,14 +108,23 @@ export async function createChatbotTransaction({
     await Promise.all([
       saveEmbeddings({ chatbotId: chatbotInsert.id, chunks }, trx),
       files && createFile({ filesResult: files }, trx),
-      ...filesResult.map(async ({ data }) => {
-        if (!data) return;
+      ...(files
+        ? filesResult.map(async ({ data }) => {
+            if (!data) return;
 
-        const fullText = await extractTextFromPdf({ fileUrl: data.ufsUrl });
-        const chunks = await getCoherentChunksFromPdf({ pdfText: fullText });
-
-        await saveEmbeddings({ chatbotId: chatbotInsert.id, chunks }, trx);
-      }),
+            const fullText = await extractTextFromPdf({ fileUrl: data.ufsUrl });
+            const { chunks, inputTokens, outputTokens } =
+              await getCoherentChunksFromPdf({
+                pdfText: fullText,
+              });
+            await updateChatbotPdfTokens({
+              pdfInputTokens: inputTokens,
+              pdfOutputTokens: outputTokens,
+              chatbotId: chatbotInsert.id,
+            });
+            await saveEmbeddings({ chatbotId: chatbotInsert.id, chunks }, trx);
+          })
+        : []),
     ]);
   });
 }

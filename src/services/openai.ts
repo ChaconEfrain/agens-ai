@@ -147,7 +147,12 @@ export async function getMostRelevantChunk({
     result: { content: string; relevance: number };
   };
 
-  return result;
+  return {
+    relevance: result.relevance,
+    content: result.content,
+    inputTokens: response.inputTokens,
+    outputTokens: response.outputTokens,
+  };
 }
 
 export async function getCoherentChunksFromPdf({
@@ -198,5 +203,9 @@ export async function getCoherentChunksFromPdf({
     result: string[];
   };
 
-  return result;
+  return {
+    chunks: result,
+    inputTokens: response.inputTokens,
+    outputTokens: response.outputTokens,
+  };
 }

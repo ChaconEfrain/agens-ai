@@ -162,3 +162,21 @@ export async function deleteChatbotAndBusiness({
 }) {
   await db.delete(businesses).where(eq(businesses.id, businessId));
 }
+
+export async function updateChatbotPdfTokens({
+  pdfInputTokens,
+  pdfOutputTokens,
+  chatbotId,
+}: {
+  pdfInputTokens: number;
+  pdfOutputTokens: number;
+  chatbotId: number;
+}) {
+  await db
+    .update(chatbots)
+    .set({
+      pdfInputTokens: sql`${chatbots.pdfInputTokens} + ${pdfInputTokens}`,
+      pdfOutputTokens: sql`${chatbots.pdfOutputTokens} + ${pdfOutputTokens}`,
+    })
+    .where(eq(chatbots.id, chatbotId));
+}

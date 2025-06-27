@@ -7,6 +7,7 @@ import { extractTextFromPdf } from "@/services/utils";
 import { auth } from "@clerk/nextjs/server";
 import { getUserByClerkId } from "@/db/user";
 import { getCoherentChunksFromPdf } from "@/services/openai";
+import { updateChatbotPdfTokens } from "@/db/chatbot";
 
 export async function updateChatbotFilesAction({
   files,
@@ -39,7 +40,13 @@ export async function updateChatbotFilesAction({
         if (!data) return;
 
         const fullText = await extractTextFromPdf({ fileUrl: data.ufsUrl });
-        const chunks = await getCoherentChunksFromPdf({ pdfText: fullText });
+        const { chunks, inputTokens, outputTokens } =
+          await getCoherentChunksFromPdf({ pdfText: fullText });
+        await updateChatbotPdfTokens({
+          pdfInputTokens: inputTokens,
+          pdfOutputTokens: outputTokens,
+          chatbotId,
+        });
         await saveEmbeddings({ chunks, chatbotId });
       }),
     ]);
