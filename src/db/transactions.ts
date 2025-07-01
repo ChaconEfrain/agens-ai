@@ -90,6 +90,8 @@ export async function createChatbotTransaction({
         testMessagesCount: 0,
         currentPeriodMessagesCount: 0,
         subscriptionId: sub?.id ?? null,
+        pdfInputTokens: 0,
+        pdfOutputTokens: 0,
       },
       trx
     );
@@ -117,11 +119,14 @@ export async function createChatbotTransaction({
               await getCoherentChunksFromPdf({
                 pdfText: fullText,
               });
-            await updateChatbotPdfTokens({
-              pdfInputTokens: inputTokens,
-              pdfOutputTokens: outputTokens,
-              chatbotId: chatbotInsert.id,
-            });
+            await updateChatbotPdfTokens(
+              {
+                pdfInputTokens: chatbotInsert.pdfInputTokens + inputTokens,
+                pdfOutputTokens: chatbotInsert.pdfOutputTokens + outputTokens,
+                chatbotId: chatbotInsert.id,
+              },
+              trx
+            );
             await saveEmbeddings({ chatbotId: chatbotInsert.id, chunks }, trx);
           })
         : []),

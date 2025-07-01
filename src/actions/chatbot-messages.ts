@@ -12,7 +12,7 @@ import {
 import {
   chatCompletions,
   createEmbeddings,
-  getMostRelevantChunk,
+  rewriteQuestionForEmbedding,
 } from "@/services/openai";
 import { ChatCompletionMessageParam } from "openai/resources/index.mjs";
 import jwt from "jsonwebtoken";
@@ -94,43 +94,41 @@ export async function sendMessageAction({
     const historyMessages = latestMessages
       .map(({ response, message }) => [
         {
-          role: "user",
+          role: "user" as const,
           content: message,
         },
         {
-          role: "assistant",
+          role: "assistant" as const,
           content: response,
         },
       ])
       .flat();
-    const questionWithHistory = `question: ${message}, history: ${historyMessages
-      .slice(-2)
-      .map(({ role, content }) => `${role}: ${content}`)
-      .join(", ")}`;
-    const [{ embedding: userEmbedding }] = await createEmbeddings([
-      questionWithHistory,
-    ]);
+
+    const {
+      rewritten,
+      inputTokens: rewriteInputTokens,
+      outputTokens: rewriteOutputTokens,
+    } = await rewriteQuestionForEmbedding({
+      historyMessages,
+      userQuestion: message,
+    });
+    const [{ embedding: userEmbedding }] = await createEmbeddings([rewritten]);
     const contextChunks = await getRelatedEmbeddings({
       userEmbedding,
       chatbotId,
-      limit: 10,
-    });
-    const {
-      relevance: relevanceScore,
-      content,
-      inputTokens: rerankInputTokens,
-      outputTokens: rerankOutputTokens,
-    } = await getMostRelevantChunk({
-      question: message,
-      chunks: contextChunks,
-      historyMessages,
+      limit: 5,
     });
 
     const messages = [
       { role: "system", content: chatbotInstructions },
       ...historyMessages,
-      { role: "user", content: `Most relevant info: ${content}` },
-      { role: "user", content: `Main question: ${message}` },
+      {
+        role: "user",
+        content: `Most relevant info:\n${contextChunks
+          .map((chunk) => `- ${chunk.content}`)
+          .join("\n")}`,
+      },
+      { role: "user", content: `Main question: ${rewritten}` },
     ] as ChatCompletionMessageParam[];
 
     const {
@@ -147,13 +145,13 @@ export async function sendMessageAction({
       message,
       response: answer,
       isTest: pathname.startsWith("/test-chatbot"),
-      relevanceScore,
+      rewrittenMessage: rewritten,
       inputTokens,
       outputTokens,
-      rerankInputTokens,
-      rerankOutputTokens,
-      totalInputTokens: inputTokens + rerankInputTokens,
-      totalOutputTokens: outputTokens + rerankOutputTokens,
+      rewriteInputTokens: rewriteInputTokens,
+      rewriteOutputTokens: rewriteOutputTokens,
+      totalInputTokens: inputTokens + rewriteInputTokens,
+      totalOutputTokens: outputTokens + rewriteOutputTokens,
     };
 
     const messageInsert = await createMessageTransaction({

@@ -10,10 +10,6 @@ export async function createBusiness(
     .insert(businesses)
     .values({
       userId: user.id,
-      chatbotObjective: form.chatbotConfig.objective,
-      chatbotPersonality: form.chatbotConfig.personality,
-      chatbotStyle: form.chatbotConfig.style,
-      chatbotTone: form.chatbotConfig.tone,
       description: form.generalInfo.description,
       name: form.generalInfo.businessName,
       productsOrServices: form.productsServices.type,

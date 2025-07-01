@@ -58,103 +58,6 @@ export async function chatCompletions({
   return result;
 }
 
-export async function getMostRelevantChunk({
-  question,
-  chunks,
-  historyMessages,
-}: {
-  question: string;
-  chunks: {
-    content: string;
-  }[];
-  historyMessages: {
-    role: string;
-    content: string;
-  }[];
-}) {
-  const numberedChunks = chunks
-    .map((chunk, i) => `${i + 1}. ${chunk.content}`)
-    .join("\n\n");
-  const history = historyMessages
-    .map((msg) => `- ${msg.role}: ${msg.content}`)
-    .join("\n");
-
-  const prompt = `
-    Given the following user question:
-
-    "${question}"
-
-    And the following message history:
-
-    ${history}
-
-    And the following list of numbered information chunks coming from an embedding search:
-    
-    ${numberedChunks}
-
-    Rate how useful each chunk is for answering the question. Only use the provided numbered information chunks. Use a number between 0.00 and 1.00, where:
-    - 1.00 means "perfectly answers"
-    - 0.00 means "not related"
-
-
-    Return the most relevant answer in JSON format and in the same language as the user's question, with the following structure:
-    {
-      "result": {
-        "content": // content of the most relevant text among the provided numbered information chunks,
-        "relevance": 0.83 // A number between 0 and 1
-      }
-    }
-    `;
-
-  const response = await chatCompletions({
-    messages: [
-      {
-        role: "system",
-        content:
-          "You are a model that evaluates the semantic relevance of text chunks based on a user's question.",
-      },
-      {
-        role: "user",
-        content: prompt,
-      },
-    ],
-    responseFormat: "json_schema",
-    jsonSchema: {
-      name: "ranked_chunks",
-      description:
-        "An object containing the most relevant chunk of text ranked based on the user's question.",
-      schema: {
-        type: "object",
-        properties: {
-          result: {
-            type: "object",
-            properties: {
-              content: {
-                type: "string",
-              },
-              relevance: {
-                type: "number",
-              },
-            },
-          },
-        },
-        required: ["result"],
-      },
-    },
-  });
-
-  const { result } = JSON.parse(response.content ?? "{}") as {
-    result: { content: string; relevance: number };
-  };
-
-  return {
-    relevance: result.relevance,
-    content: result.content,
-    inputTokens: response.inputTokens,
-    outputTokens: response.outputTokens,
-  };
-}
-
 export async function getCoherentChunksFromPdf({
   pdfText,
 }: {
@@ -205,6 +108,57 @@ export async function getCoherentChunksFromPdf({
 
   return {
     chunks: result,
+    inputTokens: response.inputTokens,
+    outputTokens: response.outputTokens,
+  };
+}
+
+export async function rewriteQuestionForEmbedding({
+  historyMessages,
+  userQuestion,
+}: {
+  historyMessages: { role: "user" | "assistant"; content: string }[];
+  userQuestion: string;
+}) {
+  const history = historyMessages
+    .map((m) => `${m.role}: ${m.content}`)
+    .join("\n");
+
+  const systemPrompt = `
+    You are an assistant that rewrites ambiguous user questions ({{userQuestion}}) by incorporating relevant context from the previous conversation ({{historyMessages}}) to make them clearer for semantic embedding comparison.
+
+    Rules:
+    - Detect the language of the original question and rewrite it in the same language.
+    - If the question is already clear, return it unchanged.
+    - If no history is provided, return the original question unchanged.
+    - If you're not sure how to rewrite it, return the original question unchanged.
+    - Very important: Always return the question in the same language as the original.
+
+    Examples:
+    - User question: "What is the capital?"
+    - History: "En dónde está Francia?"
+    - Rewritten question: "What is the capital of France?"
+  `;
+
+  const userPrompt = `
+    Conversation history ({{historyMessages}}):
+    ${history}
+
+    Original user question ({{userQuestion}}):
+    "${userQuestion}"
+
+    Rewritten question:
+  `;
+
+  const response = await chatCompletions({
+    messages: [
+      { role: "system", content: systemPrompt },
+      { role: "user", content: userPrompt },
+    ],
+  });
+
+  return {
+    rewritten: response.content ?? "",
     inputTokens: response.inputTokens,
     outputTokens: response.outputTokens,
   };

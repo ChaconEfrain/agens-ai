@@ -271,55 +271,6 @@ export default function ChatbotContext({ chatbot }: Props) {
               </Accordion>
             </AccordionContent>
           </AccordionItem>
-          <AccordionItem value="chatbot-config">
-            <AccordionTrigger className="cursor-pointer">
-              <div className="flex gap-2 items-center">
-                <Bot />
-                <span>Chatbot config</span>
-              </div>
-            </AccordionTrigger>
-            <AccordionContent className="flex flex-col gap-1">
-              <div className="flex gap-1">
-                <span className="text-muted-foreground whitespace-nowrap">
-                  Objective:
-                </span>
-                <span
-                  title={chatbot.business.chatbotObjective}
-                  className="line-clamp-1"
-                >
-                  {chatbot.business.chatbotObjective}
-                </span>
-              </div>
-              <div className="flex gap-1">
-                <span className="text-muted-foreground whitespace-nowrap">
-                  Tone:
-                </span>
-                <span>{chatbot.business.chatbotTone}</span>
-              </div>
-              <div className="flex gap-1">
-                <span className="text-muted-foreground whitespace-nowrap">
-                  Style:
-                </span>
-                <span
-                  title={chatbot.business.chatbotStyle}
-                  className="line-clamp-1"
-                >
-                  {chatbot.business.chatbotStyle}
-                </span>
-              </div>
-              <div className="flex gap-1">
-                <span className="text-muted-foreground whitespace-nowrap">
-                  Personality:
-                </span>
-                <span
-                  title={chatbot.business.chatbotPersonality}
-                  className="line-clamp-1"
-                >
-                  {chatbot.business.chatbotPersonality}
-                </span>
-              </div>
-            </AccordionContent>
-          </AccordionItem>
           <AccordionItem value="documents">
             <AccordionTrigger className="cursor-pointer">
               <div className="flex gap-2 items-center">
@@ -331,10 +282,7 @@ export default function ChatbotContext({ chatbot }: Props) {
               {chatbot.files.map((file, i) => (
                 <div key={file.id} className="flex gap-1">
                   <span className="text-muted-foreground">File {i + 1}:</span>
-                  <span
-                    title={chatbot.business.chatbotObjective}
-                    className="line-clamp-1"
-                  >
+                  <span title={file.title} className="line-clamp-1">
                     {file.title}
                   </span>
                 </div>

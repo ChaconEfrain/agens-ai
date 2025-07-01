@@ -18,6 +18,7 @@
 - [ ] Polish the status of the chatbot (active, inactive, canceled, etc)
 - [ ] Allow user to edit the business info after testing the chatbot
 - [x] Properly manage wizardId in localStorage after chatbot creation
+- [ ] Remove chatbot config from form wizard
 
 # Tech debt
 - [ ] Improve error handling

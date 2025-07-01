@@ -3,7 +3,6 @@
 import React, { useEffect, useId, useState } from "react";
 import GeneralInfo from "./general-info";
 import {
-  Bot,
   Box,
   ChevronLeft,
   ChevronRight,
@@ -23,7 +22,6 @@ import { useForm, UseFormReturn } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import ProductsAndServices from "./products-services";
 import CustomerService from "./customer-service";
-import ChatbotConfig from "./chatbot-config";
 import DocumentsStep from "./documents";
 import ShippingLogistics from "./shipping-logistics";
 import Summary from "./summary";
@@ -93,12 +91,6 @@ export interface BusinessData {
     socialMedia: string;
     whatsapp: string;
   };
-  chatbotConfig: {
-    objective: string;
-    tone: "formal" | "casual" | "friendly" | "professional";
-    style: string;
-    personality: string;
-  };
   documents: File[];
 }
 
@@ -140,12 +132,6 @@ const initialData: BusinessData = {
     phone: "",
     socialMedia: "",
     whatsapp: "",
-  },
-  chatbotConfig: {
-    objective: "",
-    tone: "professional",
-    style: "",
-    personality: "",
   },
   documents: [],
 };
@@ -221,12 +207,6 @@ export const formSchema = z.object({
       answer: z.string().optional(),
     }),
   }),
-  chatbotConfig: z.object({
-    objective: z.string().min(1, "Objective is required"),
-    tone: z.enum(["formal", "casual", "friendly", "professional"]),
-    style: z.string().min(1, "Communication Style is required"),
-    personality: z.string().min(1, "Personality is required"),
-  }),
   documents: z.array(z.instanceof(File)).optional(),
 });
 
@@ -290,10 +270,6 @@ export default function FormWizard({
       Icon: <Smile />,
     },
     {
-      label: "Chatbot Configuration",
-      Icon: <Bot />,
-    },
-    {
       label: "Aditional Documents",
       Icon: <FileIcon />,
     },
@@ -311,7 +287,6 @@ export default function FormWizard({
         ? (["shippingLogistics"] as Array<keyof FormWizardData>)
         : []),
       "customerService",
-      "chatbotConfig",
       "documents",
     ];
 
@@ -530,10 +505,8 @@ function FormWizardStep({ step, form }: FormWizardStepProps) {
     case 3:
       return <CustomerService form={form} />;
     case 4:
-      return <ChatbotConfig form={form} />;
-    case 5:
       return <DocumentsStep form={form} />;
-    case 6:
+    case 5:
       return <Summary form={form} />;
     default:
       return null;

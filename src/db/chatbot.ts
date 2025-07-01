@@ -16,6 +16,8 @@ export async function createChatbot(
     slug,
     testMessagesCount,
     subscriptionId,
+    pdfInputTokens,
+    pdfOutputTokens,
   }: ChatbotInsert,
   trx: Transaction
 ) {
@@ -30,8 +32,14 @@ export async function createChatbot(
       slug,
       testMessagesCount,
       subscriptionId,
+      pdfInputTokens,
+      pdfOutputTokens,
     })
-    .returning({ id: chatbots.id });
+    .returning({
+      id: chatbots.id,
+      pdfInputTokens: chatbots.pdfInputTokens,
+      pdfOutputTokens: chatbots.pdfOutputTokens,
+    });
 }
 
 export async function getChatbotBySlug({ slug }: { slug: string }) {
@@ -163,20 +171,29 @@ export async function deleteChatbotAndBusiness({
   await db.delete(businesses).where(eq(businesses.id, businessId));
 }
 
-export async function updateChatbotPdfTokens({
-  pdfInputTokens,
-  pdfOutputTokens,
-  chatbotId,
-}: {
-  pdfInputTokens: number;
-  pdfOutputTokens: number;
-  chatbotId: number;
-}) {
-  await db
+export async function updateChatbotPdfTokens(
+  {
+    pdfInputTokens,
+    pdfOutputTokens,
+    chatbotId,
+  }: {
+    pdfInputTokens: number;
+    pdfOutputTokens: number;
+    chatbotId: number;
+  },
+  trx?: Transaction
+) {
+  console.log("Updating chatbot PDF tokens", {
+    pdfInputTokens,
+    pdfOutputTokens,
+    chatbotId,
+  });
+  const database = trx ?? db;
+  await database
     .update(chatbots)
     .set({
-      pdfInputTokens: sql`${chatbots.pdfInputTokens} + ${pdfInputTokens}`,
-      pdfOutputTokens: sql`${chatbots.pdfOutputTokens} + ${pdfOutputTokens}`,
+      pdfInputTokens,
+      pdfOutputTokens,
     })
     .where(eq(chatbots.id, chatbotId));
 }

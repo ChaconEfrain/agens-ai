@@ -111,6 +111,11 @@
   --sidebar-ring: oklch(0.552 0.016 285.938);
 }
 
+.toaster button[data-close-button=true]:hover {
+  color: white !important;
+  background-color: var(--primary) !important;
+}
+
 
 @layer base {
   * {

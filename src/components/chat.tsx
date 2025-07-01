@@ -33,11 +33,12 @@ export default function Chat({
 }: Props) {
   const sessionId = useChatSession(chatbotSlug);
   const [messages, setMessages] = useState<Message[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loadingMessages, setLoadingMessages] = useState(false);
   const [isThinking, setIsThinking] = useState(false);
   const [token, setToken] = useState("");
   const [testMessageCount, setTestMessageCount] = useState(0);
   const [isError, setIsError] = useState(false);
+  const [isMessageLimit, setIsMessageLimit] = useState(false);
   const scrollDiv = useRef<HTMLDivElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
   const pathname = usePathname();
@@ -57,7 +58,7 @@ export default function Chat({
   }, []);
 
   useEffect(() => {
-    setLoading(true);
+    setLoadingMessages(true);
     (async () => {
       const [latestMessages, testMessageCount] = await Promise.all([
         getActiveMessagesAction({
@@ -71,7 +72,7 @@ export default function Chat({
 
       setMessages(latestMessages);
       setTestMessageCount(testMessageCount);
-      setLoading(false);
+      setLoadingMessages(false);
     })();
   }, [sessionId, chatbotId]);
 
@@ -96,10 +97,6 @@ export default function Chat({
     if (isThinking) return;
     setIsThinking(true);
     e.preventDefault();
-    if (isError) {
-      setMessages((prev) => prev.slice(0, -2));
-      setIsError(false);
-    }
     const form = e.target as HTMLFormElement;
     const formData = new FormData(form);
     const message = formData.get("chat-prompt")?.toString();
@@ -121,11 +118,7 @@ export default function Chat({
 
     if (answer) {
       if (answer === "limit reached" && formRef.current) {
-        (
-          formRef.current.elements.namedItem(
-            "chat-prompt"
-          ) as HTMLTextAreaElement
-        ).disabled = true;
+        setIsMessageLimit(true);
         setMessages((prev) => {
           const updated = [...prev];
 
@@ -159,11 +152,7 @@ export default function Chat({
           const updated = [...prev];
 
           const lastIndex = updated.length - 1;
-          updated[lastIndex] = {
-            ...updated[lastIndex],
-            response: answer.response,
-            message,
-          };
+          updated[lastIndex] = answer;
 
           return updated;
         });
@@ -179,8 +168,8 @@ export default function Chat({
   };
 
   const handleResendMessage = async () => {
-    const { message } = messages[messages.length - 2];
-    setMessages((prev) => prev.slice(0, -2));
+    const { message } = messages[messages.length - 1];
+    setMessages((prev) => prev.slice(0, -1));
     if (formRef.current) {
       const textarea = formRef.current.elements.namedItem(
         "chat-prompt"
@@ -230,11 +219,13 @@ export default function Chat({
         variant="ghost"
         onClick={clearChat}
         disabled={messages.length === 0}
+        title="Clear chat"
+        aria-label="Clear chat"
       >
         <Trash />
       </Button>
       <CardContent className="flex-grow overflow-y-scroll h-full max-h-11/12 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-accent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-muted-foreground pt-4">
-        {loading ? (
+        {loadingMessages ? (
           <div aria-hidden className="animate-pulse flex flex-col space-y-4">
             <div
               aria-hidden
@@ -288,7 +279,7 @@ export default function Chat({
             className="resize-none max-h-[150px] bg-transparent p-3 pb-1.5 text-sm outline-none ring-0 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-accent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-muted-foreground shadow-none border-none min-h-auto focus-visible:ring-[0px]"
             onInput={handleTextAreaResize}
             onKeyDown={handleKeyDown}
-            disabled={loading || isThinking}
+            disabled={loadingMessages || isMessageLimit}
           />
           <div className="self-end flex items-center gap-2">
             {isError && (

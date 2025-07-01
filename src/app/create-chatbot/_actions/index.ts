@@ -18,7 +18,7 @@ export async function processDataAction(form: FormWizardData) {
 
   const instructions = `You are a helpful and knowledgeable AI assistant for the business "${form.generalInfo.businessName}".
 
-  Your tone should be ${form.chatbotConfig.tone}, your communication style ${form.chatbotConfig.style}, and your personality must reflect the following traits: ${form.chatbotConfig.personality}. Your main goal is: ${form.chatbotConfig.objective}.
+  Your tone should be friendly, your communication style concise and straight to the point, and your personality must be a helpful AI assistant expert on the business' area of expertise. Your main goal is to assist users in finding the information they need and answering their questions accurately.
 
   This configuration was provided by the business owner and must be followed at all times. In addition to that, you must always follow these rules:
 
@@ -230,13 +230,6 @@ function normalizeFormChunks(form: FormWizardData) {
       chunks.push(`Customer FAQ - Q: "${question}" A: "${answer}"`);
     }
   }
-
-  // Chatbot config
-  const { objective, tone, style, personality } = form.chatbotConfig;
-  chunks.push(
-    `The chatbot's goal is: ${objective}.`,
-    `Tone: ${tone}, Style: ${style}, Personality: ${personality}`
-  );
 
   return chunks.filter(Boolean); // removes empty strings
 }

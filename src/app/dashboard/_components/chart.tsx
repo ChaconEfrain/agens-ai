@@ -18,15 +18,23 @@ interface Props {
   }[]
 }
 
-export default function Chart({messagesPerDay}: Props) {
+export default function Chart({ messagesPerDay }: Props) {
+  //TODO: Use Chart component from shadCN
   return (
     <ResponsiveContainer width="100%" height={400}>
-      <LineChart data={messagesPerDay} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
+      <LineChart
+        data={messagesPerDay}
+        margin={{ top: 10, right: 20, left: 0, bottom: 0 }}
+      >
         <CartesianGrid strokeDasharray="3 3" />
         <XAxis dataKey="date" fontSize={12} />
         <YAxis allowDecimals={false} fontSize={12} />
         <Tooltip
-          contentStyle={{ backgroundColor: "oklch(0.21 0.006 285.885)", borderRadius: "8px", border: "none" }}
+          contentStyle={{
+            backgroundColor: "oklch(0.21 0.006 285.885)",
+            borderRadius: "8px",
+            border: "none",
+          }}
           labelStyle={{ color: "#f3f4f6" }}
           itemStyle={{ color: "#f3f4f6" }}
         />
@@ -40,5 +48,5 @@ export default function Chart({messagesPerDay}: Props) {
         />
       </LineChart>
     </ResponsiveContainer>
-  )
+  );
 }
