@@ -1,18 +1,13 @@
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import {
-  Bot,
-  Box,
-  Check,
-  File,
-  FileText,
-  Info,
-  LoaderCircle,
-  Smile,
-} from "lucide-react";
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Box, Check, File, FileText, Info, Smile } from "lucide-react";
 import { UseFormReturn } from "react-hook-form";
 import { FormWizardData } from "./form-wizard";
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 
 interface SummaryProps {
   form: UseFormReturn<FormWizardData>;
@@ -193,39 +188,6 @@ export default function Summary({ form }: SummaryProps) {
                   )
                 )}
               </ul>
-            </div>
-          )}
-        </div>
-
-        <div className="space-y-4">
-          <h3 className="text-lg font-medium flex items-center gap-2">
-            Chatbot Configuration
-            <Bot />
-          </h3>
-          {form.getValues("chatbotConfig.objective") && (
-            <div>
-              <p className=" font-medium text-muted-foreground">Objective</p>
-              <p className="">{form.getValues("chatbotConfig.objective")}</p>
-            </div>
-          )}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <p className=" font-medium text-muted-foreground">Tone</p>
-              <p className="capitalize">
-                {form.getValues("chatbotConfig.tone")}
-              </p>
-            </div>
-            {form.getValues("chatbotConfig.style") && (
-              <div>
-                <p className=" font-medium text-muted-foreground">Style</p>
-                <p>{form.getValues("chatbotConfig.style")}</p>
-              </div>
-            )}
-          </div>
-          {form.getValues("chatbotConfig.personality") && (
-            <div>
-              <p className=" font-medium text-muted-foreground">Personality</p>
-              <p className="">{form.getValues("chatbotConfig.personality")}</p>
             </div>
           )}
         </div>
