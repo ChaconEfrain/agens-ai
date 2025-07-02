@@ -51,7 +51,11 @@ export function ChatbotCardMenu({ businessId, chatbotSlug }: Props) {
                 Test chatbot
               </Link>
             </DropdownMenuItem>
-            <DropdownMenuItem>Set due date...</DropdownMenuItem>
+            <DropdownMenuItem>
+              <Link href={`/script/${chatbotSlug}`} className="w-full">
+                Chatbot script
+              </Link>
+            </DropdownMenuItem>
             <DropdownMenuItem className="text-red-600">
               <button
                 className="flex items-center gap-1 w-full cursor-pointer"
