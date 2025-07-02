@@ -129,23 +129,22 @@ export async function rewriteQuestionForEmbedding({
 
     Rules:
     - Detect the language of the original question and rewrite it in the same language.
-    - If the question is already clear, return it unchanged.
+    - If the question is already clear, don't change it by adding stuff from the conversation history.
     - If no history is provided, return the original question unchanged.
     - If you're not sure how to rewrite it, return the original question unchanged.
-    - Very important: Always return the question in the same language as the original.
 
     Examples:
     - User question: "What is the capital?"
-    - History: "En dónde está Francia?"
+    - Previous question: "Where is France?"
     - Rewritten question: "What is the capital of France?"
   `;
 
   const userPrompt = `
-    Conversation history ({{historyMessages}}):
-    ${history}
+    Conversation history:
+    {{${history}}}
 
-    Original user question ({{userQuestion}}):
-    "${userQuestion}"
+    Original user question:
+    {{${userQuestion}}}
 
     Rewritten question:
   `;
