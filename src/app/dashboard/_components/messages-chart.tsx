@@ -7,28 +7,16 @@ import { getCurrentPeriodMessagesPerDayByClerkId } from '@/db/messages';
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
-const mockMessages = [
-  { date: "2023-10-01", messages: 5 },
-  { date: "2023-10-02", messages: 8 },
-  { date: "2023-10-03", messages: 12 },
-  { date: "2023-10-04", messages: 7 },
-  { date: "2023-10-05", messages: 10 },
-  { date: "2023-10-06", messages: 15 },
-  { date: "2023-10-07", messages: 20 },
-];
-
 export default async function MessagesChart() {
-  // const { userId } = await auth();
+  const { userId } = await auth();
 
-  // if (!userId) {
-  //   redirect("/");
-  // }
+  if (!userId) {
+    redirect("/");
+  }
 
-  // const messages = await getCurrentPeriodMessagesPerDayByClerkId({
-  //   clerkId: userId,
-  // });
-
-  // console.log("Messages per day:", messages);
+  const messages = await getCurrentPeriodMessagesPerDayByClerkId({
+    clerkId: userId,
+  });
 
   return (
     <section className="col-start-1 col-end-3">
@@ -44,7 +32,7 @@ export default async function MessagesChart() {
           </Link>
         </CardHeader>
         <CardContent>
-          <Chart messagesPerDay={mockMessages} />
+          <Chart messagesPerDay={messages} />
         </CardContent>
       </Card>
     </section>

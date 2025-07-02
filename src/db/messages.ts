@@ -135,30 +135,29 @@ export async function getCurrentPeriodMessagesPerDayByClerkId({
 
     const chatbotIds = chatbots.map((bot) => bot.id);
 
-    const rows = await db
-      .select({
-        date: sql<string>`to_char(date_trunc('day', ${messages.createdAt}), 'YYYY-MM-DD')`,
-        messages: sql<number>`COUNT(*)`,
-      })
-      .from(messages)
-      .where(
-        and(
-          inArray(messages.chatbotId, chatbotIds),
-          between(messages.createdAt, sub.periodStart, sub.periodEnd),
-          eq(messages.isTest, false)
-        )
-      )
-      .groupBy(sql`date_trunc('day', ${messages.createdAt})`)
-      .orderBy(sql`date_trunc('day', ${messages.createdAt}) ASC`);
+    const rows = await db.query.messages.findMany({
+      where: and(
+        inArray(messages.chatbotId, chatbotIds),
+        between(messages.createdAt, sub.periodStart, sub.periodEnd),
+        eq(messages.isTest, false)
+      ),
+      columns: {
+        createdAt: true,
+      },
+      orderBy: asc(messages.createdAt),
+    });
 
-    return rows.map((row) => ({
-      date: new Date(row.date + "T00:00:00Z").toLocaleString("en-US", {
-        month: "short",
-        day: "numeric",
-        timeZone: "UTC",
-      }),
-      messages: row.messages,
-    }));
+    return rows.reduce((acc, message) => {
+      const date = new Date(message.createdAt);
+      const [dateString] = date.toLocaleString().split(",");
+      const existingEntry = acc.find((entry) => entry.date === dateString);
+      if (existingEntry) {
+        existingEntry.messages += 1;
+      } else {
+        acc.push({ date: dateString, messages: 1 });
+      }
+      return acc;
+    }, [] as { date: string; messages: number }[]);
   } catch (error) {
     console.error(
       "Error on getCurrentPeriodMessagesPerDayByClerkId --> ",
