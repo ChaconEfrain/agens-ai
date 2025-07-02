@@ -28,7 +28,7 @@ export default function RootLayout({
       <SubscriptionContextProvider>
         <html lang="en">
           <body className={`${outfit.variable} antialiased bg-transparent`}>
-            <NextTopLoader color="#18181b" height={5} />
+            <NextTopLoader color="#18181b" height={5} showSpinner={false} />
             <AppWrapper>
               <Nav />
               {children}
