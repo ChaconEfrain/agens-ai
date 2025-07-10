@@ -280,6 +280,7 @@ export default function Chat({
             onInput={handleTextAreaResize}
             onKeyDown={handleKeyDown}
             disabled={loadingMessages || isMessageLimit}
+            spellCheck={false}
           />
           <div className="self-end flex items-center gap-2">
             {isError && (
