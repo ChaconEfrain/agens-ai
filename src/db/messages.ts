@@ -167,6 +167,42 @@ export async function getCurrentPeriodMessagesPerDayByClerkId({
   }
 }
 
+export async function getCurrentPeriodMessagesByClerkId({
+  clerkId,
+}: {
+  clerkId: string;
+}) {
+  try {
+    const sub = await getSubscriptionByClerkId({ clerkId });
+    const chatbots = await getChatbotsByClerkId({ clerkId });
+
+    if (!sub) throw new Error("No subscription found");
+    if (chatbots.length === 0) return [];
+
+    const chatbotIds = chatbots.map((bot) => bot.id);
+
+    const rows = await db.query.messages.findMany({
+      where: and(
+        inArray(messages.chatbotId, chatbotIds),
+        between(messages.createdAt, sub.periodStart, sub.periodEnd),
+        eq(messages.isTest, false)
+      ),
+      with: {
+        chatbot: true,
+      },
+      orderBy: desc(messages.createdAt),
+    });
+
+    return rows;
+  } catch (error) {
+    console.error(
+      "Error on getCurrentPeriodMessagesPerDayByClerkId --> ",
+      error
+    );
+    return [];
+  }
+}
+
 export async function updateMessageRating({
   messageId,
   rating,

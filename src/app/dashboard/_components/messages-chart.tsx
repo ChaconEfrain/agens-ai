@@ -1,19 +1,11 @@
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import React from 'react'
-import Chart from './chart'
-import { auth } from '@clerk/nextjs/server'
-import { redirect } from 'next/navigation';
-import { getCurrentPeriodMessagesPerDayByClerkId } from '@/db/messages';
+import Chart from "./chart";
+import { getCurrentPeriodMessagesPerDayByClerkId } from "@/db/messages";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
-export default async function MessagesChart() {
-  const { userId } = await auth();
-
-  if (!userId) {
-    redirect("/");
-  }
-
+export default async function MessagesChart({ userId }: { userId: string }) {
   const messages = await getCurrentPeriodMessagesPerDayByClerkId({
     clerkId: userId,
   });

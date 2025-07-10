@@ -6,26 +6,12 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { ALLOWED_MESSAGE_QUANTITY } from "@/consts/subscription";
-import { getSubscriptionByClerkId } from "@/db/subscriptions";
+import { Subscription } from "@/db/schema";
 import { cn } from "@/lib/utils";
-import { auth } from "@clerk/nextjs/server";
 import { Info, Slash } from "lucide-react";
-import { redirect } from "next/navigation";
 import React from "react";
 
-export default async function UserPlan() {
-  const { userId } = await auth();
-
-  if (!userId) {
-    redirect("/");
-  }
-
-  const sub = await getSubscriptionByClerkId({ clerkId: userId });
-
-  if (!sub) {
-    redirect("/");
-  }
-
+export default async function UserPlan({ sub }: { sub: Subscription }) {
   return (
     <>
       <section>
