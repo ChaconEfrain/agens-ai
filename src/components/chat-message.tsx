@@ -12,6 +12,7 @@ interface ChatMessageProps {
   liked: boolean | null;
   styles?: ChatbotStyles;
   isMock?: boolean;
+  isConversation?: boolean;
 }
 
 export default function ChatMessage({
@@ -21,12 +22,15 @@ export default function ChatMessage({
   liked,
   styles,
   isMock,
+  isConversation,
 }: ChatMessageProps) {
   const [rating, setRating] = useState<"like" | "dislike" | null>(
     liked ? "like" : liked === false ? "dislike" : null
   );
 
   const handleClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    if (isConversation) return;
+
     const id = e.currentTarget.id;
     const current = rating;
     if (!["like", "dislike"].includes(id)) return;

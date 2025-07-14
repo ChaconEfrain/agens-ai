@@ -1,6 +1,6 @@
 import { Transaction } from "@/types/db-types";
 import { db } from ".";
-import { MessageInsert, messages } from "./schema";
+import { Chatbot, MessageInsert, messages } from "./schema";
 import { and, asc, between, count, desc, eq, inArray, sql } from "drizzle-orm";
 import { getSubscriptionByClerkId } from "./subscriptions";
 import { getChatbotsByClerkId } from "./chatbot";
@@ -127,8 +127,10 @@ export async function getCurrentPeriodMessagesPerDayByClerkId({
   clerkId: string;
 }) {
   try {
-    const sub = await getSubscriptionByClerkId({ clerkId });
-    const chatbots = await getChatbotsByClerkId({ clerkId });
+    const [sub, chatbots] = await Promise.all([
+      getSubscriptionByClerkId({ clerkId }),
+      getChatbotsByClerkId({ clerkId }),
+    ]);
 
     if (!sub) throw new Error("No subscription found");
     if (chatbots.length === 0) return [];
@@ -149,7 +151,10 @@ export async function getCurrentPeriodMessagesPerDayByClerkId({
 
     return rows.reduce((acc, message) => {
       const date = new Date(message.createdAt);
-      const [dateString] = date.toLocaleString().split(",");
+      const dateString = date.toLocaleString(undefined, {
+        month: "short",
+        day: "numeric",
+      });
       const existingEntry = acc.find((entry) => entry.date === dateString);
       if (existingEntry) {
         existingEntry.messages += 1;
@@ -167,16 +172,14 @@ export async function getCurrentPeriodMessagesPerDayByClerkId({
   }
 }
 
-export async function getCurrentPeriodMessagesByClerkId({
+export async function getAllMessagesByClerkId({
   clerkId,
 }: {
   clerkId: string;
 }) {
   try {
-    const sub = await getSubscriptionByClerkId({ clerkId });
     const chatbots = await getChatbotsByClerkId({ clerkId });
 
-    if (!sub) throw new Error("No subscription found");
     if (chatbots.length === 0) return [];
 
     const chatbotIds = chatbots.map((bot) => bot.id);
@@ -184,7 +187,6 @@ export async function getCurrentPeriodMessagesByClerkId({
     const rows = await db.query.messages.findMany({
       where: and(
         inArray(messages.chatbotId, chatbotIds),
-        between(messages.createdAt, sub.periodStart, sub.periodEnd),
         eq(messages.isTest, false)
       ),
       with: {
@@ -201,6 +203,156 @@ export async function getCurrentPeriodMessagesByClerkId({
     );
     return [];
   }
+}
+
+export async function getCurrentPeriodMessagesPerChatbotPerDayByClerkId({
+  clerkId,
+}: {
+  clerkId: string;
+}) {
+  try {
+    const [sub, chatbots] = await Promise.all([
+      getSubscriptionByClerkId({ clerkId }),
+      getChatbotsByClerkId({ clerkId }),
+    ]);
+
+    if (!sub) throw new Error("No subscription found");
+    if (chatbots.length === 0) return [];
+
+    const chatbotIds = chatbots.map((bot) => bot.id);
+
+    const rows = await db.query.messages.findMany({
+      where: and(
+        inArray(messages.chatbotId, chatbotIds),
+        between(messages.createdAt, sub.periodStart, sub.periodEnd),
+        eq(messages.isTest, false)
+      ),
+      orderBy: asc(messages.createdAt),
+    });
+
+    return rows.reduce((acc, message) => {
+      const date = new Date(message.createdAt);
+      const dateString = date.toLocaleString(undefined, {
+        month: "short",
+        day: "numeric",
+      });
+      const chatbot = chatbots.find(
+        (bot) => bot.id === message.chatbotId
+      ) as Chatbot;
+      const existingEntry = acc.find(
+        (entry) =>
+          entry.chatbotSlug === chatbot.slug && entry.date === dateString
+      );
+      if (existingEntry) {
+        existingEntry.messages += 1;
+      } else {
+        acc.push({ date: dateString, chatbotSlug: chatbot.slug, messages: 1 });
+      }
+      return acc;
+    }, [] as { date: string; chatbotSlug: string; messages: number }[]);
+  } catch (error) {
+    console.error(
+      "Error on getCurrentPeriodMessagesPerChatbotPerDayByClerkId --> ",
+      error
+    );
+    return [];
+  }
+}
+
+export async function getCurrentPeriodConversationsPerChatbotPerDayByClerkId({
+  clerkId,
+}: {
+  clerkId: string;
+}) {
+  try {
+    const [sub, chatbots] = await Promise.all([
+      getSubscriptionByClerkId({ clerkId }),
+      getChatbotsByClerkId({ clerkId }),
+    ]);
+
+    if (!sub) throw new Error("No subscription found");
+    if (chatbots.length === 0) return [];
+
+    const chatbotIds = chatbots.map((bot) => bot.id);
+
+    const rows = await db.query.messages.findMany({
+      where: and(
+        inArray(messages.chatbotId, chatbotIds),
+        between(messages.createdAt, sub.periodStart, sub.periodEnd),
+        eq(messages.isTest, false)
+      ),
+      orderBy: asc(messages.createdAt),
+    });
+
+    const conversationMap = new Map<
+      string,
+      {
+        date: string;
+        chatbotSlug: string;
+        conversations: number;
+        sessionId: string;
+      }
+    >();
+
+    for (const message of rows) {
+      const date = new Date(message.createdAt as Date);
+      const dateString = date.toLocaleString(undefined, {
+        month: "short",
+        day: "numeric",
+      });
+      const chatbot = chatbots.find(
+        (bot) => bot.id === message.chatbotId
+      ) as Chatbot;
+      const key = `${dateString}-${message.sessionId}-${chatbot.slug}`;
+
+      if (!conversationMap.has(key)) {
+        conversationMap.set(key, {
+          date: dateString,
+          chatbotSlug: chatbot.slug,
+          conversations: 1,
+          sessionId: message.sessionId,
+        });
+      }
+    }
+
+    const aggregateMap = new Map<
+      string,
+      { date: string; chatbotSlug: string; conversations: number }
+    >();
+
+    for (const convo of conversationMap.values()) {
+      const aggKey = `${convo.date}-${convo.chatbotSlug}`;
+      if (aggregateMap.has(aggKey)) {
+        aggregateMap.get(aggKey)!.conversations += 1;
+      } else {
+        aggregateMap.set(aggKey, {
+          date: convo.date,
+          chatbotSlug: convo.chatbotSlug,
+          conversations: 1,
+        });
+      }
+    }
+
+    return Array.from(aggregateMap.values());
+  } catch (error) {
+    console.error(
+      "Error on getCurrentPeriodConversationsPerChatbotPerDayByClerkId --> ",
+      error
+    );
+    return [];
+  }
+}
+
+export async function getConversationBySessionId({
+  sessionId,
+}: {
+  sessionId: string;
+}) {
+  const conversation = await db.query.messages.findMany({
+    where: eq(messages.sessionId, sessionId),
+  });
+
+  return conversation;
 }
 
 export async function updateMessageRating({

@@ -10,6 +10,7 @@
 ## Dashboard
 - [ ] Show some graphics
 - [ ] Manage chatbots (activate/deactivate, styles, context data, etc)
+- [ ] Use offset to improve performance when we have thousands of messages.
 
 # Tasks
 - [ ] Create user on DB with clerk webhook

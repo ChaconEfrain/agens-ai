@@ -28,24 +28,26 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
-import { useState } from "react"
-import { Input } from "@/components/ui/input"
-import { DataTablePagination } from "./data-table-pagination"
-import { exportToExcel } from "@/lib/utils"
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { useState } from "react";
+import { Input } from "@/components/ui/input";
+import { DataTablePagination } from "./data-table-pagination";
+import { exportToExcel } from "@/lib/utils";
 
 interface DataTableProps<TData, TValue> {
-  columns: ColumnDef<TData, TValue>[]
-  data: TData[]
+  columns: ColumnDef<TData, TValue>[];
+  data: TData[];
+  chatbots: string[];
 }
 
 export default function DataTable<TData, TValue>({
   columns,
   data,
+  chatbots,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
 
   const table = useReactTable({
     data,
@@ -62,79 +64,113 @@ export default function DataTable<TData, TValue>({
       columnFilters,
       columnVisibility,
     },
-  })
+  });
 
   return (
     <Card className="min-h-[600px]">
-      <CardHeader className="flex mb-4 justify-between">
-        <div className="flex gap-4">
-          {table
-            .getAllColumns()
-            .filter((col) => ["user message", "ai response"].includes(col.id) && col.getCanFilter())
-            .map((column) => (
-              <Input
-                key={column.id}
-                placeholder={`Filter by ${column.id}`}
-                value={(column.getFilterValue() ?? "") as string}
-                onChange={(e) => column.setFilterValue(e.target.value)}
-                className="w-[200px] placeholder:capitalize"
-              />
-            ))}
-        </div>
-        <div className="flex items-center gap-4">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="ml-auto">
-                Columns
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              {table
-                .getAllColumns()
-                .filter(
-                  (column) => column.getCanHide()
-                )
-                .map((column) => {
-                  return (
-                    <DropdownMenuCheckboxItem
-                      key={column.id}
-                      className="capitalize"
-                      checked={column.getIsVisible()}
-                      onCheckedChange={(value) =>
-                        column.toggleVisibility(!!value)
-                      }
-                    >
-                      {column.id}
-                    </DropdownMenuCheckboxItem>
-                  )
-                })}
-            </DropdownMenuContent>
-          </DropdownMenu>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button>
-                Export Data
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem>
-                <button
-                  onClick={() => exportToExcel(table, 'messages.xlsx', true)}
-                  className="w-full text-left"
-                >
-                  All data
-                </button>
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <button
-                  onClick={() => exportToExcel(table, `messages-page${table.getState().pagination.pageIndex + 1}.xlsx`)}
-                  className="w-full text-left"
-                >
-                  This page
-                </button>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+      <CardHeader className="flex flex-col gap-4 mb-4">
+        <h2 className="text-2xl font-semibold">All messages</h2>
+        <div className="flex justify-between w-full">
+          <div className="flex gap-4">
+            {table
+              .getAllColumns()
+              .filter(
+                (col) =>
+                  ["user message", "ai response"].includes(col.id) &&
+                  col.getCanFilter()
+              )
+              .map((column) => (
+                <Input
+                  key={column.id}
+                  placeholder={`Filter by ${column.id}`}
+                  value={(column.getFilterValue() ?? "") as string}
+                  onChange={(e) => column.setFilterValue(e.target.value)}
+                  className="w-[200px] placeholder:capitalize"
+                />
+              ))}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" className="ml-auto">
+                  Filter by chatbots
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                {chatbots.map((slug) => (
+                  <DropdownMenuCheckboxItem
+                    key={slug}
+                    checked={
+                      table.getColumn("chatbot")?.getFilterValue() === slug
+                    }
+                    onCheckedChange={(value) =>
+                      table
+                        .getColumn("chatbot")
+                        ?.setFilterValue(value ? slug : undefined)
+                    }
+                  >
+                    {slug}
+                  </DropdownMenuCheckboxItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+          <div className="flex items-center gap-4">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" className="ml-auto">
+                  Columns
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                {table
+                  .getAllColumns()
+                  .filter((column) => column.getCanHide())
+                  .map((column) => {
+                    return (
+                      <DropdownMenuCheckboxItem
+                        key={column.id}
+                        className="capitalize"
+                        checked={column.getIsVisible()}
+                        onCheckedChange={(value) =>
+                          column.toggleVisibility(!!value)
+                        }
+                      >
+                        {column.id}
+                      </DropdownMenuCheckboxItem>
+                    );
+                  })}
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button>Export Data</Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem>
+                  <button
+                    onClick={() => exportToExcel(table, "messages.xlsx", true)}
+                    className="w-full text-left"
+                  >
+                    All data
+                  </button>
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <button
+                    onClick={() =>
+                      exportToExcel(
+                        table,
+                        `messages-page${
+                          table.getState().pagination.pageIndex + 1
+                        }.xlsx`
+                      )
+                    }
+                    className="w-full text-left"
+                  >
+                    This page
+                  </button>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
       </CardHeader>
       <CardContent className="h-full">
@@ -153,7 +189,7 @@ export default function DataTable<TData, TValue>({
                               header.getContext()
                             )}
                       </TableHead>
-                    )
+                    );
                   })}
                 </TableRow>
               ))}
@@ -167,14 +203,20 @@ export default function DataTable<TData, TValue>({
                   >
                     {row.getVisibleCells().map((cell) => (
                       <TableCell key={cell.id}>
-                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
                       </TableCell>
                     ))}
                   </TableRow>
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={columns.length} className="h-24 text-center">
+                  <TableCell
+                    colSpan={columns.length}
+                    className="h-24 text-center"
+                  >
                     No results.
                   </TableCell>
                 </TableRow>
@@ -185,5 +227,5 @@ export default function DataTable<TData, TValue>({
       </CardContent>
       <DataTablePagination table={table} />
     </Card>
-  )
+  );
 }
