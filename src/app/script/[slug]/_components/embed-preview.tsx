@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/card";
 import { Globe } from "lucide-react";
 import React, { useEffect, useState } from "react";
-import MockChat from "./mock-chat";
+import MockChat from "@/components/mock-chat";
 import { ChatbotStyles } from "@/types/embedded-chatbot";
 import { sanitizeSvg } from "@/lib/utils";
 
