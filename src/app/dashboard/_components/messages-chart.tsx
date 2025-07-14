@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import React from 'react'
-import Chart from "./chart";
+import CurrentPeriodChart from "./current-period-chart";
 import { getCurrentPeriodMessagesPerDayByClerkId } from "@/db/messages";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
@@ -24,7 +24,7 @@ export default async function MessagesChart({ userId }: { userId: string }) {
           </Link>
         </CardHeader>
         <CardContent>
-          <Chart messagesPerDay={messages} />
+          <CurrentPeriodChart messagesPerDay={messages} />
         </CardContent>
       </Card>
     </section>

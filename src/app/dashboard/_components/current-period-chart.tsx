@@ -18,8 +18,7 @@ interface Props {
   }[]
 }
 
-export default function Chart({ messagesPerDay }: Props) {
-  //TODO: Use Chart component from shadCN
+export default function CurrentPeriodChart({ messagesPerDay }: Props) {
   return (
     <ResponsiveContainer width="100%" height={400}>
       <LineChart
