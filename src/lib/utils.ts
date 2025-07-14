@@ -3,6 +3,7 @@ import { Table } from "@tanstack/react-table";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import DOMPurify from "dompurify";
+import { Message } from "@/db/schema";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -25,7 +26,7 @@ export function sanitizeSvg(svgString: string) {
   });
 }
 
-export function exportToExcel<T>(
+export function exportTableToExcel<T>(
   table: Table<T>,
   fileName: string,
   exportAll: boolean = false
@@ -56,6 +57,27 @@ export function exportToExcel<T>(
     });
     return rowData;
   });
+
+  const worksheet = XLSX.utils.json_to_sheet(data);
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, "messages");
+
+  XLSX.writeFile(workbook, fileName);
+}
+
+export function exportConversationToExcel(conversation: Message[]) {
+  const data = conversation.map((message) => ({
+    "User Message": message.message,
+    Response: message.response,
+    Rating:
+      message.liked === true
+        ? "Liked"
+        : message.liked === false
+        ? "Disliked"
+        : "No rating",
+    Date: message.createdAt ? new Date(message.createdAt).toLocaleString() : "",
+  }));
+  const fileName = "conversation.xlsx";
 
   const worksheet = XLSX.utils.json_to_sheet(data);
   const workbook = XLSX.utils.book_new();

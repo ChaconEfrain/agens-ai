@@ -350,6 +350,7 @@ export async function getConversationBySessionId({
 }) {
   const conversation = await db.query.messages.findMany({
     where: eq(messages.sessionId, sessionId),
+    orderBy: asc(messages.createdAt),
   });
 
   return conversation;

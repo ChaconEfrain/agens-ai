@@ -32,7 +32,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { DataTablePagination } from "./data-table-pagination";
-import { exportToExcel } from "@/lib/utils";
+import { exportTableToExcel } from "@/lib/utils";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -147,7 +147,9 @@ export default function DataTable<TData, TValue>({
               <DropdownMenuContent align="end">
                 <DropdownMenuItem>
                   <button
-                    onClick={() => exportToExcel(table, "messages.xlsx", true)}
+                    onClick={() =>
+                      exportTableToExcel(table, "messages.xlsx", true)
+                    }
                     className="w-full text-left"
                   >
                     All data
@@ -156,7 +158,7 @@ export default function DataTable<TData, TValue>({
                 <DropdownMenuItem>
                   <button
                     onClick={() =>
-                      exportToExcel(
+                      exportTableToExcel(
                         table,
                         `messages-page${
                           table.getState().pagination.pageIndex + 1

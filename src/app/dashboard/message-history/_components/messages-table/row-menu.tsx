@@ -21,13 +21,14 @@ import { getConversationBySessionIdAction } from "../../_actions";
 import { Chatbot, Message } from "@/db/schema";
 import { toast } from "sonner";
 import MockChat from "@/components/mock-chat";
+import { exportConversationToExcel } from "@/lib/utils";
 
 interface Props {
   sessionId: string;
   chatbot: Chatbot;
 }
 
-export default function RowMenu({sessionId, chatbot}: Props) {
+export default function RowMenu({ sessionId, chatbot }: Props) {
   const [openDrawer, setOpenDrawer] = useState(false);
   const [openDropdown, setOpenDropdown] = useState(false);
 
@@ -48,11 +49,7 @@ export default function RowMenu({sessionId, chatbot}: Props) {
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
-          <DropdownMenuItem
-            onClick={() =>
-              setOpenDrawer(true)
-            }
-          >
+          <DropdownMenuItem onClick={() => setOpenDrawer(true)}>
             View complete conversation
           </DropdownMenuItem>
           <DropdownMenuSeparator />
@@ -77,25 +74,32 @@ interface DrawerProps {
   chatbot: Chatbot;
 }
 
-function ConversationDrawer({setOpenDrawer, openDrawer, sessionId, chatbot}: DrawerProps) {
+function ConversationDrawer({
+  setOpenDrawer,
+  openDrawer,
+  sessionId,
+  chatbot,
+}: DrawerProps) {
   const [conversation, setConversation] = useState<Message[]>();
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const getConversation = async () => {
-      const {success, message, conversation} = await getConversationBySessionIdAction({sessionId});
+      const { success, message, conversation } =
+        await getConversationBySessionIdAction({ sessionId });
 
       if (!success) {
         toast.error(message, {
-          position: 'bottom-center'
+          position: "bottom-center",
         });
+        setConversation([]);
         setLoading(false);
         return;
       }
 
       setConversation(conversation ?? []);
       setLoading(false);
-    }
+    };
 
     if (!openDrawer) {
       document.body.style.pointerEvents = "";
@@ -108,15 +112,22 @@ function ConversationDrawer({setOpenDrawer, openDrawer, sessionId, chatbot}: Dra
     };
   }, [openDrawer]);
   return (
-    <Drawer
-      open={openDrawer}
-      onOpenChange={setOpenDrawer} 
-      direction="right"
-    >
+    <Drawer open={openDrawer} onOpenChange={setOpenDrawer} direction="right">
       <DrawerContent className="rounded-l-xl h-full overflow-hidden font-outfit">
         <DrawerHeader>
           <DrawerTitle>Chatbot {chatbot.slug}</DrawerTitle>
-          <DrawerDescription>{loading ? <span aria-hidden className="inline-block h-5 w-52 bg-muted-foreground animate-pulse" /> : `${new Intl.NumberFormat().format(conversation?.length ?? 0)} messages in this conversation`}</DrawerDescription>
+          <DrawerDescription>
+            {loading ? (
+              <span
+                aria-hidden
+                className="inline-block h-5 w-52 bg-muted-foreground animate-pulse"
+              />
+            ) : (
+              `${new Intl.NumberFormat().format(
+                conversation?.length ?? 0
+              )} messages in this conversation`
+            )}
+          </DrawerDescription>
         </DrawerHeader>
         <div className="h-full max-h-10/12 mt-auto px-4 pb-4">
           <MockChat
@@ -125,7 +136,19 @@ function ConversationDrawer({setOpenDrawer, openDrawer, sessionId, chatbot}: Dra
             loading={loading}
           />
         </div>
+        <DrawerFooter>
+          <Button
+            disabled={loading || !conversation}
+            onClick={() =>
+              loading || !conversation
+                ? null
+                : exportConversationToExcel(conversation)
+            }
+          >
+            Export Conversation Data
+          </Button>
+        </DrawerFooter>
       </DrawerContent>
     </Drawer>
-  )
+  );
 }
