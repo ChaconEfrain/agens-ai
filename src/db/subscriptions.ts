@@ -42,6 +42,19 @@ export async function updateSubscription({
   stripeItemId,
   stripeSubscriptionId,
 }: Omit<SubscriptionInsert, "messageCount" | "userId" | "stripeCustomerId">) {
+  const existing = await db.query.subscriptions.findFirst({
+    where: eq(subscriptions.stripeSubscriptionId, stripeSubscriptionId),
+  });
+
+  if (!existing) return;
+
+  const newPeriodStart = periodStart;
+  let currentMessageCount = existing.messageCount;
+
+  if (existing.periodStart.getTime() !== newPeriodStart.getTime()) {
+    currentMessageCount = 0;
+  }
+
   await db
     .update(subscriptions)
     .set({
@@ -50,10 +63,10 @@ export async function updateSubscription({
       status,
       plan,
       stripeItemId,
+      messageCount: currentMessageCount,
     })
-    .where(
-      eq(subscriptions.stripeSubscriptionId, stripeSubscriptionId as string)
-    );
+    .where(eq(subscriptions.stripeSubscriptionId, stripeSubscriptionId));
+
 }
 
 export async function cancelSubscription({
