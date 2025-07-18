@@ -215,6 +215,7 @@ export const messages = pgTable(
     ),
     index("messages_chatbot_id_idx").on(table.chatbotId),
     index("messages_created_at_idx").on(table.createdAt),
+    index("messages_is_test_idx").on(table.isTest),
   ]
 );
 

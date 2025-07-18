@@ -1,30 +1,40 @@
-import { Card, CardContent, CardHeader } from '@/components/ui/card'
-import React from 'react'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import React from "react";
 import CurrentPeriodChart from "./current-period-chart";
 import { getCurrentPeriodMessagesPerDayByClerkId } from "@/db/messages";
-import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { Subscription } from "@/db/schema";
+import CurrentPeriodDate from "./current-period-date";
 
-export default async function MessagesChart({ userId }: { userId: string }) {
+export default async function MessagesChart({
+  clerkId,
+  sub,
+}: {
+  clerkId: string;
+  sub: Subscription;
+}) {
   const messages = await getCurrentPeriodMessagesPerDayByClerkId({
-    clerkId: userId,
+    clerkId,
   });
 
   return (
     <section className="col-start-1 col-end-3">
-      <Card className="h-full">
-        <CardHeader className="flex items-center justify-between">
-          <h2 className="text-2xl font-semibold">Current period activity</h2>
-          <Link
-            href="/dashboard/message-history"
-            className="text-muted-foreground flex items-center gap-1 group"
-          >
-            View message history{" "}
-            <ArrowRight className="size-4 group-hover:translate-x-2 transition-transform duration-300" />
-          </Link>
+      <Card className="h-full relative">
+        <CardHeader>
+          <CardTitle>
+            <h2 className="text-2xl font-semibold">Current period activity</h2>
+          </CardTitle>
+          <CardDescription>
+            <CurrentPeriodDate end={sub.periodEnd} start={sub.periodStart} />
+          </CardDescription>
         </CardHeader>
         <CardContent>
-          <CurrentPeriodChart messagesPerDay={messages} />
+          <CurrentPeriodChart messagesPerDay={messages} clerkId={clerkId} />
         </CardContent>
       </Card>
     </section>

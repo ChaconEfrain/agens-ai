@@ -3,8 +3,8 @@ import { Card, CardHeader } from '@/components/ui/card'
 import { getChatbotsByClerkId } from "@/db/chatbot";
 import React from "react";
 
-export default async function UserChatbots({ userId }: { userId: string }) {
-  const chatbots = await getChatbotsByClerkId({ clerkId: userId });
+export default async function UserChatbots({ clerkId }: { clerkId: string }) {
+  const chatbots = await getChatbotsByClerkId({ clerkId });
 
   return (
     <section className="col-start-3 col-end-4 row-span-full">

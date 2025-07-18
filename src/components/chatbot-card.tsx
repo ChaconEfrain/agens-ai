@@ -3,7 +3,7 @@ import { Card, CardContent, CardFooter, CardHeader } from "./ui/card";
 import { Business, Chatbot, Message } from "@/db/schema";
 import { ChatbotCardMenu } from "./chatbot-card-menu";
 import { Prettify } from "@/types/helpers";
-import { MessageSquare } from "lucide-react";
+import ChatbotMessageCount from "./chatbot-message-count";
 
 interface Props {
   bot: Prettify<Chatbot & { messages: Message[] } & { business: Business }>;
@@ -35,11 +35,7 @@ export default function ChatbotCard({ bot }: Props) {
         </div>
       </CardContent>
       <CardFooter className="flex justify-end mt-auto">
-        <span className="text-sm text-muted-foreground flex items-center gap-2">
-          <MessageSquare className="size-5" />{" "}
-          {new Intl.NumberFormat().format(bot.currentPeriodMessagesCount)}{" "}
-          Messages this period
-        </span>
+        <ChatbotMessageCount bot={bot} />
       </CardFooter>
     </Card>
   );

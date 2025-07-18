@@ -1,6 +1,6 @@
 'use server'
 
-import { deleteChatbotAndBusiness } from "@/db/chatbot";
+import { deleteChatbotAndBusiness, getChatbotBySlug } from "@/db/chatbot";
 import { revalidatePath } from "next/cache";
 
 export async function deleteChatbotAndBusinessAction({
@@ -19,5 +19,15 @@ export async function deleteChatbotAndBusinessAction({
       success: false,
       message: "Something went wrong deleting your chatbot",
     };
+  }
+}
+
+export async function getChatbotBySlugAction({ slug }: { slug: string }) {
+  try {
+    const chatbot = await getChatbotBySlug({ slug });
+    return chatbot;
+  } catch (error) {
+    console.error("Error on getChatbotBySlugAction --> ", error);
+    return null;
   }
 }

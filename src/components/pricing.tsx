@@ -7,7 +7,7 @@ export default function Pricing() {
   return (
     <div>
       <div className="text-center max-w-3xl mx-auto mb-16">
-        <h1 className="text-4xl font-bold mb-4">Simple, transparent pricing</h1>
+        <h1 className="text-3xl font-bold mb-4">Simple, transparent pricing</h1>
         <p className="text-xl text-muted-foreground">
           Choose the perfect plan for your business needs. No hidden fees or
           surprises.

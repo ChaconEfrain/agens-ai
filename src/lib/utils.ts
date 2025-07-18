@@ -85,3 +85,12 @@ export function exportConversationToExcel(conversation: Message[]) {
 
   XLSX.writeFile(workbook, fileName);
 }
+
+export function isValidTimezone(timezone: string): boolean {
+  try {
+    Intl.DateTimeFormat(undefined, { timeZone: timezone });
+    return true;
+  } catch (error) {
+    return false;
+  }
+}

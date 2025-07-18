@@ -4,6 +4,7 @@ import { Chatbot, MessageInsert, messages } from "./schema";
 import { and, asc, between, count, desc, eq, inArray, sql } from "drizzle-orm";
 import { getSubscriptionByClerkId } from "./subscriptions";
 import { getChatbotsByClerkId } from "./chatbot";
+import { isValidTimezone } from "@/lib/utils";
 
 export async function createMessage(
   {
@@ -168,7 +169,7 @@ export async function getCurrentPeriodMessagesPerDayByClerkId({
       "Error on getCurrentPeriodMessagesPerDayByClerkId --> ",
       error
     );
-    return [];
+    return null;
   }
 }
 
@@ -369,4 +370,47 @@ export async function updateMessageRating({
       liked: rating === "like" ? true : rating === "dislike" ? false : null,
     })
     .where(eq(messages.id, messageId));
+}
+
+export async function getCurrentDayMessagesPerChatbotByClerkId({
+  clerkId,
+  timezone,
+}: {
+  clerkId: string;
+  timezone: string;
+}) {
+  if (!isValidTimezone(timezone)) {
+    throw new Error("Invalid timezone");
+  }
+
+  const chatbots = await getChatbotsByClerkId({ clerkId });
+  if (chatbots.length === 0) return [];
+
+  const chatbotIds = chatbots.map((bot) => bot.id);
+  const formattedIds = `{${chatbotIds.join(",")}}`;
+
+  const result = await db.execute(
+    sql`
+      SELECT c.slug as chatbot, COUNT(*)::int as messages
+      FROM messages m
+      JOIN chatbots c ON m.chatbot_id = c.id
+      WHERE m.chatbot_id = ANY(${formattedIds}::int[])
+        AND m.created_at >= date_trunc('day', now() at time zone ${timezone})
+        AND m.created_at < date_trunc('day', now() at time zone ${timezone}) + interval '1 day'
+      GROUP BY c.slug
+    `
+  );
+
+  const rows = result.rows as { chatbot: string; messages: number }[];
+
+  // Always return all chatbots, fill missing with 0
+  const chatbotMessageMap = new Map(
+    rows.map((row) => [row.chatbot, row.messages])
+  );
+  return chatbots
+    .map((bot) => ({
+      chatbot: bot.slug,
+      messages: chatbotMessageMap.get(bot.slug) ?? 0,
+    }))
+    .sort((a, b) => a.chatbot.localeCompare(b.chatbot));
 }

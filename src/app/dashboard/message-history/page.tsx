@@ -33,7 +33,7 @@ export default async function MessageHistoryPage() {
   return (
     <main className="flex flex-col gap-4 mt-6">
       <header>
-        <h1 className="text-3xl font-semibold">Message History Overview</h1>
+        <h1 className="text-3xl font-bold">Message History Overview</h1>
         <p className="text-muted-foreground">
           Explore all your messages and conversations from the current
           subscription period, along with your complete message archive.
