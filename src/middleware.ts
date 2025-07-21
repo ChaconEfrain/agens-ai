@@ -1,8 +1,29 @@
-import { clerkMiddleware } from '@clerk/nextjs/server';
+import { NextResponse } from "next/server";
+import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 
-export default clerkMiddleware({
-  clockSkewInMs: process.env.NODE_ENV === "development" ? 60000 : 5000,
-});
+const isProtectedRoute = createRouteMatcher([
+  "/((?!_next|.*\\..*|(?:embed)(?:$|/)|api/(?:embed-styles|public|webhooks)).*)",
+]);
+
+const ALLOWED_IPS = ["187.152.188.208"]; // <-- Pon aquí tus IPs autorizadas
+
+export default clerkMiddleware(
+  (_, req) => {
+    if (!isProtectedRoute(req)) return NextResponse.next();
+
+    const ip =
+      req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
+
+    if (process.env.NODE_ENV === "production" && !ALLOWED_IPS.includes(ip)) {
+      return new NextResponse("Coming soon", { status: 403 });
+    }
+
+    return NextResponse.next();
+  },
+  {
+    clockSkewInMs: process.env.NODE_ENV === "development" ? 60000 : 5000,
+  }
+);
 
 export const config = {
   matcher: [
