@@ -110,6 +110,19 @@ export async function updateChatbotCurrentMessageCount(
     .where(eq(chatbots.id, chatbotId));
 }
 
+export async function resetChatbotsCurrentMessageCountByUserId({
+  userId,
+}: {
+  userId: number;
+}) {
+  await db
+    .update(chatbots)
+    .set({
+      currentPeriodMessagesCount: 0,
+    })
+    .where(eq(chatbots.userId, userId));
+}
+
 export async function updateChatbotTestMessageCount(
   {
     chatbotId,

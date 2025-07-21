@@ -46,7 +46,7 @@ export async function updateSubscription({
     where: eq(subscriptions.stripeSubscriptionId, stripeSubscriptionId),
   });
 
-  if (!existing) return;
+  if (!existing) throw new Error("No subscription found");
 
   const newPeriodStart = periodStart;
   let currentMessageCount = existing.messageCount;
@@ -55,7 +55,7 @@ export async function updateSubscription({
     currentMessageCount = 0;
   }
 
-  await db
+  return await db
     .update(subscriptions)
     .set({
       periodStart,
@@ -65,7 +65,8 @@ export async function updateSubscription({
       stripeItemId,
       messageCount: currentMessageCount,
     })
-    .where(eq(subscriptions.stripeSubscriptionId, stripeSubscriptionId));
+    .where(eq(subscriptions.stripeSubscriptionId, stripeSubscriptionId))
+    .returning({ userId: subscriptions.userId });
 
 }
 

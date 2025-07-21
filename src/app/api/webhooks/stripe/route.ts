@@ -1,4 +1,7 @@
 import { STRIPE_WEBHOOK_EVENTS } from "@/consts/stripe";
+import {
+  resetChatbotsCurrentMessageCountByUserId,
+} from "@/db/chatbot";
 import { cancelSubscription, updateSubscription } from "@/db/subscriptions";
 import { createSubscriptionTransaction } from "@/db/transactions";
 import { stripe } from "@/services/stripe";
@@ -34,7 +37,7 @@ export async function POST(request: Request) {
     ) {
       const subscription = event.data.object;
 
-      await updateSubscription({
+      const [{ userId }] = await updateSubscription({
         periodEnd: new Date(
           subscription.items.data[0].current_period_end * 1000
         ),
@@ -49,6 +52,8 @@ export async function POST(request: Request) {
         stripeItemId: subscription.items.data[0].id,
         stripeSubscriptionId: subscription.id,
       });
+
+      await resetChatbotsCurrentMessageCountByUserId({ userId });
 
       return Response.json({ subscription, status: 200 });
     } else if (
