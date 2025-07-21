@@ -5,7 +5,7 @@ const isProtectedRoute = createRouteMatcher([
   "/((?!_next|.*\\..*|(?:embed)(?:$|/)|api/(?:embed-styles|public|webhooks)).*)",
 ]);
 
-const ALLOWED_IPS = ["187.152.188.208"]; // <-- Pon aquí tus IPs autorizadas
+const ALLOWED_IPS = ["187.152.188.208,192.168.1.254"];
 
 export default clerkMiddleware(
   (_, req) => {
