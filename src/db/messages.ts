@@ -138,17 +138,31 @@ export async function getCurrentPeriodMessagesPerDayByClerkId({
 
     const chatbotIds = chatbots.map((bot) => bot.id);
 
-    const rows = await db.query.messages.findMany({
-      where: and(
-        inArray(messages.chatbotId, chatbotIds),
-        between(messages.createdAt, sub.periodStart, sub.periodEnd),
-        eq(messages.isTest, false)
-      ),
-      columns: {
-        createdAt: true,
-      },
-      orderBy: asc(messages.createdAt),
-    });
+    let rows;
+    if (!sub.periodStart || !sub.periodEnd) {
+      rows = await db.query.messages.findMany({
+        where: and(
+          inArray(messages.chatbotId, chatbotIds),
+          eq(messages.isTest, false)
+        ),
+        columns: {
+          createdAt: true,
+        },
+        orderBy: asc(messages.createdAt),
+      });
+    } else {
+      rows = await db.query.messages.findMany({
+        where: and(
+          inArray(messages.chatbotId, chatbotIds),
+          between(messages.createdAt, sub.periodStart, sub.periodEnd),
+          eq(messages.isTest, false)
+        ),
+        columns: {
+          createdAt: true,
+        },
+        orderBy: asc(messages.createdAt),
+      });
+    }
 
     return rows.reduce((acc, message) => {
       const date = new Date(message.createdAt);
@@ -222,14 +236,25 @@ export async function getCurrentPeriodMessagesPerChatbotPerDayByClerkId({
 
     const chatbotIds = chatbots.map((bot) => bot.id);
 
-    const rows = await db.query.messages.findMany({
-      where: and(
-        inArray(messages.chatbotId, chatbotIds),
-        between(messages.createdAt, sub.periodStart, sub.periodEnd),
-        eq(messages.isTest, false)
-      ),
-      orderBy: asc(messages.createdAt),
-    });
+    let rows;
+    if (!sub.periodEnd || !sub.periodStart) {
+      rows = await db.query.messages.findMany({
+        where: and(
+          inArray(messages.chatbotId, chatbotIds),
+          eq(messages.isTest, false)
+        ),
+        orderBy: asc(messages.createdAt),
+      });
+    } else {
+      rows = await db.query.messages.findMany({
+        where: and(
+          inArray(messages.chatbotId, chatbotIds),
+          between(messages.createdAt, sub.periodStart, sub.periodEnd),
+          eq(messages.isTest, false)
+        ),
+        orderBy: asc(messages.createdAt),
+      });
+    }
 
     return rows.reduce((acc, message) => {
       const date = new Date(message.createdAt);
@@ -276,14 +301,25 @@ export async function getCurrentPeriodConversationsPerChatbotPerDayByClerkId({
 
     const chatbotIds = chatbots.map((bot) => bot.id);
 
-    const rows = await db.query.messages.findMany({
-      where: and(
-        inArray(messages.chatbotId, chatbotIds),
-        between(messages.createdAt, sub.periodStart, sub.periodEnd),
-        eq(messages.isTest, false)
-      ),
-      orderBy: asc(messages.createdAt),
-    });
+    let rows;
+    if (!sub.periodEnd || !sub.periodStart) {
+      rows = await db.query.messages.findMany({
+        where: and(
+          inArray(messages.chatbotId, chatbotIds),
+          eq(messages.isTest, false)
+        ),
+        orderBy: asc(messages.createdAt),
+      });
+    } else {
+      rows = await db.query.messages.findMany({
+        where: and(
+          inArray(messages.chatbotId, chatbotIds),
+          between(messages.createdAt, sub.periodStart, sub.periodEnd),
+          eq(messages.isTest, false)
+        ),
+        orderBy: asc(messages.createdAt),
+      });
+    }
 
     const conversationMap = new Map<
       string,
