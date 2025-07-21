@@ -1,29 +1,26 @@
-import { auth } from "@clerk/nextjs/server";
 import { db } from ".";
 import { users } from "./schema";
 import { eq } from "drizzle-orm";
 import { FindFirstUserOptions } from "@/types/db-types";
 
 export async function createUser({
+  clerkId,
   email,
   name,
 }: {
+  clerkId: string;
   email: string;
   name: string;
 }) {
-  const { userId } = await auth();
-
-  if (!userId) throw new Error("No session detected");
-
-  const user = await getUserByClerkId({ clerkId: userId });
-
-  if (user) return;
-
-  await db.insert(users).values({
-    clerkId: userId,
-    email,
-    name,
-  });
+  return await db
+    .insert(users)
+    .values({
+      clerkId,
+      email,
+      name,
+    })
+    .onConflictDoNothing({ target: users.email })
+    .returning();
 }
 
 export async function getUserByClerkId(
