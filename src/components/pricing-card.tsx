@@ -1,4 +1,6 @@
 import React, {
+  Dispatch,
+  SetStateAction,
   type ForwardRefExoticComponent,
   type RefAttributes,
 } from "react";
@@ -25,6 +27,9 @@ interface Props {
   Icon: ForwardRefExoticComponent<
     Omit<LucideProps, "ref"> & RefAttributes<SVGSVGElement>
   >;
+  checkingSub: boolean;
+  sub: Subscription | undefined;
+  setSub: Dispatch<SetStateAction<Subscription | undefined>>;
 }
 
 export default function PricingCard({
@@ -34,6 +39,9 @@ export default function PricingCard({
   label,
   plan,
   price,
+  checkingSub,
+  sub,
+  setSub,
 }: Props) {
   return (
     <Card
@@ -94,7 +102,12 @@ export default function PricingCard({
             *$1 per extra 1,000 messages
           </p>
         )}
-        <SubscribeButton plan={plan} />
+        <SubscribeButton
+          plan={plan}
+          checkingSub={checkingSub}
+          setSub={setSub}
+          sub={sub}
+        />
       </CardFooter>
     </Card>
   );

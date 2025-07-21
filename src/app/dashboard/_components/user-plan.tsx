@@ -31,6 +31,8 @@ export default function UserPlan({ sub, clerkId }: Props) {
             "bg-yellow-50 text-yellow-700 border-yellow-200 ":
               sub.status === "incomplete",
             "bg-red-50 text-red-700 border-red-200 ": sub.status === "canceled",
+            "bg-gray-50 text-gray-700 border-gray-200 ":
+              sub.status === "unsubscribed",
           })}
         >
           {sub.status[0].toUpperCase() + sub.status.slice(1)}
@@ -40,7 +42,13 @@ export default function UserPlan({ sub, clerkId }: Props) {
             <h2 className="text-2xl font-semibold">Current Plan</h2>
           </CardTitle>
           <CardDescription>
-            <PlanRenewDate date={sub.periodEnd} />
+            {sub.periodEnd ? (
+              <PlanRenewDate date={sub.periodEnd} />
+            ) : (
+              <p className="text-muted-foreground">
+                You are not subscribed yet
+              </p>
+            )}
           </CardDescription>
         </CardHeader>
         <CardContent>

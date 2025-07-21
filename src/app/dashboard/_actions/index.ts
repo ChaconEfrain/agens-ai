@@ -15,20 +15,13 @@ export async function getCurrentDayMessagesPerChatbotByClerkIdAction({clerkId, t
 
 export async function getCurrentPeriodMessagesPerDayByClerkIdAction({clerkId}: {clerkId: string}) {
   try {
-    const messages = await getCurrentPeriodMessagesPerDayByClerkId({clerkId});
+    const messages = await getCurrentPeriodMessagesPerDayByClerkId({ clerkId });
     return messages;
   } catch (error) {
-    console.error('Error on getCurrentPeriodMessagesPerDayByClerkIdAction --> ', error)
-    return null;
-  }
-}
-
-export async function getSubscriptionByClerkIdAction({clerkId}: {clerkId: string}) {
-  try {
-    const sub = await getSubscriptionByClerkId({clerkId});
-    return sub;
-  } catch (error) {
-    console.error('Error on getSubscriptionByClerkIdAction --> ', error)
+    console.error(
+      "Error on getCurrentPeriodMessagesPerDayByClerkIdAction --> ",
+      error
+    );
     return null;
   }
 }

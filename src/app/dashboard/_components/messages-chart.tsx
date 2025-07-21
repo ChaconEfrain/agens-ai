@@ -30,7 +30,11 @@ export default async function MessagesChart({
             <h2 className="text-2xl font-semibold">Current period activity</h2>
           </CardTitle>
           <CardDescription>
-            <CurrentPeriodDate end={sub.periodEnd} start={sub.periodStart} />
+            {sub.periodEnd && sub.periodStart ? (
+              <CurrentPeriodDate end={sub.periodEnd} start={sub.periodStart} />
+            ) : (
+              <p>Showing your current messages</p>
+            )}
           </CardDescription>
         </CardHeader>
         <CardContent>

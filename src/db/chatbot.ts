@@ -74,24 +74,6 @@ export async function updateChatbotStyles({
   await db.update(chatbots).set({ styles }).where(eq(chatbots.slug, slug));
 }
 
-export async function updateChatbotsSubscription(
-  {
-    subscriptionId,
-    userId,
-  }: {
-    subscriptionId: number;
-    userId: number;
-  },
-  trx: Transaction
-) {
-  await trx
-    .update(chatbots)
-    .set({
-      subscriptionId,
-    })
-    .where(eq(chatbots.userId, userId));
-}
-
 export async function updateChatbotCurrentMessageCount(
   {
     chatbotId,

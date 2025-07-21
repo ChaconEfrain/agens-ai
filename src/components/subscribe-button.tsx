@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { Dispatch, SetStateAction, useState } from "react";
 import { Button } from "./ui/button";
 import Link from "next/link";
 import {
@@ -17,26 +17,34 @@ import {
   DialogHeader,
   DialogTitle,
 } from "./ui/dialog";
-import { useSubscriptionContext } from "@/hooks/use-subscription-context";
+import { Subscription } from "@/db/schema";
+import { useUser } from "@clerk/nextjs";
 
 interface Props {
   plan: string;
+  checkingSub: boolean;
+  sub: Subscription | undefined;
+  setSub: Dispatch<SetStateAction<Subscription | undefined>>;
 }
 
-export default function SubscribeButton({ plan }: Props) {
+export default function SubscribeButton({
+  plan,
+  checkingSub,
+  sub,
+  setSub,
+}: Props) {
   const router = useRouter();
-  const {
-    subscription,
-    setSubscription,
-    loading: checkingSub,
-  } = useSubscriptionContext();
   const [loadingCheckout, setLoadingCheckout] = useState(false);
   const [loadingUpdate, setLoadingUpdate] = useState(false);
   const [openModal, setOpenModal] = useState(false);
+  const { isSignedIn } = useUser();
 
   const redirectToStripeCheckout = async () => {
+    if (!isSignedIn) {
+      toast.error("Please sign in to continue");
+    }
     setLoadingCheckout(true);
-    if (subscription?.plan === plan && subscription.status === "active") return;
+    if (sub?.plan === plan && sub.status === "active") return;
     const fromPage = window.location.href;
     const origin = window.location.origin;
     const result = await createStripeSessionAction({ fromPage, origin, plan });
@@ -52,18 +60,18 @@ export default function SubscribeButton({ plan }: Props) {
 
   const updateSubscription = async () => {
     setLoadingUpdate(true);
-    if (subscription) {
+    if (sub) {
       const result = await updateSubscriptionAction({
         newPlan: plan.toLowerCase(),
-        subscriptionId: subscription.stripeSubscriptionId,
-        subscriptionItemId: subscription.stripeItemId,
+        subscriptionId: sub.stripeSubscriptionId as string,
+        subscriptionItemId: sub.stripeItemId as string,
       });
 
       if (result.success && result.newSubPlan) {
         toast.success(result.message);
-        const newSub = { ...subscription };
+        const newSub = { ...sub };
         newSub.plan = result.newSubPlan;
-        setSubscription(newSub);
+        setSub(newSub);
       } else {
         toast.error(result.message);
       }
@@ -93,10 +101,7 @@ export default function SubscribeButton({ plan }: Props) {
     );
   }
 
-  if (
-    subscription?.plan === plan.toLowerCase() &&
-    subscription.status === "active"
-  ) {
+  if (sub?.plan === plan.toLowerCase() && sub.status === "active") {
     return (
       <Button className="w-full" disabled>
         Current Plan
@@ -104,29 +109,24 @@ export default function SubscribeButton({ plan }: Props) {
     );
   }
 
-  if (
-    subscription?.plan !== plan.toLowerCase() &&
-    subscription?.status === "active"
-  ) {
+  if (sub?.plan !== plan.toLowerCase() && sub?.status === "active") {
     return (
       <Dialog open={openModal} onOpenChange={setOpenModal}>
         <Button
           className="w-full cursor-pointer"
           onClick={() => setOpenModal(true)}
         >
-          {subscription.plan === "basic"
+          {sub.plan === "basic"
             ? "Upgrade Subscription"
             : "Downgrade Subscription"}
         </Button>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {subscription.plan === "basic"
-                ? "Upgrade to Pro"
-                : "Downgrade to Basic"}
+              {sub.plan === "basic" ? "Upgrade to Pro" : "Downgrade to Basic"}
             </DialogTitle>
             <DialogDescription>
-              {subscription.plan === "basic"
+              {sub.plan === "basic"
                 ? "Pay a prorated charge for the remaining days of the month"
                 : "Pay a prorated charge for the remaining days of the month (any credit will be applied to your next invoice)"}
             </DialogDescription>
@@ -140,7 +140,7 @@ export default function SubscribeButton({ plan }: Props) {
               onClick={updateSubscription}
               disabled={loadingUpdate}
             >
-              {subscription.plan === "basic" ? (
+              {sub.plan === "basic" ? (
                 loadingUpdate ? (
                   <>
                     Confirm Update <LoaderCircle className="animate-spin" />

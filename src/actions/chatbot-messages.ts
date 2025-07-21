@@ -39,9 +39,11 @@ export async function sendMessageAction({
   token: string;
   pathname: string;
 }) {
-  let subscription;
-  let testMessageCount;
   try {
+    let testMessageCount;
+    const subscription = await getSubscriptionByChatbotId({
+      chatbotId,
+    });
     if (!IS_DEV && pathname.startsWith("/embed")) {
       const { domain } = jwt.verify(token, JWT_SECRET) as {
         chatbotId: number;
@@ -55,27 +57,18 @@ export async function sendMessageAction({
       if (!allowedDomains.includes(domain)) {
         throw new Error(`Access from domain '${domain}' is not allowed`);
       }
-      subscription = await getSubscriptionByChatbotId({
-        chatbotId,
-      });
 
+      const freeLimitReached =
+        subscription.plan === "free" &&
+        subscription.messageCount >= ALLOWED_MESSAGE_QUANTITY.FREE;
       const basicLimitReached =
-        subscription?.plan === "basic" &&
-        subscription?.messageCount >= ALLOWED_MESSAGE_QUANTITY.BASIC;
+        subscription.plan === "basic" &&
+        subscription.messageCount >= ALLOWED_MESSAGE_QUANTITY.BASIC;
       const proLimitReached =
-        subscription?.plan === "pro" &&
-        subscription?.messageCount >= ALLOWED_MESSAGE_QUANTITY.PRO;
+        subscription.plan === "pro" &&
+        subscription.messageCount >= ALLOWED_MESSAGE_QUANTITY.PRO;
 
-      if (!subscription || subscription.status === "canceled") {
-        testMessageCount = await getChatbotTestMessageCount({ chatbotId });
-        const totalMessages = await getAllMessagesCountByChatbotId({
-          chatbotId,
-        });
-
-        if (totalMessages - testMessageCount >= ALLOWED_MESSAGE_QUANTITY.FREE) {
-          return "limit reached";
-        }
-      } else if (basicLimitReached || proLimitReached) {
+      if (freeLimitReached || basicLimitReached || proLimitReached) {
         return "limit reached";
       }
     }
@@ -156,7 +149,7 @@ export async function sendMessageAction({
 
     const messageInsert = await createMessageTransaction({
       message: dbMessage,
-      messageCount: (subscription?.messageCount as number) + 1,
+      messageCount: subscription.messageCount + 1,
       stripeSubscriptionId: subscription?.stripeSubscriptionId,
       pathname,
       testMessageCount,

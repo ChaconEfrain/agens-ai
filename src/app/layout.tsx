@@ -5,7 +5,6 @@ import { ClerkProvider } from "@clerk/nextjs";
 import Nav from "@/components/nav";
 import { Toaster } from "@/components/ui/sonner";
 import AppWrapper from "@/components/app-wrapper";
-import SubscriptionContextProvider from "@/context/subscription-context";
 import NextTopLoader from "nextjs-toploader";
 
 const outfit = Outfit({
@@ -25,18 +24,16 @@ export default function RootLayout({
 }>) {
   return (
     <ClerkProvider>
-      <SubscriptionContextProvider>
-        <html lang="en">
-          <body className={`${outfit.variable} antialiased bg-transparent`}>
-            <NextTopLoader color="#18181b" height={5} showSpinner={false} />
-            <AppWrapper>
-              <Nav />
-              {children}
-            </AppWrapper>
-            <Toaster position="bottom-right" duration={8000} closeButton />
-          </body>
-        </html>
-      </SubscriptionContextProvider>
+      <html lang="en">
+        <body className={`${outfit.variable} antialiased bg-transparent`}>
+          <NextTopLoader color="#18181b" height={5} showSpinner={false} />
+          <AppWrapper>
+            <Nav />
+            {children}
+          </AppWrapper>
+          <Toaster position="bottom-right" duration={8000} closeButton />
+        </body>
+      </html>
     </ClerkProvider>
   );
 }

@@ -4,7 +4,6 @@ import { getSubscriptionByUserId } from "@/db/subscriptions";
 import { getUserByClerkId } from "@/db/user";
 import { stripe } from "@/services/stripe";
 import { currentUser } from "@clerk/nextjs/server";
-import { revalidatePath } from "next/cache";
 
 const BASIC_PLAN_PRICE_ID = "price_1RXbblFPnR9XY3t8FfExdSsH";
 const PRO_PLAN_PRICE_ID = "price_1RXbd9FPnR9XY3t8XZeogu8q";

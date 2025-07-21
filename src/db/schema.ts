@@ -138,10 +138,9 @@ export const chatbots = pgTable(
     userId: integer("user_id")
       .references(() => users.id, { onDelete: "cascade" })
       .notNull(),
-    subscriptionId: integer("subscription_id").references(
-      () => subscriptions.id,
-      { onDelete: "set null" }
-    ),
+    subscriptionId: integer("subscription_id")
+      .references(() => subscriptions.id)
+      .notNull(),
     allowedDomains: json("allowed_domains").$type<string[]>().notNull(),
     instructions: text("instructions").notNull(),
     slug: varchar("slug", { length: 255 }).notNull().unique(),
@@ -220,10 +219,12 @@ export const messages = pgTable(
 );
 
 export const subscriptionPlanEnum = pgEnum("subscription_plan", [
+  "free",
   "basic",
   "pro",
 ]);
 export const subscriptionStatusEnum = pgEnum("subscription_status", [
+  "unsubscribed",
   "active",
   "canceled",
   "incomplete",
@@ -239,14 +240,14 @@ export const subscriptions = pgTable(
       .notNull(),
     stripeSubscriptionId: varchar("stripe_subscription_id", {
       length: 255,
-    }).notNull(),
-    stripeCustomerId: varchar("stripe_customer_id", { length: 255 }).notNull(),
-    stripeItemId: varchar("stripe_item_id", { length: 255 }).notNull(),
+    }),
+    stripeCustomerId: varchar("stripe_customer_id", { length: 255 }),
+    stripeItemId: varchar("stripe_item_id", { length: 255 }),
     plan: subscriptionPlanEnum("plan").notNull(),
     messageCount: integer("message_count").notNull().default(0),
-    periodStart: timestamp("period_start").notNull(),
-    periodEnd: timestamp("period_end").notNull(),
-    status: subscriptionStatusEnum("status").notNull(),
+    periodStart: timestamp("period_start"),
+    periodEnd: timestamp("period_end"),
+    status: subscriptionStatusEnum("status").notNull().default("unsubscribed"),
     createdAt: timestamp("created_at").notNull().defaultNow(),
     updatedAt: timestamp("updated_at").$onUpdate(() => new Date()),
   },

@@ -4,34 +4,11 @@ import { chatbots, SubscriptionInsert, subscriptions } from "./schema";
 import { Transaction } from "@/types/db-types";
 import { getUserByClerkId } from "./user";
 
-export async function createSubscription(
-  {
-    periodEnd,
-    periodStart,
-    plan,
-    status,
-    stripeCustomerId,
-    stripeSubscriptionId,
-    stripeItemId,
+export async function createSubscription({ userId }: { userId: number }) {
+  await db.insert(subscriptions).values({
+    plan: "free",
     userId,
-  }: SubscriptionInsert,
-  trx: Transaction
-) {
-  const subscription = await trx
-    .insert(subscriptions)
-    .values({
-      periodEnd,
-      periodStart,
-      plan,
-      status,
-      stripeCustomerId,
-      stripeSubscriptionId,
-      stripeItemId,
-      userId,
-    })
-    .returning({ id: subscriptions.id });
-
-  return subscription;
+  });
 }
 
 export async function updateSubscription({
@@ -41,9 +18,13 @@ export async function updateSubscription({
   plan,
   stripeItemId,
   stripeSubscriptionId,
-}: Omit<SubscriptionInsert, "messageCount" | "userId" | "stripeCustomerId">) {
+  messageCount,
+}: Omit<SubscriptionInsert, "userId" | "stripeCustomerId">) {
   const existing = await db.query.subscriptions.findFirst({
-    where: eq(subscriptions.stripeSubscriptionId, stripeSubscriptionId),
+    where: eq(
+      subscriptions.stripeSubscriptionId,
+      stripeSubscriptionId as string
+    ),
   });
 
   if (!existing) throw new Error("No subscription found");
@@ -51,7 +32,10 @@ export async function updateSubscription({
   const newPeriodStart = periodStart;
   let currentMessageCount = existing.messageCount;
 
-  if (existing.periodStart.getTime() !== newPeriodStart.getTime()) {
+  if (
+    !messageCount &&
+    existing.periodStart?.getTime() !== newPeriodStart?.getTime()
+  ) {
     currentMessageCount = 0;
   }
 
@@ -63,11 +47,12 @@ export async function updateSubscription({
       status,
       plan,
       stripeItemId,
-      messageCount: currentMessageCount,
+      messageCount: messageCount ?? currentMessageCount,
     })
-    .where(eq(subscriptions.stripeSubscriptionId, stripeSubscriptionId))
+    .where(
+      eq(subscriptions.stripeSubscriptionId, stripeSubscriptionId as string)
+    )
     .returning({ userId: subscriptions.userId });
-
 }
 
 export async function cancelSubscription({
@@ -78,6 +63,7 @@ export async function cancelSubscription({
     .update(subscriptions)
     .set({
       status,
+      plan: "free",
     })
     .where(
       eq(subscriptions.stripeSubscriptionId, stripeSubscriptionId as string)
@@ -109,8 +95,6 @@ export async function getSubscriptionByChatbotId({
   });
 
   if (!chatbot) throw new Error("Chatbot not found");
-
-  if (!chatbot.subscriptionId) return null;
 
   const subscription = await db.query.subscriptions.findFirst({
     where: eq(subscriptions.id, chatbot.subscriptionId),

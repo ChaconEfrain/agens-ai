@@ -6,7 +6,6 @@ import type { UploadFileResult } from "uploadthing/types";
 import { extractTextFromPdf } from "@/services/utils";
 import { DEFAULT_STYLES } from "@/consts/chatbot";
 import {
-  createSubscription,
   getSubscriptionByUserId,
   updateSubscriptionMessageCount,
 } from "./subscriptions";
@@ -14,7 +13,6 @@ import {
   createChatbot,
   updateChatbotCurrentMessageCount,
   updateChatbotPdfTokens,
-  updateChatbotsSubscription,
   updateChatbotTestMessageCount,
 } from "./chatbot";
 import Stripe from "stripe";
@@ -55,18 +53,17 @@ export async function createChatbotTransaction({
   )) as User & { chatbots: Chatbot[] };
   const sub = await getSubscriptionByUserId({ userId: user.id });
 
+  if (!sub) throw new Error("No subscription found");
+
   const hasChatbotButNoSub =
-    !sub && user.chatbots.length >= ALLOWED_CHATBOTS.FREE;
+    (sub.status === "unsubscribed" || sub.status === "canceled") &&
+    user.chatbots.length >= ALLOWED_CHATBOTS.FREE;
   const hasSubButChatbotLimit =
-    !!sub &&
+    sub.status === "active" &&
     user.chatbots.length >=
       ALLOWED_CHATBOTS[sub.plan.toUpperCase() as "BASIC" | "PRO"];
-  const hasChatbotAndCanceledSub =
-    !!sub &&
-    sub.status === "canceled" &&
-    user.chatbots.length >= ALLOWED_CHATBOTS.FREE;
 
-  if (hasChatbotButNoSub || hasSubButChatbotLimit || hasChatbotAndCanceledSub) {
+  if (hasChatbotButNoSub || hasSubButChatbotLimit) {
     throw new Error("Chatbot limit reached", {
       cause: "chatbot limit",
     });
@@ -89,7 +86,7 @@ export async function createChatbotTransaction({
         userId: user.id,
         testMessagesCount: 0,
         currentPeriodMessagesCount: 0,
-        subscriptionId: sub?.id ?? null,
+        subscriptionId: sub.id,
         pdfInputTokens: 0,
         pdfOutputTokens: 0,
       },
@@ -134,49 +131,12 @@ export async function createChatbotTransaction({
   });
 }
 
-export async function createSubscriptionTransaction({
-  subscription,
-  session,
-}: {
-  subscription: Stripe.Response<Stripe.Subscription>;
-  session: Stripe.Checkout.Session;
-}) {
-  await db.transaction(async (trx) => {
-    const [{ id: subscriptionId }] = await createSubscription(
-      {
-        periodEnd: new Date(
-          subscription.items.data[0].current_period_end * 1000
-        ),
-        periodStart: new Date(
-          subscription.items.data[0].current_period_start * 1000
-        ),
-        plan: subscription.items.data[0].price.lookup_key as "basic" | "pro",
-        status: subscription.status as
-          | "active"
-          | "canceled"
-          | "incomplete"
-          | "incomplete_expired",
-        stripeCustomerId: subscription.customer as string,
-        stripeSubscriptionId: subscription.id,
-        stripeItemId: subscription.items.data[0].id,
-        userId: Number(session.metadata?.userId),
-      },
-      trx
-    );
-
-    await updateChatbotsSubscription(
-      { subscriptionId, userId: Number(session.metadata?.userId) },
-      trx
-    );
-  });
-}
-
 interface MessagesTransactionProps {
   message: Omit<
     MessageInsert,
     "id" | "liked" | "createdAt" | "isActive" | "updatedAt"
   >;
-  stripeSubscriptionId: string | undefined;
+  stripeSubscriptionId: string | null;
   messageCount: number | undefined;
   pathname: string;
   testMessageCount: number | undefined;

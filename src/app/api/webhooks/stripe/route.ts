@@ -3,7 +3,6 @@ import {
   resetChatbotsCurrentMessageCountByUserId,
 } from "@/db/chatbot";
 import { cancelSubscription, updateSubscription } from "@/db/subscriptions";
-import { createSubscriptionTransaction } from "@/db/transactions";
 import { stripe } from "@/services/stripe";
 import { headers } from "next/headers";
 import type Stripe from "stripe";
@@ -29,7 +28,22 @@ export async function POST(request: Request) {
         session.subscription as string
       );
 
-      await createSubscriptionTransaction({ session, subscription });
+      await updateSubscription({
+        periodEnd: new Date(
+          subscription.items.data[0].current_period_end * 1000
+        ),
+        periodStart: new Date(
+          subscription.items.data[0].current_period_start * 1000
+        ),
+        status: subscription.status as
+          | "active"
+          | "incomplete"
+          | "incomplete_expired",
+        plan: subscription.items.data[0].price.lookup_key as "basic" | "pro",
+        stripeItemId: subscription.items.data[0].id,
+        stripeSubscriptionId: subscription.id,
+        messageCount: 0,
+      });
 
       return Response.json({ subscription, status: 200 });
     } else if (
@@ -50,7 +64,6 @@ export async function POST(request: Request) {
           | "incomplete_expired",
         plan: subscription.items.data[0].price.lookup_key as "basic" | "pro",
         stripeItemId: subscription.items.data[0].id,
-        stripeSubscriptionId: subscription.id,
       });
 
       await resetChatbotsCurrentMessageCountByUserId({ userId });
