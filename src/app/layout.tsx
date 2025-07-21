@@ -28,20 +28,12 @@ export default function RootLayout({
       <SubscriptionContextProvider>
         <html lang="en">
           <body className={`${outfit.variable} antialiased bg-transparent`}>
-            {process.env.NODE_ENV === "production" ? (
-              <div className="h-screen">
-                <p className="text-3xl text-center">Coming soon</p>
-              </div>
-            ) : (
-              <>
-                <NextTopLoader color="#18181b" height={5} showSpinner={false} />
-                <AppWrapper>
-                  <Nav />
-                  {children}
-                </AppWrapper>
-                <Toaster position="bottom-right" duration={8000} closeButton />
-              </>
-            )}
+            <NextTopLoader color="#18181b" height={5} showSpinner={false} />
+            <AppWrapper>
+              <Nav />
+              {children}
+            </AppWrapper>
+            <Toaster position="bottom-right" duration={8000} closeButton />
           </body>
         </html>
       </SubscriptionContextProvider>
