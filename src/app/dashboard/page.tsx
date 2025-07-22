@@ -13,13 +13,13 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { Button } from "@/components/ui/button";
 
 export default async function DashboardPage() {
   const { userId } = await auth();
   const sub = await getSubscriptionByClerkId({ clerkId: userId ?? "" });
 
   if (!userId || !sub) {
-    //TODO: Allow dashboard without subscription
     redirect("/");
   }
 
@@ -42,13 +42,19 @@ export default async function DashboardPage() {
               </TooltipContent>
             </Tooltip>
           </div>
-          <Link
-            href="/dashboard/message-history"
-            className="text-muted-foreground flex items-center gap-1 group"
-          >
-            View message history{" "}
-            <ArrowRight className="size-4 group-hover:translate-x-2 transition-transform duration-300" />
-          </Link>
+          {sub.chatbots.length > 0 ? (
+            <Link
+              href="/dashboard/message-history"
+              className="text-muted-foreground flex items-center gap-1 group"
+            >
+              View message history{" "}
+              <ArrowRight className="size-4 group-hover:translate-x-2 transition-transform duration-300" />
+            </Link>
+          ) : (
+            <Button asChild>
+              <Link href="/create-chatbot">Create Chatbot</Link>
+            </Button>
+          )}
         </div>
       </header>
       <div className="grid grid-cols-3 grid-rows-[30fr_70fr] h-full max-h-[720px] gap-4">

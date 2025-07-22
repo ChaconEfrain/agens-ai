@@ -1,5 +1,6 @@
 'use client'
 
+import Banner from "@/components/banner";
 import {
   BarChart,
   Bar,
@@ -9,38 +10,46 @@ import {
   Tooltip,
   ResponsiveContainer,
   Legend,
-} from "recharts"
+} from "recharts";
 
 interface Props {
   conversationsPerDay: {
-    date: string
-    chatbotSlug: string
-    conversations: number
+    date: string;
+    chatbotSlug: string;
+    conversations: number;
   }[];
-  chatbots: string[]
+  chatbots: string[];
 }
 
-export default function ConversationsPerChatbotChart({ conversationsPerDay, chatbots }: Props) {
-  const grouped: Record<string, Record<string, number>> = {}
+export default function ConversationsPerChatbotChart({
+  conversationsPerDay,
+  chatbots,
+}: Props) {
+  const grouped: Record<string, Record<string, number>> = {};
 
   conversationsPerDay.forEach(({ date, chatbotSlug, conversations }) => {
-    if (!grouped[date]) grouped[date] = {}
-    grouped[date][chatbotSlug] = conversations
-  })
+    if (!grouped[date]) grouped[date] = {};
+    grouped[date][chatbotSlug] = conversations;
+  });
 
   const chartData = Object.entries(grouped).map(([date, slugs]) => {
-    const entry: Record<string, any> = { date }
-    chatbots.forEach(slug => {
-      entry[slug] = slugs[slug] || 0
-    })
-    return entry
-  })
+    const entry: Record<string, any> = { date };
+    chatbots.forEach((slug) => {
+      entry[slug] = slugs[slug] || 0;
+    });
+    return entry;
+  });
 
   const colors = [
-    "#6366f1", "#10b981", "#f59e0b", "#ef4444", "#3b82f6", "#8b5cf6"
-  ]
+    "#6366f1",
+    "#10b981",
+    "#f59e0b",
+    "#ef4444",
+    "#3b82f6",
+    "#8b5cf6",
+  ];
 
-  return (
+  return chartData.length > 0 ? (
     <ResponsiveContainer width="100%" height={300}>
       <BarChart
         data={chartData}
@@ -69,5 +78,10 @@ export default function ConversationsPerChatbotChart({ conversationsPerDay, chat
         ))}
       </BarChart>
     </ResponsiveContainer>
-  )
+  ) : (
+    <Banner
+      bannerMessage="There aren't any conversations yet"
+      className="py-12 min-h-[300px]"
+    />
+  );
 }

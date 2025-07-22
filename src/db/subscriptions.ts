@@ -128,6 +128,9 @@ export async function getSubscriptionByClerkId({
     const user = await getUserByClerkId({ clerkId });
     const subscription = await db.query.subscriptions.findFirst({
       where: eq(subscriptions.userId, user.id),
+      with: {
+        chatbots: true,
+      },
     });
 
     return subscription;

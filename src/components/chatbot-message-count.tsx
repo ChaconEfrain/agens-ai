@@ -3,20 +3,23 @@
 import { getChatbotBySlugAction } from '@/actions/chatbot';
 import { Chatbot } from '@/db/schema'
 import { MessageSquare } from 'lucide-react'
-import React, { useEffect, useRef, useState } from 'react'
+import { usePathname } from "next/navigation";
+import React, { useEffect, useRef, useState } from "react";
 
-export default function ChatbotMessageCount({bot}: {bot: Chatbot}) {
-
+export default function ChatbotMessageCount({ bot }: { bot: Chatbot }) {
   const [chatbot, setChatbot] = useState(bot);
   const isFetching = useRef(false);
-  
+  const pathname = usePathname();
+
   useEffect(() => {
+    if (pathname === "create-chatbot") return;
+
     const getChatbot = async () => {
       if (isFetching.current) return;
 
       isFetching.current = true;
-      const data = await getChatbotBySlugAction({slug: bot.slug});
-  
+      const data = await getChatbotBySlugAction({ slug: bot.slug });
+
       if (!data) {
         isFetching.current = false;
         return;
@@ -28,7 +31,7 @@ export default function ChatbotMessageCount({bot}: {bot: Chatbot}) {
 
     const interval = setInterval(getChatbot, 5 * 60 * 1000);
 
-    return () => clearInterval(interval)
+    return () => clearInterval(interval);
   }, []);
 
   return (
@@ -37,5 +40,5 @@ export default function ChatbotMessageCount({bot}: {bot: Chatbot}) {
       {new Intl.NumberFormat().format(chatbot.currentPeriodMessagesCount)}{" "}
       Messages this period
     </span>
-  )
+  );
 }

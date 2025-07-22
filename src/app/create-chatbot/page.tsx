@@ -21,14 +21,15 @@ export default async function CreateChatbotPage() {
     getSubscriptionByClerkId({ clerkId: userId }),
   ]);
   const hasChatbotButNoSub =
-    !userSub && (userChatbots?.length ?? 0) >= ALLOWED_CHATBOTS.FREE;
+    userSub?.status === "unsubscribed" &&
+    (userChatbots?.length ?? 0) >= ALLOWED_CHATBOTS.FREE;
   const hasSubButChatbotLimit =
-    !!userSub &&
-    (userChatbots?.length ?? 0) >=
-      ALLOWED_CHATBOTS[userSub.plan.toUpperCase() as "BASIC" | "PRO"];
+    userSub?.status === "active" ||
+    (userSub?.status === "incomplete" &&
+      (userChatbots?.length ?? 0) >=
+        ALLOWED_CHATBOTS[userSub.plan.toUpperCase() as "BASIC" | "PRO"]);
   const hasChatbotAndCanceledSub =
-    !!userSub &&
-    userSub.status === "canceled" &&
+    userSub?.status === "canceled" &&
     (userChatbots?.length ?? 0) >= ALLOWED_CHATBOTS.FREE;
   return (
     <main className="my-10">

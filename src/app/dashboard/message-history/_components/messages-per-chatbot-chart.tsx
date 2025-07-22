@@ -1,6 +1,7 @@
 'use client'
 
-import React from 'react'
+import Banner from "@/components/banner";
+import React from "react";
 import {
   LineChart,
   Line,
@@ -10,38 +11,46 @@ import {
   Tooltip,
   ResponsiveContainer,
   Legend,
-} from "recharts"
+} from "recharts";
 
 interface Props {
   messagesPerDay: {
-    date: string
-    chatbotSlug: string
-    messages: number
+    date: string;
+    chatbotSlug: string;
+    messages: number;
   }[];
-  chatbots: string[]
+  chatbots: string[];
 }
 
-export default function MessagesPerChatbotChart({ messagesPerDay, chatbots }: Props) {
-  const groupedData: Record<string, Record<string, number>> = {}
+export default function MessagesPerChatbotChart({
+  messagesPerDay,
+  chatbots,
+}: Props) {
+  const groupedData: Record<string, Record<string, number>> = {};
 
   messagesPerDay.forEach(({ date, chatbotSlug, messages }) => {
-    if (!groupedData[date]) groupedData[date] = {}
-    groupedData[date][chatbotSlug] = messages
-  })
+    if (!groupedData[date]) groupedData[date] = {};
+    groupedData[date][chatbotSlug] = messages;
+  });
 
   const chartData = Object.entries(groupedData).map(([date, bots]) => {
-    const entry: Record<string, any> = { date }
-    chatbots.forEach(slug => {
-      entry[slug] = bots[slug] || 0
-    })
-    return entry
-  })
+    const entry: Record<string, any> = { date };
+    chatbots.forEach((slug) => {
+      entry[slug] = bots[slug] || 0;
+    });
+    return entry;
+  });
 
   const colors = [
-    "#6366f1", "#10b981", "#f59e0b", "#ef4444", "#3b82f6", "#8b5cf6"
-  ]
+    "#6366f1",
+    "#10b981",
+    "#f59e0b",
+    "#ef4444",
+    "#3b82f6",
+    "#8b5cf6",
+  ];
 
-  return (
+  return chartData.length > 0 ? (
     <ResponsiveContainer width="100%" height={300}>
       <LineChart
         data={chartData}
@@ -73,5 +82,10 @@ export default function MessagesPerChatbotChart({ messagesPerDay, chatbots }: Pr
         ))}
       </LineChart>
     </ResponsiveContainer>
-  )
+  ) : (
+    <Banner
+      bannerMessage="There aren't any messages yet"
+      className="py-12 min-h-[300px]"
+    />
+  );
 }
