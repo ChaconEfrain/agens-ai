@@ -1,3 +1,4 @@
+import { CLERK_WEBHOOK_EVENTS } from "@/consts/clerk";
 import { createSubscription } from "@/db/subscriptions";
 import { createUser } from "@/db/user";
 import { verifyWebhook } from "@clerk/nextjs/webhooks";
@@ -8,7 +9,7 @@ export async function POST(req: NextRequest) {
     const evt = await verifyWebhook(req);
     const eventType = evt.type;
 
-    if (eventType === "user.created") {
+    if (eventType === CLERK_WEBHOOK_EVENTS.USER_CREATED) {
       const { id, email_addresses, first_name, last_name } = evt.data;
       const [dbUser] = await createUser({
         clerkId: id,
