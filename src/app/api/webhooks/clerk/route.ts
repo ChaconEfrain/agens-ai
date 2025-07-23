@@ -1,5 +1,5 @@
 import { CLERK_WEBHOOK_EVENTS } from "@/consts/clerk";
-import { createSubscription } from "@/db/subscriptions";
+import { createDefaultSubscription } from "@/db/subscriptions";
 import { createUser } from "@/db/user";
 import { verifyWebhook } from "@clerk/nextjs/webhooks";
 import { NextRequest } from "next/server";
@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
         email: email_addresses[0].email_address,
         name: (first_name ?? "") + " " + (last_name ?? ""),
       });
-      await createSubscription({ userId: dbUser.id });
+      await createDefaultSubscription({ userId: dbUser.id });
       return Response.json({ dbUser, status: 200 });
     }
 

@@ -1,8 +1,9 @@
 import { STRIPE_WEBHOOK_EVENTS } from "@/consts/stripe";
 import {
-  resetChatbotsCurrentMessageCountByUserId,
-} from "@/db/chatbot";
-import { cancelSubscription, updateSubscription } from "@/db/subscriptions";
+  cancelSubscription,
+  createSubscription,
+  updateSubscription,
+} from "@/db/subscriptions";
 import { stripe } from "@/services/stripe";
 import { headers } from "next/headers";
 import type Stripe from "stripe";
@@ -28,6 +29,30 @@ export async function POST(request: Request) {
         session.subscription as string
       );
 
+      await createSubscription({
+        periodEnd: new Date(
+          subscription.items.data[0].current_period_end * 1000
+        ),
+        periodStart: new Date(
+          subscription.items.data[0].current_period_start * 1000
+        ),
+        status: subscription.status as
+          | "active"
+          | "incomplete"
+          | "incomplete_expired",
+        plan: subscription.items.data[0].price.lookup_key as "basic" | "pro",
+        stripeItemId: subscription.items.data[0].id,
+        stripeSubscriptionId: subscription.id,
+        stripeCustomerId: subscription.customer as string,
+        userId: Number(session.metadata?.userId),
+      });
+
+      return Response.json({ subscription, status: 200 });
+    } else if (
+      event.type === STRIPE_WEBHOOK_EVENTS.CUSTOMER_SUBSCRIPTION_UPDATED
+    ) {
+      const subscription = event.data.object;
+
       await updateSubscription({
         periodEnd: new Date(
           subscription.items.data[0].current_period_end * 1000
@@ -42,31 +67,7 @@ export async function POST(request: Request) {
         plan: subscription.items.data[0].price.lookup_key as "basic" | "pro",
         stripeItemId: subscription.items.data[0].id,
         stripeSubscriptionId: subscription.id,
-        messageCount: 0,
       });
-
-      return Response.json({ subscription, status: 200 });
-    } else if (
-      event.type === STRIPE_WEBHOOK_EVENTS.CUSTOMER_SUBSCRIPTION_UPDATED
-    ) {
-      const subscription = event.data.object;
-
-      const [{ userId }] = await updateSubscription({
-        periodEnd: new Date(
-          subscription.items.data[0].current_period_end * 1000
-        ),
-        periodStart: new Date(
-          subscription.items.data[0].current_period_start * 1000
-        ),
-        status: subscription.status as
-          | "active"
-          | "incomplete"
-          | "incomplete_expired",
-        plan: subscription.items.data[0].price.lookup_key as "basic" | "pro",
-        stripeItemId: subscription.items.data[0].id,
-      });
-
-      await resetChatbotsCurrentMessageCountByUserId({ userId });
 
       return Response.json({ subscription, status: 200 });
     } else if (
