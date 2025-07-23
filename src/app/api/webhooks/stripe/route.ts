@@ -41,7 +41,6 @@ export async function POST(request: Request) {
           | "incomplete"
           | "incomplete_expired",
         plan: subscription.items.data[0].price.lookup_key as "basic" | "pro",
-        stripeItemId: subscription.items.data[0].id,
         stripeSubscriptionId: subscription.id,
         stripeCustomerId: subscription.customer as string,
         userId: Number(session.metadata?.userId),
@@ -65,8 +64,8 @@ export async function POST(request: Request) {
           | "incomplete"
           | "incomplete_expired",
         plan: subscription.items.data[0].price.lookup_key as "basic" | "pro",
-        stripeItemId: subscription.items.data[0].id,
         stripeSubscriptionId: subscription.id,
+        cancelAtPeriodEnd: subscription.cancel_at ? true : false,
       });
 
       return Response.json({ subscription, status: 200 });

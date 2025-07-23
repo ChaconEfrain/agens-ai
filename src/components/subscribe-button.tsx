@@ -3,7 +3,7 @@ import { Button } from "./ui/button";
 import Link from "next/link";
 import {
   createStripeSessionAction,
-  updateSubscriptionAction,
+  updateSubscriptionPlanAction,
 } from "@/actions/stripe";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -47,7 +47,12 @@ export default function SubscribeButton({
     if (sub?.plan === plan && sub.status === "active") return;
     const fromPage = window.location.href;
     const origin = window.location.origin;
-    const result = await createStripeSessionAction({ fromPage, origin, plan });
+    const result = await createStripeSessionAction({
+      fromPage,
+      origin,
+      plan,
+      customerId: sub?.stripeCustomerId,
+    });
 
     if (result.url) {
       router.push(result.url);
@@ -61,10 +66,9 @@ export default function SubscribeButton({
   const updateSubscription = async () => {
     setLoadingUpdate(true);
     if (sub) {
-      const result = await updateSubscriptionAction({
+      const result = await updateSubscriptionPlanAction({
         newPlan: plan.toLowerCase(),
         subscriptionId: sub.stripeSubscriptionId as string,
-        subscriptionItemId: sub.stripeItemId as string,
       });
 
       if (result.success && result.newSubPlan) {

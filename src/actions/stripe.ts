@@ -1,6 +1,5 @@
 'use server'
 
-import { getSubscriptionByUserId } from "@/db/subscriptions";
 import { getUserByClerkId } from "@/db/user";
 import { stripe } from "@/services/stripe";
 import { currentUser } from "@clerk/nextjs/server";
@@ -12,10 +11,12 @@ export async function createStripeSessionAction({
   plan,
   fromPage,
   origin,
+  customerId,
 }: {
   plan: string;
   fromPage: string;
   origin: string;
+  customerId?: string | null;
 }) {
   try {
     const user = await currentUser();
@@ -25,6 +26,7 @@ export async function createStripeSessionAction({
     if (!appUser) return { message: "Something went wrong, please try again" };
 
     const success = await stripe.checkout.sessions.create({
+      customer: customerId ?? undefined,
       mode: "subscription",
       payment_method_types: ["card"],
       customer_email: appUser.email,
@@ -52,34 +54,13 @@ export async function createStripeSessionAction({
   }
 }
 
-export async function checkExistingSubscriptionAction({
-  clerkId,
-}: {
-  clerkId: string;
-}) {
-  try {
-    const appUser = await getUserByClerkId({ clerkId });
-
-    if (!appUser) return null;
-
-    const existing = await getSubscriptionByUserId({ userId: appUser.id });
-
-    return existing;
-  } catch (error) {
-    console.error(error);
-    return null;
-  }
-}
-
-export async function updateSubscriptionAction({
+export async function updateSubscriptionPlanAction({
   subscriptionId,
   newPlan,
 }: {
   subscriptionId: string;
-  subscriptionItemId: string;
   newPlan: string;
 }) {
-  console.log("newPlan --> ", newPlan);
   try {
     const current = await stripe.subscriptions.retrieve(subscriptionId);
     const newSub = await stripe.subscriptions.update(subscriptionId, {
@@ -102,6 +83,31 @@ export async function updateSubscriptionAction({
       message: `Subscription ${
         newPlan === "pro" ? "upgraded" : "downgraded"
       } successfully`,
+    };
+  } catch (error) {
+    console.error(error);
+    return {
+      success: false,
+      message: "Something went wrong, please try again",
+    };
+  }
+}
+
+export async function cancelSubscriptionAction({
+  subscriptionId,
+}: {
+  subscriptionId: string;
+}) {
+  try {
+    const current = await stripe.subscriptions.retrieve(subscriptionId);
+    await stripe.subscriptions.update(subscriptionId, {
+      cancel_at: current.items.data[0].current_period_end,
+    });
+
+    return {
+      success: true,
+      message:
+        "Your subscription will be canceled when the current period ends",
     };
   } catch (error) {
     console.error(error);

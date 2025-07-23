@@ -22,7 +22,6 @@ export async function createSubscription({
   periodStart,
   status,
   stripeCustomerId,
-  stripeItemId,
   stripeSubscriptionId,
   userId,
 }: Omit<SubscriptionInsert, "createdAt" | "updatedAt" | "messageCount">) {
@@ -34,7 +33,6 @@ export async function createSubscription({
       periodStart,
       status,
       stripeCustomerId,
-      stripeItemId,
       stripeSubscriptionId,
     })
     .where(eq(subscriptions.userId, userId));
@@ -45,7 +43,6 @@ export async function updateSubscription({
   periodEnd,
   status,
   plan,
-  stripeItemId,
   stripeSubscriptionId,
 }: Omit<SubscriptionInsert, "userId" | "stripeCustomerId" | "messageCount">) {
   const existing = await db.query.subscriptions.findFirst({
@@ -72,7 +69,6 @@ export async function updateSubscription({
       periodEnd,
       status,
       plan,
-      stripeItemId,
       messageCount: currentMessageCount,
     })
     .where(
@@ -89,6 +85,10 @@ export async function cancelSubscription({
     .set({
       status,
       plan: "free",
+      messageCount: 0,
+      periodEnd: null,
+      periodStart: null,
+      stripeSubscriptionId: null,
     })
     .where(
       eq(subscriptions.stripeSubscriptionId, stripeSubscriptionId as string)
@@ -160,6 +160,6 @@ export async function getSubscriptionByClerkId({
 
     return subscription;
   } catch (error) {
-    console.error("error on getSubscriptionByUserId --> ", error);
+    console.error("error on getSubscriptionByClerkId --> ", error);
   }
 }
