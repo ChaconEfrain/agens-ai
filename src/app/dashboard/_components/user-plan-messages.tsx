@@ -42,7 +42,7 @@ export default function UserPlanMessages({ sub, clerkId }: Props) {
       <Slash className="size-4 -rotate-[24deg]" />
       {new Intl.NumberFormat().format(
         ALLOWED_MESSAGE_QUANTITY[
-          subscription?.plan.toUpperCase() as "BASIC" | "PRO" | "FREE"
+          sub?.plan.toUpperCase() as "BASIC" | "PRO" | "FREE"
         ]
       )}{" "}
       Messages
