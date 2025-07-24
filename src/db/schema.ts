@@ -151,6 +151,7 @@ export const chatbots = pgTable(
       .default(0),
     pdfInputTokens: integer("pdf_input_tokens").notNull(),
     pdfOutputTokens: integer("pdf_output_tokens").notNull(),
+    isActive: boolean("is_active").notNull().default(true),
     createdAt: timestamp("created_at").notNull().defaultNow(),
     updatedAt: timestamp("updated_at").$onUpdate(() => new Date()),
   },
