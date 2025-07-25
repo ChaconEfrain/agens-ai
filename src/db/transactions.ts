@@ -15,7 +15,6 @@ import {
   updateChatbotPdfTokens,
   updateChatbotTestMessageCount,
 } from "./chatbot";
-import Stripe from "stripe";
 import { createMessage } from "./messages";
 import { createBusiness } from "./business";
 import { saveEmbeddings } from "./embeddings";
