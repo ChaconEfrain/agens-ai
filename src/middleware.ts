@@ -5,8 +5,6 @@ const isProtectedRoute = createRouteMatcher([
   "/((?!_next|.*\\..*|(?:embed)(?:$|/)|api/(?:embed-styles|public|webhooks)).*)",
 ]);
 
-const ALLOWED_IPS = ["187.152.188.208,187.147.171.221"]; //TODO: Move this to .env
-
 export default clerkMiddleware(
   (_, req) => {
     if (!isProtectedRoute(req)) return NextResponse.next();
@@ -14,7 +12,10 @@ export default clerkMiddleware(
     const ip =
       req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
 
-    if (process.env.NODE_ENV === "production" && !ALLOWED_IPS.includes(ip)) {
+    if (
+      process.env.NODE_ENV === "production" &&
+      !process.env.ALLOWED_IPS?.split(",").includes(ip)
+    ) {
       return new NextResponse("Coming soon", { status: 403 });
     }
 
