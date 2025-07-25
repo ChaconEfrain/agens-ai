@@ -1,5 +1,9 @@
 import { STRIPE_WEBHOOK_EVENTS } from "@/consts/stripe";
 import {
+  deactivateChatbotsBySubscriptionId,
+  toggleDeactivateChatbotAtPeriodEnd,
+} from "@/db/chatbot";
+import {
   cancelSubscription,
   createSubscription,
   updateSubscription,
@@ -68,16 +72,24 @@ export async function POST(request: Request) {
         cancelAtPeriodEnd: subscription.cancel_at ? true : false,
       });
 
+      await toggleDeactivateChatbotAtPeriodEnd({
+        activeChatbot: Number(subscription.metadata.activeChatbot ?? 0),
+        deactivateAtPeriodEnd: subscription.cancel_at ? true : false,
+        subscriptionId: Number(subscription.metadata.subscriptionId),
+      });
+
       return Response.json({ subscription, status: 200 });
     } else if (
       event.type === STRIPE_WEBHOOK_EVENTS.CUSTOMER_SUBSCRIPTION_DELETED
     ) {
       const subscription = event.data.object;
 
-      await cancelSubscription({
+      const [{ id }] = await cancelSubscription({
         status: subscription.status as "canceled",
         stripeSubscriptionId: subscription.id,
       });
+
+      await deactivateChatbotsBySubscriptionId({ subscriptionId: id });
 
       return Response.json({ subscription, status: 200 });
     }

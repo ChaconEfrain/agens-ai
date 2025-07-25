@@ -44,6 +44,7 @@ export async function updateSubscription({
   status,
   plan,
   stripeSubscriptionId,
+  cancelAtPeriodEnd,
 }: Omit<SubscriptionInsert, "userId" | "stripeCustomerId" | "messageCount">) {
   const existing = await db.query.subscriptions.findFirst({
     where: eq(
@@ -69,6 +70,7 @@ export async function updateSubscription({
       periodEnd,
       status,
       plan,
+      cancelAtPeriodEnd,
       messageCount: currentMessageCount,
     })
     .where(
@@ -80,7 +82,7 @@ export async function cancelSubscription({
   status,
   stripeSubscriptionId,
 }: Pick<SubscriptionInsert, "stripeSubscriptionId" | "status">) {
-  await db
+  return await db
     .update(subscriptions)
     .set({
       status,
@@ -89,10 +91,12 @@ export async function cancelSubscription({
       periodEnd: null,
       periodStart: null,
       stripeSubscriptionId: null,
+      cancelAtPeriodEnd: false,
     })
     .where(
       eq(subscriptions.stripeSubscriptionId, stripeSubscriptionId as string)
-    );
+    )
+    .returning();
 }
 
 export async function updateSubscriptionMessageCount(

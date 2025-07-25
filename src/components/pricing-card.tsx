@@ -16,7 +16,8 @@ import { Check, type LucideProps } from "lucide-react";
 import { Badge } from "./ui/badge";
 import { cn } from "@/lib/utils";
 import SubscribeButton from "./subscribe-button";
-import { Subscription } from "@/db/schema";
+import { Chatbot, Subscription } from "@/db/schema";
+import { Prettify } from "@/types/helpers";
 
 interface Props {
   plan: string;
@@ -28,8 +29,10 @@ interface Props {
     Omit<LucideProps, "ref"> & RefAttributes<SVGSVGElement>
   >;
   checkingSub: boolean;
-  sub: Subscription | undefined;
-  setSub: Dispatch<SetStateAction<Subscription | undefined>>;
+  sub: Prettify<Subscription & { chatbots: Chatbot[] }> | undefined;
+  setSub: Dispatch<
+    SetStateAction<Prettify<Subscription & { chatbots: Chatbot[] }> | undefined>
+  >;
 }
 
 export default function PricingCard({

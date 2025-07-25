@@ -1,7 +1,7 @@
 import { ChatbotStyles } from "@/types/embedded-chatbot";
 import { db } from ".";
 import { businesses, ChatbotInsert, chatbots } from "./schema";
-import { eq, sql } from "drizzle-orm";
+import { eq, inArray, sql } from "drizzle-orm";
 import { auth } from "@clerk/nextjs/server";
 import { getUserByClerkId } from "./user";
 import { Transaction } from "@/types/db-types";
@@ -178,11 +178,6 @@ export async function updateChatbotPdfTokens(
   },
   trx?: Transaction
 ) {
-  console.log("Updating chatbot PDF tokens", {
-    pdfInputTokens,
-    pdfOutputTokens,
-    chatbotId,
-  });
   const database = trx ?? db;
   await database
     .update(chatbots)
@@ -191,4 +186,55 @@ export async function updateChatbotPdfTokens(
       pdfOutputTokens,
     })
     .where(eq(chatbots.id, chatbotId));
+}
+
+export async function toggleDeactivateChatbotAtPeriodEnd({
+  deactivateAtPeriodEnd,
+  activeChatbot,
+  subscriptionId,
+}: {
+  deactivateAtPeriodEnd: boolean;
+  activeChatbot: number;
+  subscriptionId: number;
+}) {
+  const userChatbots = await getChatbotsBySubscriptionId({ subscriptionId });
+  const ids = userChatbots
+    .filter((bot) => bot.id !== activeChatbot)
+    .map((bot) => bot.id);
+
+  await db
+    .update(chatbots)
+    .set({
+      deactivateAtPeriodEnd,
+    })
+    .where(inArray(chatbots.id, ids));
+}
+
+export async function getChatbotsBySubscriptionId({
+  subscriptionId,
+}: {
+  subscriptionId: number;
+}) {
+  return await db.query.chatbots.findMany({
+    where: eq(chatbots.subscriptionId, subscriptionId),
+  });
+}
+
+export async function deactivateChatbotsBySubscriptionId({
+  subscriptionId,
+}: {
+  subscriptionId: number;
+}) {
+  const userChatbots = await getChatbotsBySubscriptionId({ subscriptionId });
+  const ids = userChatbots
+    .filter((bot) => bot.deactivateAtPeriodEnd)
+    .map((bot) => bot.id);
+
+  await db
+    .update(chatbots)
+    .set({
+      isActive: false,
+      deactivateAtPeriodEnd: false,
+    })
+    .where(inArray(chatbots.id, ids));
 }

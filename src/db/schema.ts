@@ -3,7 +3,6 @@ import { ChatbotStyles } from "@/types/embedded-chatbot";
 import { relations } from "drizzle-orm";
 import {
   boolean,
-  doublePrecision,
   index,
   integer,
   json,
@@ -152,11 +151,14 @@ export const chatbots = pgTable(
     pdfInputTokens: integer("pdf_input_tokens").notNull(),
     pdfOutputTokens: integer("pdf_output_tokens").notNull(),
     isActive: boolean("is_active").notNull().default(true),
+    deactivateAtPeriodEnd: boolean("deactivate_at_period_end")
+      .notNull()
+      .default(false),
     createdAt: timestamp("created_at").notNull().defaultNow(),
     updatedAt: timestamp("updated_at").$onUpdate(() => new Date()),
   },
   (table) => [
-    index("chatbots_business_id_idx").on(table.businessId),
+    index("chatbots_subscription_id_idx").on(table.subscriptionId),
     index("chatbots_user_id_idx").on(table.userId),
     index("chatbots_slug_idx").on(table.slug),
   ]

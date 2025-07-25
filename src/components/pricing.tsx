@@ -5,29 +5,31 @@ import PricingCard from "./pricing-card";
 import { useUser } from "@clerk/nextjs";
 import { useEffect, useState } from "react";
 import { getSubscriptionByClerkIdAction } from "@/actions/subscription";
-import { Subscription } from "@/db/schema";
+import { Chatbot, Subscription } from "@/db/schema";
+import { Prettify } from "@/types/helpers";
 
-export default function Pricing() {
+export default function Pricing({ Heading }: { Heading: "h1" | "h2" }) {
   const { isSignedIn, user, isLoaded } = useUser();
   const [checkingSub, setCheckingSub] = useState(false);
-  const [sub, setSub] = useState<Subscription>();
+  const [sub, setSub] =
+    useState<Prettify<Subscription & { chatbots: Chatbot[] }>>();
 
   useEffect(() => {
     (async () => {
       setCheckingSub(true);
       if (isSignedIn) {
         const sub = await getSubscriptionByClerkIdAction({ clerkId: user.id });
-        if (sub) {
-          setSub(sub);
-        }
-      }
+        setSub(sub);
+      } else setSub(undefined);
       setCheckingSub(false);
     })();
-  }, [isLoaded]);
+  }, [isLoaded, isSignedIn]);
   return (
     <div>
       <div className="text-center max-w-3xl mx-auto mb-16">
-        <h1 className="text-3xl font-bold mb-4">Simple, transparent pricing</h1>
+        <Heading className="text-3xl font-bold mb-4">
+          Simple, transparent pricing
+        </Heading>
         <p className="text-xl text-muted-foreground">
           Choose the perfect plan for your business needs. No hidden fees or
           surprises.

@@ -94,20 +94,58 @@ export async function updateSubscriptionPlanAction({
 }
 
 export async function cancelSubscriptionAction({
+  stripeSubscriptionId,
   subscriptionId,
+  activeChatbot,
 }: {
+  stripeSubscriptionId: string;
   subscriptionId: string;
+  activeChatbot?: string;
 }) {
   try {
-    const current = await stripe.subscriptions.retrieve(subscriptionId);
-    await stripe.subscriptions.update(subscriptionId, {
+    const current = await stripe.subscriptions.retrieve(stripeSubscriptionId);
+    await stripe.subscriptions.update(stripeSubscriptionId, {
       cancel_at: current.items.data[0].current_period_end,
+      metadata: {
+        activeChatbot: activeChatbot ?? null,
+        subscriptionId,
+      },
     });
 
     return {
       success: true,
-      message:
-        "Your subscription will be canceled when the current period ends",
+      message: "Your subscription is scheduled for cancelation at period end",
+    };
+  } catch (error) {
+    console.error(error);
+    return {
+      success: false,
+      message: "Something went wrong, please try again",
+    };
+  }
+}
+
+export async function revertCancelSubscriptionAction({
+  stripeSubscriptionId,
+  subscriptionId,
+  activeChatbot,
+}: {
+  stripeSubscriptionId: string;
+  subscriptionId: string;
+  activeChatbot?: string;
+}) {
+  try {
+    await stripe.subscriptions.update(stripeSubscriptionId, {
+      cancel_at: null,
+      metadata: {
+        activeChatbot: activeChatbot ?? null,
+        subscriptionId,
+      },
+    });
+
+    return {
+      success: true,
+      message: "Your subscription will no longer be canceled at period end",
     };
   } catch (error) {
     console.error(error);
