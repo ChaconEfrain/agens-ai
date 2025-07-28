@@ -1,6 +1,8 @@
 import { STRIPE_WEBHOOK_EVENTS } from "@/consts/stripe";
 import {
+  activateChatbotsBySubscriptionId,
   deactivateChatbotsBySubscriptionId,
+  deactivateMarkedChatbotsBySubscriptionId,
   toggleDeactivateChatbotAtPeriodEnd,
 } from "@/db/chatbot";
 import {
@@ -72,11 +74,31 @@ export async function POST(request: Request) {
         cancelAtPeriodEnd: subscription.cancel_at ? true : false,
       });
 
-      await toggleDeactivateChatbotAtPeriodEnd({
-        activeChatbot: Number(subscription.metadata.activeChatbot ?? 0),
-        deactivateAtPeriodEnd: subscription.cancel_at ? true : false,
-        subscriptionId: Number(subscription.metadata.subscriptionId),
-      });
+      if (subscription.metadata.action === "cancel") {
+        await toggleDeactivateChatbotAtPeriodEnd({
+          activeChatbot: Number(subscription.metadata.activeChatbot ?? 0),
+          deactivateAtPeriodEnd: subscription.cancel_at ? true : false,
+          subscriptionId: Number(subscription.metadata.subscriptionId),
+        });
+      } else if (
+        subscription.metadata.action === "update" &&
+        (subscription.items.data[0].price.lookup_key as "basic" | "pro") ===
+          "basic" &&
+        subscription.metadata.activeChatbot
+      ) {
+        await deactivateChatbotsBySubscriptionId({
+          activeChatbot: Number(subscription.metadata.activeChatbot ?? 0),
+          subscriptionId: Number(subscription.metadata.subscriptionId),
+        });
+      } else if (
+        subscription.metadata.action === "update" &&
+        (subscription.items.data[0].price.lookup_key as "basic" | "pro") ===
+          "pro"
+      ) {
+        await activateChatbotsBySubscriptionId({
+          subscriptionId: Number(subscription.metadata.subscriptionId),
+        });
+      }
 
       return Response.json({ subscription, status: 200 });
     } else if (
@@ -89,7 +111,7 @@ export async function POST(request: Request) {
         stripeSubscriptionId: subscription.id,
       });
 
-      await deactivateChatbotsBySubscriptionId({ subscriptionId: id });
+      await deactivateMarkedChatbotsBySubscriptionId({ subscriptionId: id });
 
       return Response.json({ subscription, status: 200 });
     }

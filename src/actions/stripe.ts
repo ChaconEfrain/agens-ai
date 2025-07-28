@@ -55,15 +55,19 @@ export async function createStripeSessionAction({
 }
 
 export async function updateSubscriptionPlanAction({
+  stripeSubscriptionId,
   subscriptionId,
   newPlan,
+  activeChatbot,
 }: {
+  stripeSubscriptionId: string;
   subscriptionId: string;
   newPlan: string;
+  activeChatbot?: string;
 }) {
   try {
-    const current = await stripe.subscriptions.retrieve(subscriptionId);
-    const newSub = await stripe.subscriptions.update(subscriptionId, {
+    const current = await stripe.subscriptions.retrieve(stripeSubscriptionId);
+    const newSub = await stripe.subscriptions.update(stripeSubscriptionId, {
       items: [
         {
           id: current.items.data[0].id,
@@ -75,6 +79,11 @@ export async function updateSubscriptionPlanAction({
         },
       ],
       proration_behavior: "create_prorations",
+      metadata: {
+        activeChatbot: activeChatbot ?? null,
+        subscriptionId,
+        action: "update",
+      },
     });
 
     return {
@@ -109,6 +118,7 @@ export async function cancelSubscriptionAction({
       metadata: {
         activeChatbot: activeChatbot ?? null,
         subscriptionId,
+        action: "cancel",
       },
     });
 
@@ -140,6 +150,7 @@ export async function revertCancelSubscriptionAction({
       metadata: {
         activeChatbot: activeChatbot ?? null,
         subscriptionId,
+        action: "cancel",
       },
     });
 

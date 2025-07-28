@@ -220,7 +220,7 @@ export async function getChatbotsBySubscriptionId({
   });
 }
 
-export async function deactivateChatbotsBySubscriptionId({
+export async function deactivateMarkedChatbotsBySubscriptionId({
   subscriptionId,
 }: {
   subscriptionId: number;
@@ -235,6 +235,42 @@ export async function deactivateChatbotsBySubscriptionId({
     .set({
       isActive: false,
       deactivateAtPeriodEnd: false,
+    })
+    .where(inArray(chatbots.id, ids));
+}
+
+export async function deactivateChatbotsBySubscriptionId({
+  activeChatbot,
+  subscriptionId,
+}: {
+  activeChatbot: number;
+  subscriptionId: number;
+}) {
+  const userChatbots = await getChatbotsBySubscriptionId({ subscriptionId });
+  const ids = userChatbots
+    .filter((bot) => bot.id !== activeChatbot)
+    .map((bot) => bot.id);
+
+  await db
+    .update(chatbots)
+    .set({
+      isActive: false,
+    })
+    .where(inArray(chatbots.id, ids));
+}
+
+export async function activateChatbotsBySubscriptionId({
+  subscriptionId,
+}: {
+  subscriptionId: number;
+}) {
+  const userChatbots = await getChatbotsBySubscriptionId({ subscriptionId });
+  const ids = userChatbots.map((bot) => bot.id);
+
+  await db
+    .update(chatbots)
+    .set({
+      isActive: true,
     })
     .where(inArray(chatbots.id, ids));
 }

@@ -1,4 +1,10 @@
-import React, { Dispatch, MouseEvent, SetStateAction, useState } from "react";
+import React, {
+  Dispatch,
+  MouseEvent,
+  SetStateAction,
+  useEffect,
+  useState,
+} from "react";
 import { Button } from "./ui/button";
 import Link from "next/link";
 import {
@@ -40,6 +46,7 @@ import {
   SelectValue,
 } from "./ui/select";
 import { Prettify } from "@/types/helpers";
+import { ALLOWED_CHATBOTS } from "@/consts/subscription";
 
 interface Props {
   plan: string;
@@ -74,6 +81,15 @@ export default function SubscribeButton({
     },
   });
 
+  useEffect(() => {
+    if (!openModal) {
+      document.body.style.pointerEvents = "";
+    }
+    return () => {
+      document.body.style.pointerEvents = "";
+    };
+  }, [openModal]);
+
   const redirectToStripeCheckout = async () => {
     if (!isSignedIn) {
       toast.info("Please, sign in to continue");
@@ -99,13 +115,22 @@ export default function SubscribeButton({
     setLoadingCheckout(false);
   };
 
-  const updateSubscription = async () => {
+  const updateSubscription = async (
+    arg: z.infer<typeof formSchema> | MouseEvent<HTMLButtonElement>
+  ) => {
     setLoadingModal(true);
+    let activeChatbot;
+
+    if ("activeChatbot" in arg) {
+      activeChatbot = arg.activeChatbot;
+    }
 
     if (sub) {
       const result = await updateSubscriptionPlanAction({
         newPlan: plan.toLowerCase(),
-        subscriptionId: sub.stripeSubscriptionId as string,
+        stripeSubscriptionId: sub.stripeSubscriptionId as string,
+        subscriptionId: sub?.id.toString()!,
+        activeChatbot,
       });
 
       if (result.success && result.newSubPlan) {
@@ -239,7 +264,13 @@ export default function SubscribeButton({
 
   if (sub?.plan === plan.toLowerCase() && sub.status === "active") {
     return (
-      <Dialog open={openModal} onOpenChange={setOpenModal}>
+      <Dialog
+        open={openModal}
+        onOpenChange={(open) => {
+          setOpenModal(open);
+          form.reset();
+        }}
+      >
         <Button
           className="w-full text-red-500"
           variant="ghost"
@@ -269,9 +300,19 @@ export default function SubscribeButton({
                   name="activeChatbot"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Active chatbot</FormLabel>
+                      <FormLabel>
+                        Choose the chatbot that will remain active
+                      </FormLabel>
                       <FormControl>
-                        <Select {...field} onValueChange={field.onChange}>
+                        <Select
+                          {...field}
+                          onValueChange={field.onChange}
+                          onOpenChange={(open) => {
+                            if (open) {
+                              document.body.style.pointerEvents = "";
+                            }
+                          }}
+                        >
                           <SelectTrigger className="w-full">
                             <SelectValue placeholder="Select chatbot" />
                           </SelectTrigger>
@@ -320,7 +361,13 @@ export default function SubscribeButton({
 
   if (sub?.plan !== plan.toLowerCase() && sub?.status === "active") {
     return (
-      <Dialog open={openModal} onOpenChange={setOpenModal}>
+      <Dialog
+        open={openModal}
+        onOpenChange={(open) => {
+          setOpenModal(open);
+          form.reset();
+        }}
+      >
         <Button
           className="w-full cursor-pointer"
           onClick={() => {
@@ -348,14 +395,67 @@ export default function SubscribeButton({
                 : "Pay a prorated charge for the remaining days of the month (any credit will be applied to your next invoice)"}
             </DialogDescription>
           </DialogHeader>
+          {sub.plan === "pro" &&
+            sub.chatbots.length > ALLOWED_CHATBOTS["BASIC"] && (
+              <Form {...form}>
+                <form
+                  onSubmit={form.handleSubmit(updateSubscription)}
+                  id="active-chatbot-form"
+                >
+                  <FormField
+                    control={form.control}
+                    name="activeChatbot"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>
+                          Choose the chatbot that will remain active
+                        </FormLabel>
+                        <FormControl>
+                          <Select
+                            {...field}
+                            onValueChange={field.onChange}
+                            onOpenChange={(open) => {
+                              if (open) {
+                                document.body.style.pointerEvents = "";
+                              }
+                            }}
+                          >
+                            <SelectTrigger className="w-full">
+                              <SelectValue placeholder="Select chatbot" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {sub.chatbots.map((bot) => (
+                                <SelectItem
+                                  key={bot.id}
+                                  value={bot.id.toString()}
+                                >
+                                  {bot.slug}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </form>
+              </Form>
+            )}
           <DialogFooter className="w-full flex gap-2">
             <Button variant="outline" className="w-1/2" asChild>
               <DialogClose>Cancel</DialogClose>
             </Button>
             <Button
               className="w-1/2"
-              onClick={updateSubscription}
+              onClick={
+                sub.chatbots.length > ALLOWED_CHATBOTS["BASIC"] &&
+                sub.plan === "pro"
+                  ? undefined
+                  : updateSubscription
+              }
               disabled={loadingModal}
+              form={sub.chatbots.length > 0 ? "active-chatbot-form" : undefined}
             >
               {sub.plan === "basic" ? (
                 loadingModal ? (
