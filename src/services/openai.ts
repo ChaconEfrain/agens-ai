@@ -47,6 +47,7 @@ export async function chatCompletions({
     model: "gpt-4.1-mini",
     response_format,
     messages,
+    max_completion_tokens: 40,
   });
 
   const result = {
