@@ -9,7 +9,7 @@ import React from "react";
 import CurrentPeriodChart from "./current-period-chart";
 import { getCurrentPeriodMessagesPerDayByClerkId } from "@/db/messages";
 import { Subscription } from "@/db/schema";
-import CurrentPeriodDate from "./current-period-date";
+import ClientDate from "@/components/client-date";
 
 export default async function MessagesChart({
   clerkId,
@@ -31,7 +31,10 @@ export default async function MessagesChart({
           </CardTitle>
           <CardDescription>
             {sub.periodEnd && sub.periodStart ? (
-              <CurrentPeriodDate end={sub.periodEnd} start={sub.periodStart} />
+              <p>
+                Showing messages between <ClientDate date={sub.periodStart} />{" "}
+                and <ClientDate date={sub.periodEnd} />
+              </p>
             ) : (
               <p>Showing your current messages</p>
             )}

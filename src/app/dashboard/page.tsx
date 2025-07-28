@@ -61,7 +61,7 @@ export default async function DashboardPage() {
         <UserPlan sub={sub} clerkId={userId} />
         <CurrentMessages clerkId={userId} />
         <MessagesChart clerkId={userId} sub={sub} />
-        <UserChatbots clerkId={userId} />
+        <UserChatbots clerkId={userId} sub={sub} />
       </div>
     </main>
   );

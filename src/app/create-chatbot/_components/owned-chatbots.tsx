@@ -46,7 +46,7 @@ export default async function OwnedChatbots({ userChatbots, userSub }: Props) {
       <CardHeader>
         <h2 className="text-xl font-semibold">Your Chatbots</h2>
       </CardHeader>
-      <ChatbotCards userChatbots={userChatbots} />
+      <ChatbotCards userChatbots={userChatbots} sub={userSub} />
       <CardFooter className="flex flex-col gap-2 mt-auto">
         {(userSub || (userChatbots && userChatbots?.length > 0)) && (
           <span className="self-end text-sm text-muted-foreground">

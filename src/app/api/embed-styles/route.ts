@@ -59,6 +59,19 @@ export async function GET(req: NextRequest) {
       }
     );
   }
+  
+  if (!chatbot.isActive) {
+    return NextResponse.json(
+      { error: `Chatbot '${slug}' is inactive` },
+      {
+        status: 403,
+        headers: {
+          ...DEFAULT_HEADERS,
+          "Access-Control-Allow-Origin": `https://${originDomain}`,
+        },
+      }
+    );
+  }
 
   const token = jwt.sign(
     {

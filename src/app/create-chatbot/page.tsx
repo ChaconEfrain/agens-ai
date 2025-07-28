@@ -21,25 +21,18 @@ export default async function CreateChatbotPage() {
     getSubscriptionByClerkId({ clerkId: userId }),
   ]);
   const hasChatbotButNoSub =
-    userSub?.status === "unsubscribed" &&
+    (userSub?.status === "unsubscribed" || userSub?.status === "canceled") &&
     (userChatbots?.length ?? 0) >= ALLOWED_CHATBOTS.FREE;
   const hasSubButChatbotLimit =
-    userSub?.status === "active" ||
-    (userSub?.status === "incomplete" &&
-      (userChatbots?.length ?? 0) >=
-        ALLOWED_CHATBOTS[userSub.plan.toUpperCase() as "BASIC" | "PRO"]);
-  const hasChatbotAndCanceledSub =
-    userSub?.status === "canceled" &&
-    (userChatbots?.length ?? 0) >= ALLOWED_CHATBOTS.FREE;
+    (userSub?.status === "active" || userSub?.status === "incomplete") &&
+    (userChatbots?.length ?? 0) >=
+      ALLOWED_CHATBOTS[userSub.plan.toUpperCase() as "BASIC" | "PRO"];
+
   return (
     <main className="my-10">
-      <div className="grid grid-cols-[70fr_30fr] gap-6">
+      <div className="grid grid-cols-[2fr_1fr] gap-4">
         <FormWizard
-          limitReached={
-            hasChatbotButNoSub ||
-            hasSubButChatbotLimit ||
-            hasChatbotAndCanceledSub
-          }
+          limitReached={hasChatbotButNoSub || hasSubButChatbotLimit}
         />
         <OwnedChatbots userChatbots={userChatbots} userSub={userSub} />
       </div>

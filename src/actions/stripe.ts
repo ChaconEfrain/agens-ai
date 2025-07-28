@@ -4,8 +4,8 @@ import { getUserByClerkId } from "@/db/user";
 import { stripe } from "@/services/stripe";
 import { currentUser } from "@clerk/nextjs/server";
 
-const BASIC_PLAN_PRICE_ID = "price_1RXbblFPnR9XY3t8FfExdSsH";
-const PRO_PLAN_PRICE_ID = "price_1RXbd9FPnR9XY3t8XZeogu8q";
+const BASIC_PLAN_PRICE_ID = process.env.BASIC_PLAN_PRICE_ID;
+const PRO_PLAN_PRICE_ID = process.env.PRO_PLAN_PRICE_ID;
 
 export async function createStripeSessionAction({
   plan,

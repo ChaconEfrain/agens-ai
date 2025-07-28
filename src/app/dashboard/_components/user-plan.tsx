@@ -11,9 +11,9 @@ import { Subscription } from "@/db/schema";
 import { cn } from "@/lib/utils";
 import { ArrowRight } from "lucide-react";
 import React from "react";
-import PlanRenewDate from "./plan-renew-date";
 import Link from "next/link";
 import UserPlanMessages from "./user-plan-messages";
+import ClientDate from "@/components/client-date";
 
 interface Props {
   clerkId: string;
@@ -43,7 +43,10 @@ export default function UserPlan({ sub, clerkId }: Props) {
           </CardTitle>
           <CardDescription>
             {sub.periodEnd ? (
-              <PlanRenewDate date={sub.periodEnd} />
+              <p className="text-muted-foreground">
+                Your plan will {sub.cancelAtPeriodEnd ? "be canceled" : "renew"}{" "}
+                on <ClientDate date={sub.periodEnd} />
+              </p>
             ) : (
               <p className="text-muted-foreground">
                 You are not subscribed yet

@@ -1,9 +1,15 @@
 import ChatbotCards from '@/components/chatbot-cards'
 import { Card, CardHeader } from '@/components/ui/card'
 import { getChatbotsByClerkId } from "@/db/chatbot";
+import { Subscription } from "@/db/schema";
 import React from "react";
 
-export default async function UserChatbots({ clerkId }: { clerkId: string }) {
+interface Props {
+  clerkId: string;
+  sub: Subscription;
+}
+
+export default async function UserChatbots({ clerkId, sub }: Props) {
   const chatbots = await getChatbotsByClerkId({ clerkId });
 
   return (
@@ -12,7 +18,7 @@ export default async function UserChatbots({ clerkId }: { clerkId: string }) {
         <CardHeader>
           <h2 className="text-2xl font-semibold">Your Chatbots</h2>
         </CardHeader>
-        <ChatbotCards userChatbots={chatbots} />
+        <ChatbotCards userChatbots={chatbots} sub={sub} />
       </Card>
     </section>
   );
