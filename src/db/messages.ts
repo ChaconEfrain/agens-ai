@@ -1,6 +1,6 @@
 import { Transaction } from "@/types/db-types";
 import { db } from ".";
-import { Chatbot, MessageInsert, messages } from "./schema";
+import { Chatbot, chatbots, MessageInsert, messages } from "./schema";
 import { and, asc, between, count, desc, eq, inArray, sql } from "drizzle-orm";
 import { getSubscriptionByClerkId } from "./subscriptions";
 import { getChatbotsByClerkId } from "./chatbot";
@@ -226,44 +226,40 @@ export async function getCurrentPeriodMessagesPerChatbotPerDayByClerkId({
   clerkId: string;
 }) {
   try {
-    const [sub, chatbots] = await Promise.all([
+    const [sub, userChatbots] = await Promise.all([
       getSubscriptionByClerkId({ clerkId }),
       getChatbotsByClerkId({ clerkId }),
     ]);
 
     if (!sub) throw new Error("No subscription found");
-    if (chatbots.length === 0) return [];
+    if (userChatbots.length === 0) return [];
 
-    const chatbotIds = chatbots.map((bot) => bot.id);
+    const chatbotIds = userChatbots.map((bot) => bot.id);
 
-    let rows;
-    if (!sub.periodEnd || !sub.periodStart) {
-      rows = await db.query.messages.findMany({
-        where: and(
+    const rows = await db
+      .select()
+      .from(messages)
+      .innerJoin(chatbots, eq(messages.chatbotId, chatbots.id))
+      .where(
+        and(
           inArray(messages.chatbotId, chatbotIds),
-          eq(messages.isTest, false)
-        ),
-        orderBy: asc(messages.createdAt),
-      });
-    } else {
-      rows = await db.query.messages.findMany({
-        where: and(
-          inArray(messages.chatbotId, chatbotIds),
-          between(messages.createdAt, sub.periodStart, sub.periodEnd),
-          eq(messages.isTest, false)
-        ),
-        orderBy: asc(messages.createdAt),
-      });
-    }
+          eq(messages.isTest, false),
+          eq(chatbots.isActive, true),
+          sub.periodEnd && sub.periodStart
+            ? between(messages.createdAt, sub.periodStart, sub.periodEnd)
+            : undefined
+        )
+      )
+      .orderBy(messages.createdAt);
 
-    return rows.reduce((acc, message) => {
-      const date = new Date(message.createdAt);
+    return rows.reduce((acc, { messages }) => {
+      const date = new Date(messages.createdAt);
       const dateString = date.toLocaleString(undefined, {
         month: "short",
         day: "numeric",
       });
-      const chatbot = chatbots.find(
-        (bot) => bot.id === message.chatbotId
+      const chatbot = userChatbots.find(
+        (bot) => bot.id === messages.chatbotId
       ) as Chatbot;
       const existingEntry = acc.find(
         (entry) =>
@@ -433,6 +429,7 @@ export async function getCurrentDayMessagesPerChatbotByClerkId({
       WHERE m.chatbot_id = ANY(${formattedIds}::int[])
         AND m.created_at >= date_trunc('day', now() at time zone ${timezone})
         AND m.created_at < date_trunc('day', now() at time zone ${timezone}) + interval '1 day'
+        AND c.is_active = true
       GROUP BY c.slug
     `
   );
@@ -444,6 +441,7 @@ export async function getCurrentDayMessagesPerChatbotByClerkId({
     rows.map((row) => [row.chatbot, row.messages])
   );
   return chatbots
+    .filter((bot) => bot.isActive)
     .map((bot) => ({
       chatbot: bot.slug,
       messages: chatbotMessageMap.get(bot.slug) ?? 0,

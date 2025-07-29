@@ -9,7 +9,13 @@ import {
   getCurrentPeriodMessagesPerChatbotPerDayByClerkId,
 } from "@/db/messages";
 import { getChatbotsByClerkId } from "@/db/chatbot";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import MessagesPerChatbotChart from "./_components/messages-per-chatbot-chart";
 import ConversationsPerChatbotChart from "./_components/conversations-per-chatbot-chart";
 
@@ -42,27 +48,41 @@ export default async function MessageHistoryPage() {
       <section className="grid grid-cols-2 gap-4">
         <Card className="h-full">
           <CardHeader>
-            <h2 className="text-2xl font-semibold">
-              Current period messages per chatbot
-            </h2>
+            <CardTitle>
+              <h2 className="text-2xl font-semibold">
+                Current period messages
+              </h2>
+            </CardTitle>
+            <CardDescription>
+              <p>Showing messages per active chatbot</p>
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <MessagesPerChatbotChart
               messagesPerDay={messagesPerChatbot}
-              chatbots={chatbots.map((bot) => bot.slug)}
+              chatbots={chatbots
+                .filter((bot) => bot.isActive)
+                .map((bot) => bot.slug)}
             />
           </CardContent>
         </Card>
         <Card className="h-full">
           <CardHeader>
-            <h2 className="text-2xl font-semibold">
-              Current period conversations per chatbot
-            </h2>
+            <CardTitle>
+              <h2 className="text-2xl font-semibold">
+                Current period conversations
+              </h2>
+            </CardTitle>
+            <CardDescription>
+              <p>Showing conversations per active chatbot</p>
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <ConversationsPerChatbotChart
               conversationsPerDay={conversationsPerChatbot}
-              chatbots={chatbots.map((bot) => bot.slug)}
+              chatbots={chatbots
+                .filter((bot) => bot.isActive)
+                .map((bot) => bot.slug)}
             />
           </CardContent>
         </Card>

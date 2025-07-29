@@ -29,13 +29,13 @@ export default function ConversationsPerChatbotChart({
 
   conversationsPerDay.forEach(({ date, chatbotSlug, conversations }) => {
     if (!grouped[date]) grouped[date] = {};
-    grouped[date][chatbotSlug] = conversations;
+    grouped[date][chatbotSlug.split("-")[0]] = conversations;
   });
 
   const chartData = Object.entries(grouped).map(([date, slugs]) => {
     const entry: Record<string, any> = { date };
     chatbots.forEach((slug) => {
-      entry[slug] = slugs[slug] || 0;
+      entry[slug.split("-")[0]] = slugs[slug.split("-")[0]] || 0;
     });
     return entry;
   });
@@ -71,7 +71,7 @@ export default function ConversationsPerChatbotChart({
         {chatbots.map((slug, i) => (
           <Bar
             key={slug}
-            dataKey={slug}
+            dataKey={slug.split("-")[0]}
             fill={colors[i % colors.length]}
             radius={[4, 4, 0, 0]}
           />

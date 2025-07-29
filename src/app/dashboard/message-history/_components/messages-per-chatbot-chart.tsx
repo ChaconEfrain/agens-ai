@@ -30,13 +30,13 @@ export default function MessagesPerChatbotChart({
 
   messagesPerDay.forEach(({ date, chatbotSlug, messages }) => {
     if (!groupedData[date]) groupedData[date] = {};
-    groupedData[date][chatbotSlug] = messages;
+    groupedData[date][chatbotSlug.split("-")[0]] = messages;
   });
 
   const chartData = Object.entries(groupedData).map(([date, bots]) => {
     const entry: Record<string, any> = { date };
     chatbots.forEach((slug) => {
-      entry[slug] = bots[slug] || 0;
+      entry[slug.split("-")[0]] = bots[slug.split("-")[0]] || 0;
     });
     return entry;
   });
@@ -73,7 +73,7 @@ export default function MessagesPerChatbotChart({
           <Line
             key={slug}
             type="monotone"
-            dataKey={slug}
+            dataKey={slug.split("-")[0]}
             stroke={colors[i % colors.length]}
             strokeWidth={2}
             dot={{ r: 3 }}
