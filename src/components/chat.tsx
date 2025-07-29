@@ -65,13 +65,15 @@ export default function Chat({
           chatbotId,
           sessionId,
         }),
-        getChatbotTestMessageCountAction({
-          chatbotId,
-        }),
+        pathname.startsWith("/test-chatbot")
+          ? getChatbotTestMessageCountAction({
+              chatbotId,
+            })
+          : undefined,
       ]);
 
       setMessages(latestMessages);
-      setTestMessageCount(testMessageCount);
+      setTestMessageCount(testMessageCount ?? 0);
       setLoadingMessages(false);
     })();
   }, [sessionId, chatbotId]);
