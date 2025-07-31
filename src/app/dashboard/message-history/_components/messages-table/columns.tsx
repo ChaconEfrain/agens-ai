@@ -6,6 +6,7 @@ import { Prettify } from "@/types/helpers"
 import { ColumnDef } from "@tanstack/react-table"
 import { ArrowUpDown } from "lucide-react"
 import RowMenu from "./row-menu";
+import ClientDate from "@/components/client-date";
 
 export const columns: ColumnDef<Prettify<Message & { chatbot: Chatbot }>>[] = [
   {
@@ -59,8 +60,11 @@ export const columns: ColumnDef<Prettify<Message & { chatbot: Chatbot }>>[] = [
     id: "Date",
     header: "Date",
     cell: ({ getValue }) => {
-      const date = new Date(getValue() as string).toLocaleString();
-      return <div suppressHydrationWarning>{date}</div>;
+      return (
+        <div>
+          <ClientDate date={new Date(getValue() as string)} />
+        </div>
+      );
     },
   },
   {

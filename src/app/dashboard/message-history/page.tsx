@@ -5,7 +5,6 @@ import { auth } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation';
 import {
   getCurrentPeriodConversationsPerChatbotPerDayByClerkId,
-  getAllMessagesByClerkId,
   getCurrentPeriodMessagesPerChatbotPerDayByClerkId,
 } from "@/db/messages";
 import { getChatbotsByClerkId } from "@/db/chatbot";
@@ -26,9 +25,8 @@ export default async function MessageHistoryPage() {
     redirect("/");
   }
 
-  const [messages, chatbots, messagesPerChatbot, conversationsPerChatbot] =
+  const [chatbots, messagesPerChatbot, conversationsPerChatbot] =
     await Promise.all([
-      getAllMessagesByClerkId({ clerkId: userId }),
       getChatbotsByClerkId({ clerkId: userId }),
       getCurrentPeriodMessagesPerChatbotPerDayByClerkId({ clerkId: userId }),
       getCurrentPeriodConversationsPerChatbotPerDayByClerkId({
@@ -90,7 +88,7 @@ export default async function MessageHistoryPage() {
       <section>
         <DataTable
           columns={columns}
-          data={messages}
+          clerkId={userId}
           chatbots={chatbots.map((bot) => bot.slug)}
         />
       </section>

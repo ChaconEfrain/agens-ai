@@ -94,3 +94,8 @@ export function isValidTimezone(timezone: string): boolean {
     return false;
   }
 }
+
+export function getPaginationParams(page: number, pageSize: number) {
+  const offset = page * pageSize;
+  return { offset, limit: pageSize };
+}

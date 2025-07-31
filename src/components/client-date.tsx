@@ -9,7 +9,7 @@ export default function ClientDate({
 }) {
   const [localeDate, setLocaleDate] = useState("");
   useEffect(() => {
-    setLocaleDate(new Date(date).toLocaleString());
+    setLocaleDate(date.toLocaleString());
   }, []);
   return (
     <>

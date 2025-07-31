@@ -5,7 +5,6 @@ import { getRelatedEmbeddings } from "@/db/embeddings";
 import {
   disableMessagesByChatbotId,
   getActiveMessagesByChatbotId,
-  getAllMessagesCountByChatbotId,
   getLatestMessagesByChatbotId,
   updateMessageRating,
 } from "@/db/messages";

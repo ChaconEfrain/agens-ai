@@ -1,10 +1,20 @@
 import { Transaction } from "@/types/db-types";
 import { db } from ".";
 import { Chatbot, chatbots, MessageInsert, messages } from "./schema";
-import { and, asc, between, count, desc, eq, inArray, sql } from "drizzle-orm";
+import {
+  and,
+  asc,
+  between,
+  count,
+  desc,
+  eq,
+  ilike,
+  inArray,
+  sql,
+} from "drizzle-orm";
 import { getSubscriptionByClerkId } from "./subscriptions";
 import { getChatbotsByClerkId } from "./chatbot";
-import { isValidTimezone } from "@/lib/utils";
+import { getPaginationParams, isValidTimezone } from "@/lib/utils";
 
 export async function createMessage(
   {
@@ -92,21 +102,6 @@ export async function getActiveMessagesByChatbotId({
   return messagesList;
 }
 
-export async function getAllMessagesCountByChatbotId({
-  chatbotId,
-}: {
-  chatbotId: number;
-}) {
-  const [{ count: messagesCount }] = await db
-    .select({
-      count: count(),
-    })
-    .from(messages)
-    .where(eq(messages.chatbotId, chatbotId));
-
-  return messagesCount;
-}
-
 export async function disableMessagesByChatbotId({
   chatbotId,
   sessionId,
@@ -187,38 +182,78 @@ export async function getCurrentPeriodMessagesPerDayByClerkId({
   }
 }
 
-export async function getAllMessagesByClerkId({
+export async function getPaginatedMessagesByClerkId({
   clerkId,
+  page,
+  pageSize,
+  userMessageFilter,
+  aiResponseFilter,
+  chatbotSlugFilter,
 }: {
   clerkId: string;
+  page: number;
+  pageSize: number;
+  userMessageFilter?: string;
+  aiResponseFilter?: string;
+  chatbotSlugFilter?: string;
 }) {
   try {
     const chatbots = await getChatbotsByClerkId({ clerkId });
-
-    if (chatbots.length === 0) return [];
+    if (chatbots.length === 0) return { data: [], total: 0 };
+    let chatbotId;
+    if (chatbotSlugFilter) {
+      chatbotId = chatbots.find((bot) => bot.slug === chatbotSlugFilter)?.id;
+    }
 
     const chatbotIds = chatbots.map((bot) => bot.id);
+    const { offset, limit } = getPaginationParams(page, pageSize);
+    const [data, countResult] = await Promise.all([
+      db.query.messages.findMany({
+        where: and(
+          inArray(messages.chatbotId, chatbotIds),
+          eq(messages.isTest, false),
+          userMessageFilter
+            ? ilike(messages.message, `%${userMessageFilter}%`)
+            : undefined,
+          aiResponseFilter
+            ? ilike(messages.response, `%${aiResponseFilter}%`)
+            : undefined,
+          chatbotSlugFilter && chatbotId
+            ? eq(messages.chatbotId, chatbotId)
+            : undefined
+        ),
+        with: { chatbot: true },
+        orderBy: desc(messages.createdAt),
+        offset,
+        limit,
+      }),
+      db
+        .select({ count: count() })
+        .from(messages)
+        .where(
+          and(
+            inArray(messages.chatbotId, chatbotIds),
+            eq(messages.isTest, false),
+            userMessageFilter
+              ? ilike(messages.message, `%${userMessageFilter}%`)
+              : undefined,
+            aiResponseFilter
+              ? ilike(messages.response, `%${aiResponseFilter}%`)
+              : undefined,
+            chatbotSlugFilter && chatbotId
+              ? eq(messages.chatbotId, chatbotId)
+              : undefined
+          )
+        ),
+    ]);
 
-    const rows = await db.query.messages.findMany({
-      where: and(
-        inArray(messages.chatbotId, chatbotIds),
-        eq(messages.isTest, false)
-      ),
-      with: {
-        chatbot: true,
-      },
-      orderBy: desc(messages.createdAt),
-    });
-
-    return rows;
+    return { data, total: countResult[0].count };
   } catch (error) {
-    console.error(
-      "Error on getCurrentPeriodMessagesPerDayByClerkId --> ",
-      error
-    );
-    return [];
+    console.error("Error on getPaginatedMessagesByClerkId --> ", error);
+    return { data: [], total: 0 };
   }
 }
+
 
 export async function getCurrentPeriodMessagesPerChatbotPerDayByClerkId({
   clerkId,
