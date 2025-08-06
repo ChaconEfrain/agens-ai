@@ -29,7 +29,7 @@ export default async function PageContainer({
         </p>
       </header>
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-6">
-        <ScriptContainer slug={slug} styles={chatbot.styles} />
+        <ScriptContainer chatbot={chatbot} styles={chatbot.styles} />
       </div>
     </div>
   );

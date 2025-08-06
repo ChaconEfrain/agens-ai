@@ -6,14 +6,15 @@ import Customization from "./customization";
 import EmbedPreview from "./embed-preview";
 import { ChatbotStyles } from "@/types/embedded-chatbot";
 import ChatbotReady from "./chatbot-ready";
+import { Chatbot } from "@/db/schema";
 
 interface Props {
-  slug: string;
+  chatbot: Chatbot;
   styles: ChatbotStyles;
 }
 
 export default function ScriptContainer({
-  slug,
+  chatbot,
   styles: chatbotStyles,
 }: Props) {
   const [styles, setStyles] = useState<ChatbotStyles>(chatbotStyles);
@@ -25,10 +26,14 @@ export default function ScriptContainer({
   return (
     <>
       <div className="flex flex-col gap-6">
-        <ChatbotReady />
-        <ScriptDisplay slug={slug} />
+        <ChatbotReady isActive={chatbot.isActive} />
+        <ScriptDisplay slug={chatbot.slug} />
       </div>
-      <Customization styles={styles} updateStyles={updateStyles} slug={slug} />
+      <Customization
+        styles={styles}
+        updateStyles={updateStyles}
+        slug={chatbot.slug}
+      />
       <EmbedPreview styles={styles} />
     </>
   );

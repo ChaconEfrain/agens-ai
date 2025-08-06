@@ -1,9 +1,10 @@
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Code, Globe, Smartphone } from 'lucide-react'
-import React from 'react'
+import { cn } from "@/lib/utils";
+import { Code, Globe, Smartphone } from "lucide-react";
+import React from "react";
 
-export default function ChatbotReady() {
+export default function ChatbotReady({ isActive }: { isActive: boolean }) {
   return (
     <Card>
       <CardHeader>
@@ -11,20 +12,22 @@ export default function ChatbotReady() {
           <div>
             <CardTitle className="flex items-center gap-2">
               <div className="h-2 w-2 rounded-full bg-green-500"></div>
-              <h2>Chatbot Ready</h2>
+              <h2 className="text-2xl">Chatbot Ready</h2>
             </CardTitle>
             <CardDescription>
               <p>
-                Your chatbot is live and ready to be embedded on your
-                website
+                Your chatbot is live and ready to be embedded on your website
               </p>
             </CardDescription>
           </div>
           <Badge
             variant="secondary"
-            className="bg-green-50 text-green-700 border-green-200"
+            className={cn({
+              "bg-green-50 text-green-700 border-green-200": isActive,
+              "bg-red-50 text-red-700 border-red-200": !isActive,
+            })}
           >
-            Active
+            {isActive ? "Active" : "Inactive"}
           </Badge>
         </div>
       </CardHeader>
@@ -45,5 +48,5 @@ export default function ChatbotReady() {
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }

@@ -59,9 +59,9 @@ export default function ChatbotWidget() {
 
   return (
     <Card className="grow">
-      <CardHeader>
+      <CardHeader className="gap-0">
         <CardTitle>
-          <h2>Embed Code</h2>
+          <h2 className="text-2xl">Embed Code</h2>
         </CardTitle>
         <CardDescription>
           <p>Copy and paste this code into your website to add the chatbot</p>

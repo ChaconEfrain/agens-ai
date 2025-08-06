@@ -1,6 +1,5 @@
 'use server'
 
-import { utapi } from "@/app/api/uploadthing/core";
 import { saveEmbeddings } from "@/db/embeddings";
 import { createFile } from "@/db/files";
 import { extractTextFromPdf } from "@/services/utils";
@@ -8,6 +7,7 @@ import { auth } from "@clerk/nextjs/server";
 import { getUserByClerkId } from "@/db/user";
 import { getCoherentChunksFromPdf } from "@/services/openai";
 import { updateChatbotPdfTokens } from "@/db/chatbot";
+import { utapi } from "@/services/uploadthing";
 
 export async function updateChatbotFilesAction({
   files,

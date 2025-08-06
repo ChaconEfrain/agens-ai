@@ -1,7 +1,6 @@
 'use server'
 
 import { FormWizardData } from "../_components/form-wizard";
-import { utapi } from "@/app/api/uploadthing/core";
 import type { UploadFileResult } from "uploadthing/types";
 import { createChatbotTransaction } from "@/db/transactions";
 import { UploadThingError } from "uploadthing/server";
@@ -12,6 +11,7 @@ import {
 } from "@/db/form-wizard-progress";
 import { auth } from "@clerk/nextjs/server";
 import { getUserByClerkId } from "@/db/user";
+import { utapi } from "@/services/uploadthing";
 
 export async function processDataAction(form: FormWizardData) {
   const chunks = normalizeFormChunks(form);
