@@ -20,7 +20,8 @@
 - [ ] Allow user to edit the business info after testing the chatbot
 - [x] Properly manage wizardId in localStorage after chatbot creation
 - [x] Remove chatbot config from form wizard
-- [ ] Check when user downgrades from pro to basic and has more than allowed chatbots
+- [x] Check when user downgrades from pro to basic and has more than allowed chatbots
+- [ ] Validate files quantity and file size before uploading to uploadThing
 
 # Tech debt
 - [ ] Improve error handling
