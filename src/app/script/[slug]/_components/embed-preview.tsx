@@ -8,10 +8,10 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Globe } from "lucide-react";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import MockChat from "@/components/mock-chat";
 import { ChatbotStyles } from "@/types/embedded-chatbot";
-import { sanitizeSvg } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 
 interface Props {
   styles: ChatbotStyles;
@@ -19,17 +19,12 @@ interface Props {
 
 export default function EmbedPreview({ styles }: Props) {
   const [open, setOpen] = useState(true);
-  const [sanitizedSvg, setSanitizedSvg] = useState("");
-
-  useEffect(() => {
-    setSanitizedSvg(sanitizeSvg(styles.button.icon));
-  }, []);
 
   return (
     <Card className="col-span-full">
-      <CardHeader>
+      <CardHeader className="gap-0">
         <CardTitle>
-          <h2>Embed Preview</h2>
+          <h2 className="text-2xl">Embed Preview</h2>
         </CardTitle>
         <CardDescription>
           <p>See how your chatbot will appear on your website</p>
@@ -73,21 +68,29 @@ export default function EmbedPreview({ styles }: Props) {
             )}
           </div>
           <button
-            className={`cursor-pointer absolute flex items-center justify-center ${
-              styles.position.includes("bottom") ? "bottom-4" : "top-4"
-            } ${styles.position.includes("right") ? "right-4" : "left-4"}`}
+            className={cn(
+              "cursor-pointer absolute flex items-center justify-center shadow-[0_2px_10px_rgba(0,0,0,0.1)]",
+              {
+                "bottom-4": styles.position.includes("bottom"),
+                "top-4": !styles.position.includes("bottom"),
+                "right-4": styles.position.includes("right"),
+                "left-4": !styles.position.includes("right"),
+              }
+            )}
             style={{
               width: styles.button.width,
               height: styles.button.height,
               backgroundColor: styles.button.bgColor,
               borderRadius: styles.button.borderRadius,
-              boxShadow: "0 2px 10px rgba(0,0,0,0.1)",
             }}
             onClick={() => setOpen(!open)}
-            dangerouslySetInnerHTML={{
-              __html: sanitizedSvg,
-            }}
-          ></button>
+          >
+            <img
+              src={styles.button.icon}
+              alt="Chatbot icon"
+              className="size-8"
+            />
+          </button>
         </div>
       </CardContent>
     </Card>

@@ -15,7 +15,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { LoaderCircle, Settings } from "lucide-react";
+import { LoaderCircle, Settings, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { z } from "zod";
 import { Slider } from "@/components/ui/slider";
@@ -32,7 +32,8 @@ import {
 import { ChatbotStyles } from "@/types/embedded-chatbot";
 import { updateStylesAction } from "../_actions";
 import { toast } from "sonner";
-import { cn, sanitizeSvg } from "@/lib/utils";
+import { cn } from "@/lib/utils";
+import { useRef, useState } from "react";
 
 interface Props {
   styles: ChatbotStyles;
@@ -67,7 +68,7 @@ export const customizationSchema = z.object({
       .min(20, "Height must be at least 20px")
       .max(50, "Height must be at most 50px"),
     bgColor: z.string().regex(/^#[0-9A-F]{6}$/i, "Invalid hex color"),
-    icon: z.string().regex(/^<svg[^>]*>(.|\n)*?<\/svg>$/, "Invalid SVG icon"),
+    icon: z.string(),
     borderRadius: z
       .number()
       .min(0)
@@ -76,18 +77,78 @@ export const customizationSchema = z.object({
 });
 
 export default function Customization({ styles, updateStyles, slug }: Props) {
+  const iconRef = useRef(styles.button.icon);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [dragActive, setDragActive] = useState(false);
+  const [previewIcon, setPreviewIcon] = useState("");
+  const [imageFile, setImageFile] = useState<File>();
   const form = useForm<z.infer<typeof customizationSchema>>({
     resolver: zodResolver(customizationSchema),
     defaultValues: styles,
     mode: "onChange",
   });
 
+  const handleFile = (file: File) => {
+    const url = URL.createObjectURL(file);
+    setPreviewIcon(url);
+    updateStyles({
+      button: {
+        ...styles.button,
+        icon: url,
+      },
+    });
+    setImageFile(file);
+    form.setValue("button.icon", url);
+  };
+
+  const handleDrag = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.type === "dragenter" || e.type === "dragover") {
+      setDragActive(true);
+    } else if (e.type === "dragleave") {
+      setDragActive(false);
+    }
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+
+    const file = e.dataTransfer.files[0];
+    if (file && file.type.startsWith("image/")) {
+      handleFile(file);
+    }
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    e.preventDefault();
+    if (e.target.files && e.target.files.length > 0) {
+      const file = e.target.files[0];
+      if (file && file.type.startsWith("image/")) {
+        handleFile(file);
+      }
+    }
+  };
+
   const saveStyles = async (formData: z.infer<typeof customizationSchema>) => {
-    if (!form.formState.isDirty) return;
+    if (
+      JSON.stringify(form.getValues()) ===
+      JSON.stringify(form.formState.defaultValues)
+    ) {
+      return;
+    }
+
+    if (imageFile && imageFile.size > 1 * 1024 * 1024) {
+      toast.error("Image file must be under 1MB");
+      return;
+    }
 
     const { success, message } = await updateStylesAction({
       styles: formData,
       slug,
+      imageFile,
     });
 
     if (success) {
@@ -99,12 +160,16 @@ export default function Customization({ styles, updateStyles, slug }: Props) {
 
   return (
     <Card className="h-full row-start-1 col-start-2">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Settings className="h-4 w-4" />
-          Customization
+      <CardHeader className="gap-0">
+        <CardTitle>
+          <h2 className="text-2xl flex gap-1 items-center">
+            <Settings className="h-5 w-5" />
+            Customization
+          </h2>
         </CardTitle>
-        <CardDescription>Customize and preview below</CardDescription>
+        <CardDescription>
+          <p>Customize and preview below</p>
+        </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         <Form {...form}>
@@ -530,36 +595,83 @@ export default function Customization({ styles, updateStyles, slug }: Props) {
                 </FormItem>
               )}
             />
-            <FormField
-              control={form.control}
-              name="button.icon"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel htmlFor="buttonIcon">Button icon (SVG)</FormLabel>
-                  <FormControl>
-                    <Input
-                      value={field.value ?? ""}
-                      onChange={(e) => {
-                        const sanitizedSvg = sanitizeSvg(e.target.value);
-                        field.onChange(sanitizedSvg);
-                        updateStyles({
-                          button: { ...styles.button, icon: sanitizedSvg },
-                        });
-                      }}
-                      placeholder="Copy and paste your SVG icon here"
-                      id="buttonIcon"
-                      className="flex-1"
-                    />
-                  </FormControl>
-                  <FormMessage className="text-xs" />
-                </FormItem>
+            <div>
+              <p className="text-sm font-medium mb-2">Button icon</p>
+              {previewIcon ? (
+                <div className="relative">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="absolute bottom-2 right-2"
+                    onClick={() => {
+                      setPreviewIcon("");
+                      form.setValue("button.icon", iconRef.current);
+                      updateStyles({
+                        button: {
+                          ...styles.button,
+                          icon: iconRef.current,
+                        },
+                      });
+                    }}
+                  >
+                    Remove
+                  </Button>
+                  <img
+                    src={previewIcon}
+                    alt="Chatbot icon"
+                    className="size-20 mx-auto"
+                  />
+                </div>
+              ) : (
+                <div
+                  className={`border-2 border-dashed rounded-lg p-6 text-center ${
+                    dragActive
+                      ? "border-primary bg-primary/5"
+                      : "border-muted-foreground/25"
+                  }`}
+                  onDragEnter={handleDrag}
+                  onDragLeave={handleDrag}
+                  onDragOver={handleDrag}
+                  onDrop={handleDrop}
+                >
+                  <Input
+                    ref={fileInputRef}
+                    type="file"
+                    onChange={handleChange}
+                    accept="Image/*"
+                    className="hidden"
+                  />
+
+                  <div className="flex flex-col items-center justify-center space-y-3">
+                    <div className="rounded-full bg-primary/10 p-3">
+                      <Upload className="h-6 w-6 text-primary" />
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-sm font-medium">
+                        Drag and drop your preferred image
+                      </p>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => fileInputRef.current?.click()}
+                    >
+                      Select Files
+                    </Button>
+                  </div>
+                </div>
               )}
-            />
+            </div>
             <Button
               className={cn("w-full cursor-pointer", {
                 "pointer-events-none": form.formState.isSubmitting,
               })}
-              disabled={form.formState.isSubmitting || !form.formState.isDirty}
+              disabled={
+                form.formState.isSubmitting ||
+                JSON.stringify(form.getValues()) ===
+                  JSON.stringify(form.formState.defaultValues)
+              }
             >
               {form.formState.isSubmitting ? (
                 <>
