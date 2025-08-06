@@ -1,7 +1,7 @@
 import { ChatbotStyles } from "@/types/embedded-chatbot";
 import { db } from ".";
 import { businesses, ChatbotInsert, chatbots } from "./schema";
-import { eq, inArray, sql } from "drizzle-orm";
+import { and, eq, inArray, sql } from "drizzle-orm";
 import { auth } from "@clerk/nextjs/server";
 import { getUserByClerkId } from "./user";
 import { Transaction } from "@/types/db-types";
@@ -71,7 +71,12 @@ export async function updateChatbotStyles({
 
   if (!userId) throw new Error("No session detected");
 
-  await db.update(chatbots).set({ styles }).where(eq(chatbots.slug, slug));
+  const user = await getUserByClerkId({ clerkId: userId });
+
+  await db
+    .update(chatbots)
+    .set({ styles })
+    .where(and(eq(chatbots.slug, slug), eq(chatbots.userId, user.id)));
 }
 
 export async function updateChatbotCurrentMessageCount(
