@@ -289,7 +289,8 @@ export default function SubscribeButton({
                 : "If you confirm, your subscription will be canceled at the end of the current period and you'll be moved back to free tier"}
             </DialogDescription>
           </DialogHeader>
-          {sub.chatbots.length > 0 && (
+          {sub.chatbots.filter((bot) => bot.isActive).length >
+            ALLOWED_CHATBOTS["FREE"] && (
             <Form {...form}>
               <form
                 onSubmit={form.handleSubmit(cancelSubscription)}
@@ -396,7 +397,8 @@ export default function SubscribeButton({
             </DialogDescription>
           </DialogHeader>
           {sub.plan === "pro" &&
-            sub.chatbots.length > ALLOWED_CHATBOTS["BASIC"] && (
+            sub.chatbots.filter((bot) => bot.isActive).length >
+              ALLOWED_CHATBOTS["BASIC"] && (
               <Form {...form}>
                 <form
                   onSubmit={form.handleSubmit(updateSubscription)}
