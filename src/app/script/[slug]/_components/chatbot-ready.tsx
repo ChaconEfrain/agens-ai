@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 import { Code, Globe, Smartphone } from "lucide-react";
 import React from "react";
 
-export default function ChatbotReady({ isActive }: { isActive: boolean }) {
+export default function ChatbotReady({ isActive }: { isActive?: boolean }) {
   return (
     <Card>
       <CardHeader>
