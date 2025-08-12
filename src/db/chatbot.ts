@@ -248,7 +248,7 @@ export async function deactivateChatbotsBySubscriptionId({
   activeChatbot,
   subscriptionId,
 }: {
-  activeChatbot: number;
+  activeChatbot?: number;
   subscriptionId: number;
 }) {
   const userChatbots = await getChatbotsBySubscriptionId({ subscriptionId });
