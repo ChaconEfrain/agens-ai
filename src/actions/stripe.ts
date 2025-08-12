@@ -6,17 +6,16 @@ import { currentUser } from "@clerk/nextjs/server";
 
 const BASIC_PLAN_PRICE_ID = process.env.BASIC_PLAN_PRICE_ID;
 const PRO_PLAN_PRICE_ID = process.env.PRO_PLAN_PRICE_ID;
+const PRO_PLAN_METERED_PRICE_ID = process.env.PRO_PLAN_METERED_PRICE_ID;
 
 export async function createStripeSessionAction({
   plan,
   fromPage,
   origin,
-  customerId,
 }: {
   plan: string;
   fromPage: string;
   origin: string;
-  customerId?: string | null;
 }) {
   try {
     const user = await currentUser();
@@ -26,7 +25,6 @@ export async function createStripeSessionAction({
     if (!appUser) return { message: "Something went wrong, please try again" };
 
     const success = await stripe.checkout.sessions.create({
-      customer: customerId ?? undefined,
       mode: "subscription",
       payment_method_types: ["card"],
       customer_email: appUser.email,
@@ -35,6 +33,11 @@ export async function createStripeSessionAction({
           price: plan === "Basic" ? BASIC_PLAN_PRICE_ID : PRO_PLAN_PRICE_ID,
           quantity: 1,
         },
+        plan === "Pro"
+          ? {
+              price: PRO_PLAN_METERED_PRICE_ID,
+            }
+          : {},
       ],
       metadata: {
         userId: appUser.id,
@@ -47,7 +50,7 @@ export async function createStripeSessionAction({
 
     return { url };
   } catch (error) {
-    console.error(error instanceof Error ? error.message : error);
+    console.error("Something went wrong on createStripeSessionAction: ", error);
     return {
       message: "Something went wrong, please try again",
     };
@@ -77,6 +80,14 @@ export async function updateSubscriptionPlanAction({
           price: newPlan === "pro" ? PRO_PLAN_PRICE_ID : BASIC_PLAN_PRICE_ID,
           quantity: 1,
         },
+        newPlan === "pro"
+          ? {
+              price: PRO_PLAN_METERED_PRICE_ID,
+            }
+          : {
+              id: current.items.data[1].id,
+              deleted: true,
+            },
       ],
       proration_behavior: "create_prorations",
       metadata: {

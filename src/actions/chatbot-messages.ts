@@ -18,7 +18,12 @@ import jwt from "jsonwebtoken";
 import { getSubscriptionByChatbotId } from "@/db/subscriptions";
 import { ALLOWED_MESSAGE_QUANTITY } from "@/consts/subscription";
 import { createMessageTransaction } from "@/db/transactions";
-import { getChatbotTestMessageCount } from "@/db/chatbot";
+import {
+  deactivateChatbotsBySubscriptionId,
+  getChatbotTestMessageCount,
+} from "@/db/chatbot";
+import { stripe } from "@/services/stripe";
+import { EXTRA_MESSAGES_METER } from "@/consts/stripe";
 
 const JWT_SECRET = process.env.JWT_SECRET!;
 const IS_DEV = process.env.NODE_ENV === "development";
@@ -63,11 +68,11 @@ export async function sendMessageAction({
       const basicLimitReached =
         subscription.plan === "basic" &&
         subscription.messageCount >= ALLOWED_MESSAGE_QUANTITY.BASIC;
-      const proLimitReached =
-        subscription.plan === "pro" &&
-        subscription.messageCount >= ALLOWED_MESSAGE_QUANTITY.PRO;
 
-      if (freeLimitReached || basicLimitReached || proLimitReached) {
+      if (freeLimitReached || basicLimitReached) {
+        await deactivateChatbotsBySubscriptionId({
+          subscriptionId: subscription.id,
+        });
         return "limit reached";
       }
     }
@@ -153,6 +158,22 @@ export async function sendMessageAction({
       pathname,
       testMessageCount,
     });
+
+    if (messageInsert) {
+      const proLimitReached =
+        subscription.plan === "pro" &&
+        subscription.messageCount >= ALLOWED_MESSAGE_QUANTITY.PRO;
+
+      if (proLimitReached) {
+        await stripe.billing.meterEvents.create({
+          event_name: EXTRA_MESSAGES_METER,
+          payload: {
+            value: "0.001",
+            stripe_customer_id: subscription.stripeCustomerId as string,
+          },
+        });
+      }
+    }
 
     return messageInsert ?? "error";
   } catch (error) {

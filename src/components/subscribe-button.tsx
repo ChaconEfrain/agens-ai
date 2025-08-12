@@ -103,7 +103,6 @@ export default function SubscribeButton({
       fromPage,
       origin,
       plan,
-      customerId: sub?.stripeCustomerId,
     });
 
     if (result.url) {
@@ -451,8 +450,8 @@ export default function SubscribeButton({
             <Button
               className="w-1/2"
               onClick={
-                sub.chatbots.length > ALLOWED_CHATBOTS["BASIC"] &&
-                sub.plan === "pro"
+                sub.chatbots.filter((bot) => bot.isActive).length >
+                  ALLOWED_CHATBOTS["BASIC"] && sub.plan === "pro"
                   ? undefined
                   : updateSubscription
               }

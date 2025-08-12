@@ -23,6 +23,7 @@ export async function createSubscription({
   status,
   stripeCustomerId,
   stripeSubscriptionId,
+  stripeMeteredItemId,
   userId,
 }: Omit<SubscriptionInsert, "createdAt" | "updatedAt" | "messageCount">) {
   await db
@@ -34,6 +35,7 @@ export async function createSubscription({
       status,
       stripeCustomerId,
       stripeSubscriptionId,
+      stripeMeteredItemId,
     })
     .where(eq(subscriptions.userId, userId));
 }
@@ -45,7 +47,8 @@ export async function updateSubscription({
   plan,
   stripeSubscriptionId,
   cancelAtPeriodEnd,
-}: Omit<SubscriptionInsert, "userId" | "stripeCustomerId" | "messageCount">) {
+  stripeMeteredItemId,
+}: Omit<SubscriptionInsert, "userId" | "messageCount">) {
   const existing = await db.query.subscriptions.findFirst({
     where: eq(
       subscriptions.stripeSubscriptionId,
@@ -72,6 +75,7 @@ export async function updateSubscription({
       plan,
       cancelAtPeriodEnd,
       messageCount: currentMessageCount,
+      stripeMeteredItemId,
     })
     .where(
       eq(subscriptions.stripeSubscriptionId, stripeSubscriptionId as string)
@@ -87,11 +91,11 @@ export async function cancelSubscription({
     .set({
       status,
       plan: "free",
-      messageCount: 0,
       periodEnd: null,
       periodStart: null,
       stripeSubscriptionId: null,
       cancelAtPeriodEnd: false,
+      stripeMeteredItemId: null,
     })
     .where(
       eq(subscriptions.stripeSubscriptionId, stripeSubscriptionId as string)
@@ -127,12 +131,6 @@ export async function getSubscriptionByChatbotId({
 
   const subscription = await db.query.subscriptions.findFirst({
     where: eq(subscriptions.id, chatbot.subscriptionId),
-    columns: {
-      messageCount: true,
-      status: true,
-      plan: true,
-      stripeSubscriptionId: true,
-    },
   });
 
   if (!subscription) throw new Error("Subscription not found");

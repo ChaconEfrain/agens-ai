@@ -245,6 +245,7 @@ export const subscriptions = pgTable(
       length: 255,
     }),
     stripeCustomerId: varchar("stripe_customer_id", { length: 255 }),
+    stripeMeteredItemId: varchar("stripe_metered_item_id", { length: 255 }),
     plan: subscriptionPlanEnum("plan").notNull(),
     messageCount: integer("message_count").notNull().default(0),
     periodStart: timestamp("period_start"),

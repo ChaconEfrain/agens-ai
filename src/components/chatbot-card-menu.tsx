@@ -55,6 +55,7 @@ export function ChatbotCardMenu({ businessId, chatbotSlug }: Props) {
               <Link href={`/script/${chatbotSlug}`} className="w-full">
                 Chatbot script
               </Link>
+              {/* TODO: Add Activate/Deactivate option, Check sub status before activating */}
             </DropdownMenuItem>
             <DropdownMenuItem className="text-red-600">
               <button

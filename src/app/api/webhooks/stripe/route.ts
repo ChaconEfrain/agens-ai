@@ -49,6 +49,7 @@ export async function POST(request: Request) {
         plan: subscription.items.data[0].price.lookup_key as "basic" | "pro",
         stripeSubscriptionId: subscription.id,
         stripeCustomerId: subscription.customer as string,
+        stripeMeteredItemId: subscription.items.data[1]?.id ?? null,
         userId: Number(session.metadata?.userId),
       });
 
@@ -71,6 +72,7 @@ export async function POST(request: Request) {
           | "incomplete_expired",
         plan: subscription.items.data[0].price.lookup_key as "basic" | "pro",
         stripeSubscriptionId: subscription.id,
+        stripeMeteredItemId: subscription.items.data[1]?.id ?? null,
         cancelAtPeriodEnd: subscription.cancel_at ? true : false,
       });
 
