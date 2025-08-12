@@ -36,7 +36,10 @@
 
   // Floating button
   const button = document.createElement("button");
-  button.innerHTML = styles.button.icon ?? "💬";
+  const buttonIcon = document.createElement("img");
+  buttonIcon.src = styles.button.icon;
+  buttonIcon.alt = "Chatbot icon";
+  button.innerHTML = buttonIcon;
   button.style.position = "fixed";
   button.style[isBottom ? "bottom" : "top"] = "16px";
   button.style[isRight ? "right" : "left"] = "16px";
