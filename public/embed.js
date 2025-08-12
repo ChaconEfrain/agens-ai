@@ -39,6 +39,8 @@
   const buttonIcon = document.createElement("img");
   buttonIcon.src = styles.button.icon;
   buttonIcon.alt = "Chatbot icon";
+  buttonIcon.style.height = "32px";
+  buttonIcon.style.width = "32px";
   button.appendChild(buttonIcon);
   button.style.position = "fixed";
   button.style[isBottom ? "bottom" : "top"] = "16px";
