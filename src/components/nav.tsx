@@ -10,8 +10,8 @@ import {
 import React from "react";
 import { Button } from "./ui/button";
 import Link from "next/link";
-import { BotMessageSquare } from "lucide-react";
 import { usePathname } from "next/navigation";
+import ChatbotIcon from "@/assets/chatbot-icon.webp";
 
 export default function Nav() {
   const { isSignedIn } = useUser();
@@ -21,12 +21,16 @@ export default function Nav() {
 
   return (
     <nav className="flex justify-between items-center py-4">
-      <Link href="/" className="text-xl flex items-center gap-1">
+      <Link href="/" className="text-xl flex items-end">
+        <img
+          src={ChatbotIcon.src}
+          alt="Chatbot with a grey suit and a vintage look"
+          className="size-8"
+        />
         <div>
           <span>Agens</span>
           <span className="font-bold">AI</span>
         </div>
-        <BotMessageSquare />
       </Link>
       <div className="flex items-center gap-6">
         <ul className="flex gap-4">
