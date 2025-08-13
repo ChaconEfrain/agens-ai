@@ -55,6 +55,19 @@ export async function POST(request: Request) {
 
       return Response.json({ subscription, status: 200 });
     } else if (
+      event.type === STRIPE_WEBHOOK_EVENTS.CUSTOMER_SUBSCRIPTION_DELETED
+    ) {
+      const subscription = event.data.object;
+
+      const [{ id }] = await cancelSubscription({
+        status: subscription.status as "canceled",
+        stripeSubscriptionId: subscription.id,
+      });
+
+      await deactivateMarkedChatbotsBySubscriptionId({ subscriptionId: id });
+
+      return Response.json({ subscription, status: 200 });
+    } else if (
       event.type === STRIPE_WEBHOOK_EVENTS.CUSTOMER_SUBSCRIPTION_UPDATED
     ) {
       const subscription = event.data.object;
@@ -101,19 +114,6 @@ export async function POST(request: Request) {
           subscriptionId: Number(subscription.metadata.subscriptionId),
         });
       }
-
-      return Response.json({ subscription, status: 200 });
-    } else if (
-      event.type === STRIPE_WEBHOOK_EVENTS.CUSTOMER_SUBSCRIPTION_DELETED
-    ) {
-      const subscription = event.data.object;
-
-      const [{ id }] = await cancelSubscription({
-        status: subscription.status as "canceled",
-        stripeSubscriptionId: subscription.id,
-      });
-
-      await deactivateMarkedChatbotsBySubscriptionId({ subscriptionId: id });
 
       return Response.json({ subscription, status: 200 });
     }
