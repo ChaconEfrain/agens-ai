@@ -1,12 +1,13 @@
 import ChatbotCards from '@/components/chatbot-cards'
 import { Card, CardHeader } from '@/components/ui/card'
 import { getChatbotsByClerkId } from "@/db/chatbot";
-import { Subscription } from "@/db/schema";
+import { Chatbot, Subscription } from "@/db/schema";
+import { Prettify } from "@/types/helpers";
 import React from "react";
 
 interface Props {
   clerkId: string;
-  sub: Subscription;
+  sub: Prettify<Subscription & { chatbots: Chatbot[] }>;
 }
 
 export default async function UserChatbots({ clerkId, sub }: Props) {

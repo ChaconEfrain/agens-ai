@@ -9,7 +9,7 @@ interface Props {
   userChatbots:
     | Prettify<Chatbot & { messages: Message[] } & { business: Business }>[]
     | undefined;
-  sub: Subscription | undefined;
+  sub: Prettify<Subscription & { chatbots: Chatbot[] }> | undefined;
 }
 
 export default function ChatbotCards({ userChatbots, sub }: Props) {

@@ -22,6 +22,7 @@ interface Props {
   chatbotId: number;
   chatbotSlug: string;
   chatbotInstructions: string;
+  chatbotIsActive: boolean;
   chatbotStyles?: ChatbotStyles;
 }
 
@@ -29,6 +30,7 @@ export default function Chat({
   chatbotId,
   chatbotSlug,
   chatbotInstructions,
+  chatbotIsActive,
   chatbotStyles,
 }: Props) {
   const sessionId = useChatSession(chatbotSlug);
@@ -116,6 +118,7 @@ export default function Chat({
       chatbotInstructions,
       token,
       pathname,
+      chatbotIsActive,
     });
 
     if (answer) {
@@ -281,7 +284,7 @@ export default function Chat({
             className="resize-none max-h-[150px] bg-transparent p-3 pb-1.5 text-sm outline-none ring-0 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-accent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-muted-foreground shadow-none border-none min-h-auto focus-visible:ring-[0px]"
             onInput={handleTextAreaResize}
             onKeyDown={handleKeyDown}
-            disabled={loadingMessages || isMessageLimit}
+            disabled={loadingMessages || isMessageLimit || !chatbotIsActive}
             spellCheck={false}
           />
           <div className="self-end flex items-center gap-2">

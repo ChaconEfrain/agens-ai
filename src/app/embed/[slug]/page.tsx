@@ -27,6 +27,7 @@ export default async function EmbedPage({ params }: { params: Promise<{ slug: st
         chatbotInstructions={chatbot.instructions}
         chatbotSlug={chatbot.slug}
         chatbotStyles={chatbot.styles}
+        chatbotIsActive={chatbot.isActive}
       />
     </div>
   );

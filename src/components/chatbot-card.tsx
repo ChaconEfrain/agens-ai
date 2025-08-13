@@ -10,7 +10,7 @@ import ClientDate from "./client-date";
 
 interface Props {
   bot: Prettify<Chatbot & { messages: Message[] } & { business: Business }>;
-  sub: Subscription | undefined;
+  sub: Prettify<Subscription & { chatbots: Chatbot[] }> | undefined;
 }
 
 export default function ChatbotCard({ bot, sub }: Props) {
@@ -45,7 +45,12 @@ export default function ChatbotCard({ bot, sub }: Props) {
       </CardHeader>
       <CardContent>
         <div className="absolute top-2 right-2">
-          <ChatbotCardMenu businessId={bot.businessId} chatbotSlug={bot.slug} />
+          <ChatbotCardMenu
+            businessId={bot.businessId}
+            chatbotSlug={bot.slug}
+            isActive={bot.isActive}
+            sub={sub}
+          />
         </div>
       </CardContent>
       <CardFooter className="flex flex-col gap-1 items-end mt-auto">

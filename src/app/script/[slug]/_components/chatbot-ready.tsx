@@ -11,12 +11,21 @@ export default function ChatbotReady({ isActive }: { isActive?: boolean }) {
         <div className="flex items-center justify-between">
           <div>
             <CardTitle className="flex items-center gap-2">
-              <div className="h-2 w-2 rounded-full bg-green-500"></div>
-              <h2 className="text-2xl">Chatbot Ready</h2>
+              <div
+                className={cn("h-2 w-2 rounded-full", {
+                  "bg-green-500": isActive,
+                  "bg-red-500": !isActive,
+                })}
+              ></div>
+              <h2 className="text-2xl">
+                {isActive ? "Chatbot Ready" : "Chatbot Paused"}
+              </h2>
             </CardTitle>
             <CardDescription>
               <p>
-                Your chatbot is live and ready to be embedded on your website
+                {isActive
+                  ? "Your chatbot is live and ready to be embedded on your website"
+                  : "Your chatbot is currently inactive, you can activate it on your dashboard"}
               </p>
             </CardDescription>
           </div>

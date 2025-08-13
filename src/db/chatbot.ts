@@ -1,7 +1,7 @@
 import { ChatbotStyles } from "@/types/embedded-chatbot";
 import { db } from ".";
 import { businesses, ChatbotInsert, chatbots } from "./schema";
-import { and, eq, inArray, sql } from "drizzle-orm";
+import { and, eq, inArray, not, sql } from "drizzle-orm";
 import { auth } from "@clerk/nextjs/server";
 import { getUserByClerkId } from "./user";
 import { Transaction } from "@/types/db-types";
@@ -278,4 +278,13 @@ export async function activateChatbotsBySubscriptionId({
       isActive: true,
     })
     .where(inArray(chatbots.id, ids));
+}
+
+export async function toggleChatbotBySlug({ slug }: { slug: string }) {
+  await db
+    .update(chatbots)
+    .set({
+      isActive: not(chatbots.isActive),
+    })
+    .where(eq(chatbots.slug, slug));
 }

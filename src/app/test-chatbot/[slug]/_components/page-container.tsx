@@ -4,8 +4,14 @@ import { auth } from '@clerk/nextjs/server';
 import { notFound, redirect } from 'next/navigation';
 import React from 'react'
 import ChatbotContext from './chatbot-context';
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 
-export default async function PageContainer({params}: {params: Promise<{slug: string}>}) {
+export default async function PageContainer({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
   const { userId } = await auth();
 
   if (!userId) {
@@ -19,7 +25,17 @@ export default async function PageContainer({params}: {params: Promise<{slug: st
   return (
     <div>
       <header className="my-4">
-        <h1 className="text-3xl font-bold">{chatbot.business.name} Chatbot</h1>
+        <h1 className="text-3xl font-bold flex items-center gap-2">
+          {chatbot.business.name} Chatbot{" "}
+          <Badge
+            className={cn({
+              "bg-green-50 text-green-700 border-green-200 ": chatbot.isActive,
+              "bg-red-50 text-red-700 border-red-200 ": !chatbot.isActive,
+            })}
+          >
+            {chatbot.isActive ? "Active" : "Inactive"}
+          </Badge>
+        </h1>
         <p className="text-muted-foreground">
           Test your chatbot before deploying it to your website. These messages
           won't count to your plan limit.
@@ -32,6 +48,7 @@ export default async function PageContainer({params}: {params: Promise<{slug: st
               chatbotId={chatbot.id}
               chatbotSlug={chatbot.slug}
               chatbotInstructions={chatbot.instructions}
+              chatbotIsActive={chatbot.isActive}
             />
           </section>
           <section className="h-[80dvh]">
@@ -40,5 +57,5 @@ export default async function PageContainer({params}: {params: Promise<{slug: st
         </div>
       </main>
     </div>
-  )
+  );
 }

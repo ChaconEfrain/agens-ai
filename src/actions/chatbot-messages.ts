@@ -35,6 +35,7 @@ export async function sendMessageAction({
   sessionId,
   token,
   pathname,
+  chatbotIsActive,
 }: {
   message: string;
   chatbotId: number;
@@ -42,7 +43,12 @@ export async function sendMessageAction({
   sessionId: string;
   token: string;
   pathname: string;
+  chatbotIsActive: boolean;
 }) {
+  if (!chatbotIsActive) {
+    return "error";
+  }
+
   try {
     let testMessageCount;
     const subscription = await getSubscriptionByChatbotId({

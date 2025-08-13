@@ -14,7 +14,7 @@ interface Props {
   userChatbots:
     | Prettify<Chatbot & { messages: Message[] } & { business: Business }>[]
     | undefined;
-  userSub: Subscription | undefined;
+  userSub: Prettify<Subscription & { chatbots: Chatbot[] }> | undefined;
 }
 
 export default async function OwnedChatbots({ userChatbots, userSub }: Props) {
