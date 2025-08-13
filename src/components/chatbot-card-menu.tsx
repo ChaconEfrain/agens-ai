@@ -41,7 +41,6 @@ export function ChatbotCardMenu({
   const [action, setAction] = useState<
     "activate" | "deactivate" | "delete" | ""
   >("");
-  const [loading, setLoading] = useState(false);
   const path = usePathname();
 
   useEffect(() => {
@@ -51,20 +50,19 @@ export function ChatbotCardMenu({
   }, [openDropdown]);
 
   const handleActivateChatbot = async () => {
-    setLoading(true);
+    const loadingToast = toast.loading("Activating chatbot...");
     const { success } = await toggleChatbotAction({
       slug: chatbotSlug,
       path,
     });
 
+    toast.dismiss(loadingToast);
     if (success) {
       toast.success("Chatbot activated successfully");
       setOpenModal(false);
     } else {
       toast.error("Something went wrong activating the chatbot");
     }
-
-    setLoading(false);
   };
 
   return (
@@ -121,13 +119,7 @@ export function ChatbotCardMenu({
                     handleActivateChatbot();
                   }}
                 >
-                  {loading ? (
-                    <>
-                      Activating <LoaderCircle className="animate-spin" />
-                    </>
-                  ) : (
-                    "Activate"
-                  )}
+                  Activate
                 </button>
               )}
             </DropdownMenuItem>
