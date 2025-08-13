@@ -6,12 +6,7 @@ export const SUBSCRIPTION_PLANS = [
     label: "Starter",
     price: "$0",
     description: "Perfect for small businesses just getting started",
-    includes: [
-      "1 chatbot",
-      "100 messages",
-      "1 PDF upload",
-      "AgensAI branding",
-    ] as string[],
+    includes: ["1 chatbot", "100 messages", "1 PDF upload"] as string[],
     Icon: Bot,
   },
   {
