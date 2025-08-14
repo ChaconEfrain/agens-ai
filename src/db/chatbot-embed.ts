@@ -9,6 +9,7 @@ export async function getChatbotBySlugEmbed({ slug }: { slug: string }) {
       with: {
         business: true,
         files: true,
+        subscription: true,
       },
     });
 

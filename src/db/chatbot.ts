@@ -49,6 +49,7 @@ export async function getChatbotBySlug({ slug }: { slug: string }) {
       with: {
         business: true,
         files: true,
+        subscription: true,
       },
     });
 

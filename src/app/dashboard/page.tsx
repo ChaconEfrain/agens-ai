@@ -7,13 +7,14 @@ import { redirect } from "next/navigation";
 import { getSubscriptionByClerkId } from "@/db/subscriptions";
 import CurrentMessages from "./_components/current-messages";
 import Link from "next/link";
-import { ArrowRight, Info } from "lucide-react";
+import { Info } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
+import MessageHistoryLink from "./_components/message-history-link";
 
 export default async function DashboardPage() {
   const { userId } = await auth();
@@ -43,13 +44,7 @@ export default async function DashboardPage() {
             </Tooltip>
           </div>
           {sub.chatbots.length > 0 ? (
-            <Link
-              href="/dashboard/message-history"
-              className="text-muted-foreground flex items-center gap-1 group"
-            >
-              View message history{" "}
-              <ArrowRight className="size-4 group-hover:translate-x-2 transition-transform duration-300" />
-            </Link>
+            <MessageHistoryLink sub={sub} />
           ) : (
             <Button asChild>
               <Link href="/create-chatbot">Create Chatbot</Link>

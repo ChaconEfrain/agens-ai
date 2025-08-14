@@ -6,10 +6,15 @@ import Customization from "./customization";
 import EmbedPreview from "./embed-preview";
 import { ChatbotStyles } from "@/types/embedded-chatbot";
 import ChatbotReady from "./chatbot-ready";
-import { Chatbot } from "@/db/schema";
+import { Business, Chatbot, File, Subscription } from "@/db/schema";
+import { Prettify } from "@/types/helpers";
 
 interface Props {
-  chatbot: Chatbot;
+  chatbot: Prettify<
+    Chatbot & { subscription: Subscription } & { files: File[] } & {
+      business: Business;
+    }
+  >;
   styles: ChatbotStyles;
 }
 
@@ -33,8 +38,9 @@ export default function ScriptContainer({
         styles={styles}
         updateStyles={updateStyles}
         slug={chatbot.slug}
+        sub={chatbot.subscription}
       />
-      <EmbedPreview styles={styles} />
+      <EmbedPreview styles={styles} sub={chatbot.subscription} />
     </>
   );
 }

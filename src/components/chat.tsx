@@ -12,7 +12,7 @@ import {
   getChatbotTestMessageCountAction,
   sendMessageAction,
 } from "@/actions/chatbot-messages";
-import type { Message } from "@/db/schema";
+import type { Message, Subscription } from "@/db/schema";
 import { useChatSession } from "@/hooks/use-chat-session";
 import { ChatbotStyles } from "@/types/embedded-chatbot";
 import { usePathname } from "next/navigation";
@@ -23,6 +23,7 @@ interface Props {
   chatbotSlug: string;
   chatbotInstructions: string;
   chatbotIsActive: boolean;
+  subPlan: Subscription["plan"];
   chatbotStyles?: ChatbotStyles;
 }
 
@@ -31,6 +32,7 @@ export default function Chat({
   chatbotSlug,
   chatbotInstructions,
   chatbotIsActive,
+  subPlan,
   chatbotStyles,
 }: Props) {
   const sessionId = useChatSession(chatbotSlug);
@@ -201,7 +203,7 @@ export default function Chat({
 
   return (
     <Card className="flex flex-col h-full relative">
-      {chatbotStyles?.chat.showBranding && (
+      {subPlan === "free" && (
         <p className="absolute top-2 right-4 text-xs text-muted-foreground">
           Powered by{" "}
           <a

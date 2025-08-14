@@ -12,12 +12,14 @@ import React, { useState } from "react";
 import MockChat from "@/components/mock-chat";
 import { ChatbotStyles } from "@/types/embedded-chatbot";
 import { cn } from "@/lib/utils";
+import { Subscription } from "@/db/schema";
 
 interface Props {
   styles: ChatbotStyles;
+  sub: Subscription;
 }
 
-export default function EmbedPreview({ styles }: Props) {
+export default function EmbedPreview({ styles, sub }: Props) {
   const [open, setOpen] = useState(true);
 
   return (
@@ -53,7 +55,7 @@ export default function EmbedPreview({ styles }: Props) {
             }}
           >
             <MockChat styles={styles} />
-            {styles.chat.showBranding && (
+            {sub.plan === "free" && (
               <p className="absolute top-2 right-4 text-xs text-muted-foreground">
                 Powered by{" "}
                 <a

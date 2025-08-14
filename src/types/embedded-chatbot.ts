@@ -7,7 +7,6 @@ export interface ChatbotStyles {
     userTextColor: string;
     botBgColor: string;
     botTextColor: string;
-    showBranding: boolean;
   };
   button: {
     width: number;

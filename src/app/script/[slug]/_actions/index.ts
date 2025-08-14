@@ -4,17 +4,27 @@ import { ChatbotStyles } from "@/types/embedded-chatbot";
 import { UploadThingError } from "uploadthing/server";
 import { utapi } from "@/services/uploadthing";
 import { updateChatbotStyles } from "@/db/chatbot";
+import { Subscription } from "@/db/schema";
 
 export async function updateStylesAction({
   styles,
   slug,
   imageFile,
+  plan,
 }: {
   styles: ChatbotStyles;
   slug: string;
   imageFile?: File;
+  plan: Subscription["plan"];
 }) {
   try {
+    if (plan === "free") {
+      return {
+        success: false,
+        message: "You must be subscribed to change the styles",
+      };
+    }
+
     let imageUrl;
     if (imageFile) {
       if (!imageFile.type.startsWith("image/")) {

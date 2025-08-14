@@ -10,7 +10,6 @@ export const DEFAULT_STYLES: ChatbotStyles = {
     userTextColor: "#ffffff",
     botBgColor: "#f3f4f6",
     botTextColor: "#1e2939",
-    showBranding: true,
   },
   button: {
     width: 50,

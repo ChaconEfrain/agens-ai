@@ -49,6 +49,7 @@ export default async function PageContainer({
               chatbotSlug={chatbot.slug}
               chatbotInstructions={chatbot.instructions}
               chatbotIsActive={chatbot.isActive}
+              subPlan={chatbot.subscription.plan}
             />
           </section>
           <section className="h-[80dvh]">

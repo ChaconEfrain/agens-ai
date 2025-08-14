@@ -87,7 +87,7 @@ export function ChatbotCardMenu({
             </DropdownMenuItem>
             <DropdownMenuItem>
               <Link href={`/script/${chatbotSlug}`} className="w-full">
-                Chatbot script
+                Chatbot script and styles
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem>
