@@ -25,7 +25,7 @@ export default async function DashboardPage() {
   }
 
   return (
-    <main className="my-10 space-y-4">
+    <main className="my-2 space-y-4">
       <header>
         <h1 className="text-3xl font-bold">Dashboard Overview</h1>
         <div className="flex justify-between items-center">
