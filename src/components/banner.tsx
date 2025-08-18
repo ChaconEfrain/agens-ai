@@ -1,6 +1,5 @@
 import { cn } from "@/lib/utils";
 import React from "react";
-import ChatbotIcon from "@/assets/chatbot-icon.webp";
 
 export default function Banner({
   bannerMessage,
@@ -17,7 +16,7 @@ export default function Banner({
       )}
     >
       <img
-        src={ChatbotIcon.src}
+        src="/chatbot-icon-webp"
         alt="Chatbot with a grey suit and a vintage look"
         className="size-20"
       />
