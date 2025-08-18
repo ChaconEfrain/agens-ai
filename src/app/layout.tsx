@@ -6,7 +6,6 @@ import Nav from "@/components/nav";
 import { Toaster } from "@/components/ui/sonner";
 import AppWrapper from "@/components/app-wrapper";
 import NextTopLoader from "nextjs-toploader";
-import Favicon from "@/assets/favicon.webp";
 
 const outfit = Outfit({
   variable: "--font-outfit",
@@ -18,7 +17,7 @@ export const metadata: Metadata = {
   description:
     "Create, customize, and deploy AI-powered chatbots for your business in minutes. AgensAI helps you train bots with your own data, integrate them into your website, and deliver better customer experiences.",
   icons: {
-    icon: Favicon.src,
+    icon: "/favicon.webp",
   },
 };
 

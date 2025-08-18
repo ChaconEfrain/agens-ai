@@ -11,7 +11,6 @@ import React from "react";
 import { Button } from "./ui/button";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import ChatbotIcon from "@/assets/chatbot-icon.webp";
 
 export default function Nav() {
   const { isSignedIn } = useUser();
@@ -23,7 +22,7 @@ export default function Nav() {
     <nav className="flex justify-between items-center py-4">
       <Link href="/" className="text-xl flex items-end">
         <img
-          src={ChatbotIcon.src}
+          src="/chatbot-icon.webp"
           alt="Chatbot with a grey suit and a vintage look"
           className="size-8"
         />

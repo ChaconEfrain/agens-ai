@@ -1,5 +1,4 @@
 import { ChatbotStyles } from "@/types/embedded-chatbot";
-import ChatbotIcon from "@/assets/chatbot-icon.webp";
 
 export const DEFAULT_STYLES: ChatbotStyles = {
   position: "bottom-right",
@@ -15,7 +14,7 @@ export const DEFAULT_STYLES: ChatbotStyles = {
     width: 50,
     height: 50,
     bgColor: "#2b2233",
-    icon: ChatbotIcon.src,
+    icon: "/chatbot-icon.webp",
     borderRadius: 30,
   },
 };
