@@ -162,7 +162,9 @@ export async function createMessageTransaction({
               trx
             )
           : undefined,
-        stripeSubscriptionId && messageCount
+        stripeSubscriptionId &&
+        messageCount &&
+        !pathname.startsWith("/test-chatbot")
           ? updateSubscriptionMessageCount(
               { stripeSubscriptionId, messageCount },
               trx
