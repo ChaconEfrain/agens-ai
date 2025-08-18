@@ -133,46 +133,37 @@ export async function getCurrentPeriodMessagesPerDayByClerkId({
 
     const chatbotIds = chatbots.map((bot) => bot.id);
 
-    let rows;
-    if (!sub.periodStart || !sub.periodEnd) {
-      rows = await db.query.messages.findMany({
-        where: and(
-          inArray(messages.chatbotId, chatbotIds),
-          eq(messages.isTest, false)
-        ),
-        columns: {
-          createdAt: true,
-        },
-        orderBy: asc(messages.createdAt),
-      });
-    } else {
-      rows = await db.query.messages.findMany({
-        where: and(
-          inArray(messages.chatbotId, chatbotIds),
-          between(messages.createdAt, sub.periodStart, sub.periodEnd),
-          eq(messages.isTest, false)
-        ),
-        columns: {
-          createdAt: true,
-        },
-        orderBy: asc(messages.createdAt),
-      });
-    }
+    const rows = await db.query.messages.findMany({
+      where: and(
+        inArray(messages.chatbotId, chatbotIds),
+        eq(messages.isTest, false),
+        sub.periodStart && sub.periodEnd
+          ? between(messages.createdAt, sub.periodStart, sub.periodEnd)
+          : undefined
+      ),
+      columns: {
+        createdAt: true,
+      },
+      orderBy: asc(messages.createdAt),
+    });
 
-    return rows.reduce((acc, message) => {
-      const date = new Date(message.createdAt);
-      const dateString = date.toLocaleString(undefined, {
-        month: "short",
-        day: "numeric",
-      });
-      const existingEntry = acc.find((entry) => entry.date === dateString);
-      if (existingEntry) {
-        existingEntry.messages += 1;
-      } else {
-        acc.push({ date: dateString, messages: 1 });
-      }
-      return acc;
-    }, [] as { date: string; messages: number }[]);
+    return rows.reduce(
+      (acc, message) => {
+        const date = new Date(message.createdAt);
+        const dateString = date.toLocaleString(undefined, {
+          month: "short",
+          day: "numeric",
+        });
+        const existingEntry = acc.find((entry) => entry.date === dateString);
+        if (existingEntry) {
+          existingEntry.messages += 1;
+        } else {
+          acc.push({ date: dateString, messages: 1 });
+        }
+        return acc;
+      },
+      [] as { date: string; messages: number }[]
+    );
   } catch (error) {
     console.error(
       "Error on getCurrentPeriodMessagesPerDayByClerkId --> ",
@@ -254,7 +245,6 @@ export async function getPaginatedMessagesByClerkId({
   }
 }
 
-
 export async function getCurrentPeriodMessagesPerChatbotPerDayByClerkId({
   clerkId,
 }: {
@@ -332,25 +322,16 @@ export async function getCurrentPeriodConversationsPerChatbotPerDayByClerkId({
 
     const chatbotIds = chatbots.map((bot) => bot.id);
 
-    let rows;
-    if (!sub.periodEnd || !sub.periodStart) {
-      rows = await db.query.messages.findMany({
-        where: and(
-          inArray(messages.chatbotId, chatbotIds),
-          eq(messages.isTest, false)
-        ),
-        orderBy: asc(messages.createdAt),
-      });
-    } else {
-      rows = await db.query.messages.findMany({
-        where: and(
-          inArray(messages.chatbotId, chatbotIds),
-          between(messages.createdAt, sub.periodStart, sub.periodEnd),
-          eq(messages.isTest, false)
-        ),
-        orderBy: asc(messages.createdAt),
-      });
-    }
+    const rows = await db.query.messages.findMany({
+      where: and(
+        inArray(messages.chatbotId, chatbotIds),
+        eq(messages.isTest, false),
+        sub.periodEnd && sub.periodStart
+          ? between(messages.createdAt, sub.periodStart, sub.periodEnd)
+          : undefined
+      ),
+      orderBy: asc(messages.createdAt),
+    });
 
     const conversationMap = new Map<
       string,
@@ -464,6 +445,7 @@ export async function getCurrentDayMessagesPerChatbotByClerkId({
       WHERE m.chatbot_id = ANY(${formattedIds}::int[])
         AND m.created_at >= date_trunc('day', now() at time zone ${timezone})
         AND m.created_at < date_trunc('day', now() at time zone ${timezone}) + interval '1 day'
+        AND m.is_test != true
         AND c.is_active = true
       GROUP BY c.slug
     `
