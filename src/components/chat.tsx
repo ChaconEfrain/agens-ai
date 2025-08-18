@@ -203,7 +203,7 @@ export default function Chat({
 
   return (
     <Card className="flex flex-col h-full relative">
-      {subPlan === "free" && (
+      {subPlan === "free" && !pathname.startsWith("/test-chatbot") && (
         <p className="absolute top-2 right-4 text-xs text-muted-foreground">
           Powered by{" "}
           <a
