@@ -131,6 +131,9 @@ export async function getSubscriptionByChatbotId({
 
   const subscription = await db.query.subscriptions.findFirst({
     where: eq(subscriptions.id, chatbot.subscriptionId),
+    with: {
+      user: true,
+    },
   });
 
   if (!subscription) throw new Error("Subscription not found");
