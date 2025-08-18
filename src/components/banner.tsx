@@ -16,7 +16,7 @@ export default function Banner({
       )}
     >
       <img
-        src="/chatbot-icon-webp"
+        src="/chatbot-icon.webp"
         alt="Chatbot with a grey suit and a vintage look"
         className="size-20"
       />
