@@ -24,8 +24,7 @@ import {
 } from "@/db/chatbot";
 import { stripe } from "@/services/stripe";
 import { EXTRA_MESSAGES_METER } from "@/consts/stripe";
-import { resend } from "@/services/resend";
-import MessageLimitWarningEmail from "@/components/email/message-limit-warning-email";
+import { sendMessageLimitEmail } from "@/services/resend";
 
 const JWT_SECRET = process.env.JWT_SECRET!;
 const IS_DEV = process.env.NODE_ENV === "development";
@@ -172,8 +171,12 @@ export async function sendMessageAction({
         subscription.plan === "pro" &&
         subscription.messageCount >= ALLOWED_MESSAGE_QUANTITY.PRO;
       const upgradeFlag =
-        subscription.plan !== 'pro' &&
-        subscription.messageCount / ALLOWED_MESSAGE_QUANTITY[subscription.plan.toUpperCase() as 'FREE' | 'BASIC'] >= 0.8
+        subscription.plan !== "pro" &&
+        subscription.messageCount /
+          ALLOWED_MESSAGE_QUANTITY[
+            subscription.plan.toUpperCase() as "FREE" | "BASIC"
+          ] >=
+          0.8;
 
       if (proLimitReached) {
         await stripe.billing.meterEvents.create({
@@ -185,13 +188,10 @@ export async function sendMessageAction({
         });
       }
 
-      if (upgradeFlag) {
-        await resend.emails.send({
-          from: 'AgensAI <efrain.chacon@agensai.chat>',
+      if (upgradeFlag && !pathname.startsWith("/test-chatbot")) {
+        await sendMessageLimitEmail({
+          name: subscription.user.name,
           to: subscription.user.email,
-          replyTo: 'efrain.chacon@agensai.chat',
-          subject: 'Message limit heads up',
-          react: <MessageLimitWarningEmail username={subscription.user.name} />,
         });
       }
     }
