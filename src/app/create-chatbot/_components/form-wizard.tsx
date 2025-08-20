@@ -33,7 +33,7 @@ import {
 } from "../_actions";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { FormWizardProgress } from "@/db/schema";
+import { Chatbot, FormWizardProgress, Subscription } from "@/db/schema";
 import {
   Card,
   CardContent,
@@ -42,6 +42,7 @@ import {
 } from "@/components/ui/card";
 import FormLoader from "./form-loader";
 import ChatbotLimitMessage from "./chatbot-limit-message";
+import { Prettify } from "@/types/helpers";
 
 export interface BusinessData {
   generalInfo: {
@@ -214,8 +215,10 @@ export type FormWizardData = z.infer<typeof formSchema>;
 
 export default function FormWizard({
   limitReached,
+  userSub,
 }: {
   limitReached: boolean;
+  userSub: Prettify<Subscription & { chatbots: Chatbot[] }> | undefined;
 }) {
   const [progress, setProgress] = useState<FormWizardProgress>();
   const [currentStep, setCurrentStep] = useState(progress?.step ?? 0);
@@ -423,7 +426,11 @@ export default function FormWizard({
                 onSubmit={form.handleSubmit(processData)}
                 className="blur-sm"
               >
-                <FormWizardStep step={currentStep} form={form} />
+                <FormWizardStep
+                  step={currentStep}
+                  form={form}
+                  userSub={userSub}
+                />
               </form>
             </Form>
             <ChatbotLimitMessage />
@@ -433,7 +440,11 @@ export default function FormWizard({
         ) : (
           <Form {...form}>
             <form onSubmit={form.handleSubmit(processData)} id={wizardFormId}>
-              <FormWizardStep step={currentStep} form={form} />
+              <FormWizardStep
+                step={currentStep}
+                form={form}
+                userSub={userSub}
+              />
             </form>
           </Form>
         )}
@@ -486,14 +497,15 @@ export default function FormWizard({
 interface FormWizardStepProps {
   step: number;
   form: UseFormReturn<FormWizardData>;
+  userSub: Prettify<Subscription & { chatbots: Chatbot[] }> | undefined;
 }
 
-function FormWizardStep({ step, form }: FormWizardStepProps) {
+function FormWizardStep({ step, form, userSub }: FormWizardStepProps) {
   const baseStepIndex = form.getValues("hasPhysicalProducts")
     ? step
     : step >= 2
-    ? step + 1
-    : step;
+      ? step + 1
+      : step;
 
   switch (baseStepIndex) {
     case 0:
@@ -505,7 +517,7 @@ function FormWizardStep({ step, form }: FormWizardStepProps) {
     case 3:
       return <CustomerService form={form} />;
     case 4:
-      return <DocumentsStep form={form} />;
+      return <DocumentsStep form={form} userSub={userSub} />;
     case 5:
       return <Summary form={form} />;
     default:

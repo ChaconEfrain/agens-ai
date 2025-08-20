@@ -10,3 +10,8 @@ export const ALLOWED_CHATBOTS = {
   BASIC: 1,
   PRO: 3,
 } as const;
+
+export const ALLOWED_PDF = {
+  FREE: 1,
+  BASIC: 3,
+} as const;

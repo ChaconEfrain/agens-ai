@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import {
   Card,
   CardContent,
@@ -8,14 +8,43 @@ import {
 } from "@/components/ui/card";
 import DragAndDrop from "@/components/drag-and-drop";
 import { WizardStepProps } from "@/types/form-wizard";
+import { ALLOWED_PDF } from "@/consts/subscription";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
-export default function DocumentsStep({ form }: WizardStepProps) {
+export default function DocumentsStep({ form, userSub }: WizardStepProps) {
   const handleFiles = (files: FileList) => {
     const validFiles = Array.from(files).filter(
       (file) => file.type === "application/pdf"
     );
 
     const currentDocuments = form.getValues("documents") ?? [];
+
+    if (
+      (userSub?.plan === "free" &&
+        ((form.getValues("documents")?.length ?? 0) >= ALLOWED_PDF["FREE"] ||
+          validFiles.length > ALLOWED_PDF["FREE"])) ||
+      (userSub?.plan === "basic" &&
+        ((form.getValues("documents")?.length ?? 0) >= ALLOWED_PDF["BASIC"] ||
+          validFiles.length > ALLOWED_PDF["BASIC"]))
+    ) {
+      toast.error(() => {
+        return (
+          <div className="flex items-center">
+            <p>
+              Your current subscription plan only allows{" "}
+              {ALLOWED_PDF[userSub.plan.toUpperCase() as "FREE" | "BASIC"]} PDF
+              upload
+            </p>
+            <Button asChild size="sm">
+              <Link href="/pricing">Manage plan</Link>
+            </Button>
+          </div>
+        );
+      });
+      return;
+    }
 
     form.setValue("documents", [...currentDocuments, ...validFiles]);
   };
@@ -27,10 +56,6 @@ export default function DocumentsStep({ form }: WizardStepProps) {
   };
 
   const documents = form.watch("documents");
-
-  useEffect(() => {
-    console.log("documents --> ", documents);
-  }, [documents]);
 
   return (
     <Card>

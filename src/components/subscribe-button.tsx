@@ -390,9 +390,15 @@ export default function SubscribeButton({
               {sub.plan === "basic" ? "Upgrade to Pro" : "Downgrade to Basic"}
             </DialogTitle>
             <DialogDescription>
-              {sub.plan === "basic"
-                ? "Pay a prorated charge for the remaining days of the month"
-                : "Pay a prorated charge for the remaining days of the month (any credit will be applied to your next invoice)"}
+              {sub.plan === "basic" ? (
+                <>
+                  Pay a prorated charge for the remaining days of the month, go
+                  to <Link href="/dashboard">your dashboard</Link> to activate
+                  or deactivate your chatbots
+                </>
+              ) : (
+                "Pay a prorated charge for the remaining days of the month (any credit will be applied to your next invoice)"
+              )}
             </DialogDescription>
           </DialogHeader>
           {sub.plan === "pro" &&
@@ -461,10 +467,10 @@ export default function SubscribeButton({
               {sub.plan === "basic" ? (
                 loadingModal ? (
                   <>
-                    Confirm Update <LoaderCircle className="animate-spin" />
+                    Confirm Upgrade <LoaderCircle className="animate-spin" />
                   </>
                 ) : (
-                  "Confirm Update"
+                  "Confirm Upgrade"
                 )
               ) : loadingModal ? (
                 <>

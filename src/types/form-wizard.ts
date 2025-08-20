@@ -1,7 +1,9 @@
 import { FormWizardData } from "@/app/create-chatbot/_components/form-wizard";
-import { FormWizardProgress } from "@/db/schema";
 import { UseFormReturn } from "react-hook-form";
+import { Prettify } from "./helpers";
+import { Chatbot, Subscription } from "@/db/schema";
 
 export interface WizardStepProps {
   form: UseFormReturn<FormWizardData>;
+  userSub?: Prettify<Subscription & { chatbots: Chatbot[] }> | undefined;
 }

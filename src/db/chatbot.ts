@@ -265,22 +265,6 @@ export async function deactivateChatbotsBySubscriptionId({
     .where(inArray(chatbots.id, ids));
 }
 
-export async function activateChatbotsBySubscriptionId({
-  subscriptionId,
-}: {
-  subscriptionId: number;
-}) {
-  const userChatbots = await getChatbotsBySubscriptionId({ subscriptionId });
-  const ids = userChatbots.map((bot) => bot.id);
-
-  await db
-    .update(chatbots)
-    .set({
-      isActive: true,
-    })
-    .where(inArray(chatbots.id, ids));
-}
-
 export async function toggleChatbotBySlug({ slug }: { slug: string }) {
   await db
     .update(chatbots)

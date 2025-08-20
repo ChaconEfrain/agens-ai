@@ -28,7 +28,7 @@ export default async function CreateChatbotPage() {
   return (
     <main className="my-10">
       <div className="grid grid-cols-[2fr_1fr] gap-4">
-        <FormWizard limitReached={limitReached} />
+        <FormWizard limitReached={limitReached} userSub={userSub} />
         <OwnedChatbots userChatbots={userChatbots} userSub={userSub} />
       </div>
     </main>

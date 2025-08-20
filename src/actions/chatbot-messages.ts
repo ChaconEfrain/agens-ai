@@ -25,9 +25,21 @@ import {
 import { stripe } from "@/services/stripe";
 import { EXTRA_MESSAGES_METER } from "@/consts/stripe";
 import { sendMessageLimitEmail } from "@/services/resend";
+import { MAX_CHARS } from "@/consts/chat";
 
 const JWT_SECRET = process.env.JWT_SECRET!;
 const IS_DEV = process.env.NODE_ENV === "development";
+
+interface sendMessageActionProps {
+  message: string;
+  chatbotId: number;
+  chatbotInstructions: string;
+  sessionId: string;
+  token: string;
+  pathname: string;
+  chatbotIsActive: boolean;
+  totalChars: number;
+}
 
 export async function sendMessageAction({
   message,
@@ -37,22 +49,14 @@ export async function sendMessageAction({
   token,
   pathname,
   chatbotIsActive,
-}: {
-  message: string;
-  chatbotId: number;
-  chatbotInstructions: string;
-  sessionId: string;
-  token: string;
-  pathname: string;
-  chatbotIsActive: boolean;
-}) {
-  if (!chatbotIsActive) {
+  totalChars,
+}: sendMessageActionProps) {
+  if (!chatbotIsActive || totalChars > MAX_CHARS) {
     return "error";
   }
 
   try {
-    let testMessageCount;
-    const subscription = await getSubscriptionByChatbotId({
+    const { subscription, chatbot } = await getSubscriptionByChatbotId({
       chatbotId,
     });
     if (!IS_DEV && pathname.startsWith("/embed")) {
@@ -61,11 +65,8 @@ export async function sendMessageAction({
         domain: string;
         slug: string;
       };
-      const allowedDomains = await getChatbotAllowedDomainsEmbed({
-        id: chatbotId,
-      });
 
-      if (!allowedDomains.includes(domain)) {
+      if (!chatbot.allowedDomains.includes(domain)) {
         throw new Error(`Access from domain '${domain}' is not allowed`);
       }
 
@@ -85,8 +86,7 @@ export async function sendMessageAction({
     }
 
     if (pathname.startsWith("/test-chatbot")) {
-      testMessageCount = await getChatbotTestMessageCount({ chatbotId });
-      if (testMessageCount >= ALLOWED_MESSAGE_QUANTITY.TEST) {
+      if (chatbot.testMessagesCount >= ALLOWED_MESSAGE_QUANTITY.TEST) {
         return "limit reached";
       }
     }
@@ -163,7 +163,7 @@ export async function sendMessageAction({
       messageCount: subscription.messageCount + 1,
       stripeSubscriptionId: subscription?.stripeSubscriptionId,
       pathname,
-      testMessageCount,
+      testMessageCount: chatbot.testMessagesCount,
     });
 
     if (messageInsert) {

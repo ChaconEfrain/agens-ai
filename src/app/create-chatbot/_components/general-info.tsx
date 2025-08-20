@@ -24,8 +24,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { X } from "lucide-react";
+import { Info, X } from "lucide-react";
 import { WizardStepProps } from "@/types/form-wizard";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export default function GeneralInfo({ form }: WizardStepProps) {
   const currentYear = new Date().getFullYear();
@@ -94,6 +99,7 @@ export default function GeneralInfo({ form }: WizardStepProps) {
                 <Textarea
                   placeholder="Briefly describe your business and its offerings"
                   className="resize-none"
+                  spellCheck={false}
                   {...field}
                 />
               </FormControl>
@@ -107,7 +113,21 @@ export default function GeneralInfo({ form }: WizardStepProps) {
             name="generalInfo.website"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Websites that will use the chatbot*</FormLabel>
+                <FormLabel>
+                  Websites that will use the chatbot*
+                  <Tooltip>
+                    <TooltipTrigger className="text-muted-foreground">
+                      <Info className="size-5" />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <span>
+                        Make sure to spell the URL correctly, if it doesn't
+                        match with your website's URL you won't be able to use
+                        your chatbot.
+                      </span>
+                    </TooltipContent>
+                  </Tooltip>
+                </FormLabel>
                 <div className="flex gap-2 items-center">
                   <FormControl>
                     <Input placeholder="https://yourbusiness.com" {...field} />

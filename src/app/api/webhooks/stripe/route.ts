@@ -1,6 +1,5 @@
 import { STRIPE_WEBHOOK_EVENTS } from "@/consts/stripe";
 import {
-  activateChatbotsBySubscriptionId,
   deactivateChatbotsBySubscriptionId,
   deactivateMarkedChatbotsBySubscriptionId,
   toggleDeactivateChatbotAtPeriodEnd,
@@ -12,20 +11,17 @@ import {
 } from "@/db/subscriptions";
 import { stripe } from "@/services/stripe";
 import { headers } from "next/headers";
-import type Stripe from "stripe";
 
-const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
+const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET!;
 
 export async function POST(request: Request) {
   const sig = (await headers()).get("stripe-signature");
 
-  let event: Stripe.Event;
-
   try {
-    event = stripe.webhooks.constructEvent(
+    const event = stripe.webhooks.constructEvent(
       await request.text(),
       sig as string,
-      webhookSecret
+      STRIPE_WEBHOOK_SECRET
     );
 
     if (event.type === STRIPE_WEBHOOK_EVENTS.CHECKOUT_SESSION_COMPLETED) {
@@ -103,14 +99,6 @@ export async function POST(request: Request) {
       ) {
         await deactivateChatbotsBySubscriptionId({
           activeChatbot: Number(subscription.metadata.activeChatbot ?? 0),
-          subscriptionId: Number(subscription.metadata.subscriptionId),
-        });
-      } else if (
-        subscription.metadata.action === "update" &&
-        (subscription.items.data[0].price.lookup_key as "basic" | "pro") ===
-          "pro"
-      ) {
-        await activateChatbotsBySubscriptionId({
           subscriptionId: Number(subscription.metadata.subscriptionId),
         });
       }

@@ -18,6 +18,7 @@ export async function updateChatbotFilesAction({
   chatbotId: number;
   businessId: number;
 }) {
+  //TODO: Check for user sub plan
   const { userId } = await auth();
 
   if (!userId) throw new Error("No session detected");

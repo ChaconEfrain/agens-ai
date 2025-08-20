@@ -17,6 +17,8 @@ import { useChatSession } from "@/hooks/use-chat-session";
 import { ChatbotStyles } from "@/types/embedded-chatbot";
 import { usePathname } from "next/navigation";
 import { ALLOWED_MESSAGE_QUANTITY } from "@/consts/subscription";
+import { cn } from "@/lib/utils";
+import { MAX_CHARS } from "@/consts/chat";
 
 interface Props {
   chatbotId: number;
@@ -43,6 +45,7 @@ export default function Chat({
   const [testMessageCount, setTestMessageCount] = useState(0);
   const [isError, setIsError] = useState(false);
   const [isMessageLimit, setIsMessageLimit] = useState(false);
+  const [totalChars, setTotalChars] = useState(0);
   const scrollDiv = useRef<HTMLDivElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
   const pathname = usePathname();
@@ -90,6 +93,7 @@ export default function Chat({
     const target = e.target;
     target.style.height = "auto";
     target.style.height = `${target.scrollHeight}px`;
+    setTotalChars(e.target.value.length);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -100,9 +104,11 @@ export default function Chat({
   };
 
   const sendMessage = async (e: FormEvent<HTMLFormElement>) => {
-    if (isThinking) return;
-    setIsThinking(true);
     e.preventDefault();
+    if (isThinking || totalChars > MAX_CHARS) return;
+    setIsThinking(true);
+    const chars = totalChars;
+    setTotalChars(0);
     const form = e.target as HTMLFormElement;
     const formData = new FormData(form);
     const message = formData.get("chat-prompt")?.toString();
@@ -121,6 +127,7 @@ export default function Chat({
       token,
       pathname,
       chatbotIsActive,
+      totalChars: chars,
     });
 
     if (answer) {
@@ -283,7 +290,7 @@ export default function Chat({
             placeholder="Ask questions about your business"
             id="chat-input"
             rows={1}
-            className="resize-none max-h-[150px] bg-transparent p-3 pb-1.5 text-sm outline-none ring-0 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-accent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-muted-foreground shadow-none border-none min-h-auto focus-visible:ring-[0px]"
+            className="resize-none max-h-[150px] bg-transparent p-3 pb-1.5 text-sm outline-none ring-0 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-accent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-muted-foreground shadow-none border-none min-h-auto focus-visible:ring-[0px] wrap-anywhere"
             onInput={handleTextAreaResize}
             onKeyDown={handleKeyDown}
             disabled={loadingMessages || isMessageLimit || !chatbotIsActive}
@@ -306,10 +313,21 @@ export default function Chat({
               title="Send prompt"
               className="cursor-pointer"
               type="submit"
+              disabled={totalChars > MAX_CHARS}
             >
               <Send />
             </Button>
           </div>
+          <span
+            className={cn(
+              "text-xs text-muted-foreground absolute bottom-2 left-2",
+              {
+                "text-red-500": totalChars > MAX_CHARS,
+              }
+            )}
+          >
+            {totalChars} / {MAX_CHARS}
+          </span>
         </form>
       </CardFooter>
     </Card>

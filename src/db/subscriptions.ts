@@ -138,7 +138,7 @@ export async function getSubscriptionByChatbotId({
 
   if (!subscription) throw new Error("Subscription not found");
 
-  return subscription;
+  return { subscription, chatbot };
 }
 
 export async function getSubscriptionByUserId({ userId }: { userId: number }) {

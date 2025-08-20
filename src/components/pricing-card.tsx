@@ -12,12 +12,13 @@ import {
   CardHeader,
   CardTitle,
 } from "./ui/card";
-import { Check, type LucideProps } from "lucide-react";
+import { Check, Info, type LucideProps } from "lucide-react";
 import { Badge } from "./ui/badge";
 import { cn } from "@/lib/utils";
 import SubscribeButton from "./subscribe-button";
 import { Chatbot, Subscription } from "@/db/schema";
 import { Prettify } from "@/types/helpers";
+import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 
 interface Props {
   plan: string;
@@ -94,7 +95,22 @@ export default function PricingCard({
           {includes.map((feature) => (
             <li key={feature} className="flex items-start gap-2">
               <Check className="h-4 w-4 text-primary mt-0.5" />
-              <span>{feature}</span>
+              <span className="flex items-center gap-1">
+                {feature}{" "}
+                {feature.includes("messages") && (
+                  <Tooltip>
+                    <TooltipTrigger className="text-muted-foreground">
+                      <Info className="size-4" />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <span>
+                        1 message is made up of a question from the user and the
+                        AI's response.
+                      </span>
+                    </TooltipContent>
+                  </Tooltip>
+                )}
+              </span>
             </li>
           ))}
         </ul>
