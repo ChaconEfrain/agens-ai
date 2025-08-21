@@ -42,14 +42,7 @@ export async function createChatbotTransaction({
 
   if (!userId) throw new Error("No session detected");
 
-  const user = (await getUserByClerkId(
-    { clerkId: userId },
-    {
-      with: {
-        chatbots: true,
-      },
-    }
-  )) as User & { chatbots: Chatbot[] };
+  const user = await getUserByClerkId({ clerkId: userId });
   const sub = await getSubscriptionByUserId({ userId: user.id });
 
   if (!sub) throw new Error("No subscription found");

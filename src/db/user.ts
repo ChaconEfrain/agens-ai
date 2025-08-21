@@ -1,7 +1,6 @@
 import { db } from ".";
 import { users } from "./schema";
 import { eq } from "drizzle-orm";
-import { FindFirstUserOptions } from "@/types/db-types";
 
 export async function createUser({
   clerkId,
@@ -23,13 +22,13 @@ export async function createUser({
     .returning();
 }
 
-export async function getUserByClerkId(
-  { clerkId }: { clerkId: string },
-  options?: FindFirstUserOptions
-) {
+export async function getUserByClerkId({ clerkId }: { clerkId: string }) {
   const user = await db.query.users.findFirst({
     where: eq(users.clerkId, clerkId),
-    ...options,
+    with: {
+      files: true,
+      chatbots: true,
+    },
   });
 
   if (!user) throw new Error("User not found");
