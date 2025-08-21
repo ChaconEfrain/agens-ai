@@ -32,17 +32,32 @@ export default function Nav() {
         </div>
       </Link>
       <div className="flex items-center gap-6">
-        <ul className="flex gap-4">
-          <li>Pricing</li>
-          <li>About</li>
-          <li>Contact</li>
+        <ul className="flex gap-1">
+          <li>
+            <Link
+              href="/pricing"
+              className="hover:bg-primary hover:text-white transition px-2 py-1 rounded-md"
+            >
+              Pricing
+            </Link>
+          </li>
           {isSignedIn && (
             <>
               <li>
-                <Link href="/create-chatbot">Create chatbot</Link>
+                <Link
+                  href="/create-chatbot"
+                  className="hover:bg-primary hover:text-white transition px-2 py-1 rounded-md"
+                >
+                  Create chatbot
+                </Link>
               </li>
               <li>
-                <Link href="/dashboard">Dashboard</Link>
+                <Link
+                  href="/dashboard"
+                  className="hover:bg-primary hover:text-white transition px-2 py-1 rounded-md"
+                >
+                  Dashboard
+                </Link>
               </li>
             </>
           )}
