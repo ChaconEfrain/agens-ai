@@ -11,7 +11,10 @@ export const db =
   globalForDb.db ??
   drizzle(
     new Pool({
-      connectionString: process.env.DATABASE_URL,
+      connectionString:
+        process.env.NODE_ENV === "production"
+          ? process.env.DATABASE_URL!
+          : process.env.DEV_DATABASE_URL!,
       ssl: { rejectUnauthorized: false }, // necesario con Neon
     }),
     { schema }
