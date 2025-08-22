@@ -7,7 +7,7 @@ import {
   UserButton,
   useUser,
 } from "@clerk/nextjs";
-import React from "react";
+import React, { useState, useRef } from "react";
 import { Button } from "./ui/button";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -16,7 +16,36 @@ export default function Nav() {
   const { isSignedIn } = useUser();
   const pathname = usePathname();
 
+  const [hoverStyle, setHoverStyle] = useState<{
+    left: number;
+    width: number;
+    top: number;
+    height: number;
+    opacity: number;
+  }>({ left: 0, width: 0, top: 0, height: 0, opacity: 0 });
+
+  const containerRef = useRef<HTMLUListElement>(null);
+
   if (pathname.startsWith("/embed")) return null;
+
+  const handleMouseEnter = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const containerRect = containerRef.current?.getBoundingClientRect();
+
+    if (containerRect) {
+      setHoverStyle({
+        left: rect.left - containerRect.left,
+        width: rect.width,
+        top: rect.top - containerRect.top,
+        height: rect.height,
+        opacity: 1,
+      });
+    }
+  };
+
+  const handleMouseLeave = () => {
+    setHoverStyle((prev) => ({ ...prev, opacity: 0 }));
+  };
 
   return (
     <nav className="flex justify-between items-center py-4">
@@ -32,11 +61,27 @@ export default function Nav() {
         </div>
       </Link>
       <div className="flex items-center gap-6">
-        <ul className="flex gap-1">
+        <ul
+          className="relative flex gap-2"
+          ref={containerRef}
+          onMouseLeave={handleMouseLeave}
+        >
+          {/* highlight dinámico */}
+          <span
+            className="absolute rounded-md bg-primary transition-all duration-500 ease-in-out"
+            style={{
+              left: hoverStyle.left,
+              width: hoverStyle.width,
+              top: hoverStyle.top,
+              height: hoverStyle.height,
+              opacity: hoverStyle.opacity,
+            }}
+          />
           <li>
             <Link
               href="/pricing"
-              className="hover:bg-primary hover:text-white transition px-2 py-1 rounded-md"
+              onMouseEnter={handleMouseEnter}
+              className="relative z-10 px-2 py-1 rounded-md transition-colors hover:text-white"
             >
               Pricing
             </Link>
@@ -46,7 +91,8 @@ export default function Nav() {
               <li>
                 <Link
                   href="/create-chatbot"
-                  className="hover:bg-primary hover:text-white transition px-2 py-1 rounded-md"
+                  onMouseEnter={handleMouseEnter}
+                  className="relative z-10 px-2 py-1 rounded-md transition-colors hover:text-white"
                 >
                   Create chatbot
                 </Link>
@@ -54,7 +100,8 @@ export default function Nav() {
               <li>
                 <Link
                   href="/dashboard"
-                  className="hover:bg-primary hover:text-white transition px-2 py-1 rounded-md"
+                  onMouseEnter={handleMouseEnter}
+                  className="relative z-10 px-2 py-1 rounded-md transition-colors hover:text-white"
                 >
                   Dashboard
                 </Link>
