@@ -24,9 +24,17 @@ export async function GET(req: NextRequest) {
     );
   }
 
-  const referer = req.headers.get("referer") ?? "";
+  const originHeader = req.headers.get("origin");
+  const refererHeader = req.headers.get("referer");
 
-  if (!referer) {
+  let originDomain = "";
+  if (originHeader) {
+    originDomain = new URL(originHeader).hostname.replace(/^www\./, "");
+  } else if (refererHeader) {
+    originDomain = new URL(refererHeader).hostname.replace(/^www\./, "");
+  }
+
+  if (!originDomain) {
     return NextResponse.json(
       { error: "Unknown domain" },
       {
@@ -35,8 +43,6 @@ export async function GET(req: NextRequest) {
       }
     );
   }
-
-  const originDomain = new URL(referer).hostname.replace(/^www\./, "");
 
   const chatbot = await getChatbotBySlugEmbed({ slug });
 
@@ -59,7 +65,7 @@ export async function GET(req: NextRequest) {
       }
     );
   }
-  
+
   if (!chatbot.isActive) {
     return NextResponse.json(
       { error: `Chatbot '${slug}' is inactive` },
@@ -97,16 +103,7 @@ export async function GET(req: NextRequest) {
 }
 
 export async function OPTIONS(req: NextRequest) {
-  const referer = req.headers.get("referer") ?? "";
-  let origin = "*";
-
-  try {
-    if (referer) {
-      origin = `https://${new URL(referer).hostname.replace(/^www\./, "")}`;
-    }
-  } catch (error) {
-    console.error(error);
-  }
+  const origin = req.headers.get("origin") ?? "*";
 
   return new NextResponse(null, {
     status: 204,
@@ -116,3 +113,4 @@ export async function OPTIONS(req: NextRequest) {
     },
   });
 }
+
