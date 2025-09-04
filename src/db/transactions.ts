@@ -16,10 +16,10 @@ import {
   updateChatbotTestMessageCount,
 } from "./chatbot";
 import { createMessage } from "./messages";
-import { createBusiness } from "./business";
-import { saveEmbeddings } from "./embeddings";
+import { createBusiness, updateBusiness } from "./business";
+import { saveEmbeddings, updateChatbotEmbeddings } from "./embeddings";
 import { createFile } from "./files";
-import { Chatbot, MessageInsert, User } from "./schema";
+import { MessageInsert } from "./schema";
 import { ALLOWED_CHATBOTS } from "@/consts/subscription";
 import { getCoherentChunksFromPdf } from "@/services/openai";
 
@@ -167,5 +167,14 @@ export async function createMessageTransaction({
     );
 
     return messageInsert?.[0];
+  });
+}
+
+export async function updateBusinessAndEmbeddingsTransaction({chatbotId, form, businessId, chunks}: {chatbotId: number, form: FormWizardData, businessId: number, chunks: string[]}) {
+  return await db.transaction(async (trx) => {
+    await Promise.all([
+      updateBusiness({ form, businessId }, trx),
+      updateChatbotEmbeddings({ chatbotId, chunks }, trx)
+    ])
   });
 }

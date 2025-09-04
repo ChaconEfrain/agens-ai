@@ -5,5 +5,6 @@ import { Chatbot, Subscription } from "@/db/schema";
 
 export interface WizardStepProps {
   form: UseFormReturn<FormWizardData>;
+  className?: string;
   userSub?: Prettify<Subscription & { chatbots: Chatbot[] }> | undefined;
 }

@@ -341,9 +341,17 @@ export default function SubscribeButton({
             </Button>
             <Button
               className="w-1/2"
-              onClick={sub.chatbots.length > 0 ? undefined : cancelSubscription}
+              onClick={
+                sub.chatbots.filter((bot) => bot.isActive).length === 0
+                  ? undefined
+                  : cancelSubscription
+              }
               disabled={loadingModal}
-              form={sub.chatbots.length > 0 ? "active-chatbot-form" : undefined}
+              form={
+                sub.chatbots.filter((bot) => bot.isActive).length === 0
+                  ? "active-chatbot-form"
+                  : undefined
+              }
             >
               {loadingModal ? (
                 <>

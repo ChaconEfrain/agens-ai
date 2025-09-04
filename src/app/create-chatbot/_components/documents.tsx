@@ -13,7 +13,11 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
-export default function DocumentsStep({ form, userSub }: WizardStepProps) {
+export default function DocumentsStep({
+  form,
+  userSub,
+  className,
+}: WizardStepProps) {
   const handleFiles = (files: FileList) => {
     const validFiles = Array.from(files).filter(
       (file) => file.type === "application/pdf"
@@ -58,7 +62,7 @@ export default function DocumentsStep({ form, userSub }: WizardStepProps) {
   const documents = form.watch("documents");
 
   return (
-    <Card>
+    <Card className={className}>
       <CardHeader>
         <CardTitle className="text-xl font-semibold">
           <h2>Additional Documents</h2>

@@ -15,17 +15,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { Trash } from "lucide-react";
 import { WizardStepProps } from "@/types/form-wizard";
 
-export default function ProductsAndServices({ form }: WizardStepProps) {
+export default function ProductsAndServices({
+  form,
+  className,
+}: WizardStepProps) {
   const { fields, append, remove } = useFieldArray({
     control: form.control,
     name: "productsServices.items",
   });
-
-  const watchedValues = form.watch(); // observa todos los campos
-
-  useEffect(() => {
-    console.log("Form changed:", watchedValues);
-  }, [watchedValues]);
 
   const type = form.watch("productsServices.type");
 
@@ -52,7 +49,7 @@ export default function ProductsAndServices({ form }: WizardStepProps) {
   };
 
   return (
-    <Card>
+    <Card className={className}>
       <CardHeader>
         <CardTitle className="text-xl font-semibold">
           <h2>Products & Services</h2>

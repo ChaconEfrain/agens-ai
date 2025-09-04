@@ -22,14 +22,8 @@ const contactMethods = [
   { value: "whatsapp", label: "WhatsApp" },
 ];
 
-export default function CustomerService({ form }: WizardStepProps) {
-  const contactMethodsSelected = form.watch("customerService.contactMethods"); // observa todos los campos
-  const customerService = form.watch("customerService.commonQuestions"); // observa todos los campos
-
-  useEffect(() => {
-    console.log("Form changed:", contactMethodsSelected);
-    console.log("Customer Service:", customerService);
-  }, [contactMethodsSelected, customerService]);
+export default function CustomerService({ form, className }: WizardStepProps) {
+  const contactMethodsSelected = form.watch("customerService.contactMethods");
 
   const { fields, append, remove } = useFieldArray({
     control: form.control,
@@ -49,7 +43,7 @@ export default function CustomerService({ form }: WizardStepProps) {
   };
 
   return (
-    <Card>
+    <Card className={className}>
       <CardHeader>
         <CardTitle className="text-xl font-semibold">
           <h2>Customer Service</h2>

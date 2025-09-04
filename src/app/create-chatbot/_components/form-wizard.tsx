@@ -44,7 +44,7 @@ import FormLoader from "./form-loader";
 import ChatbotLimitMessage from "./chatbot-limit-message";
 import { Prettify } from "@/types/helpers";
 
-export interface BusinessData {
+interface BusinessData {
   generalInfo: {
     businessName: string;
     description: string;

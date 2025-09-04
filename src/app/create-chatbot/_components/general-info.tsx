@@ -96,7 +96,7 @@ export default function GeneralInfo({ form }: WizardStepProps) {
             <FormItem>
               <FormLabel>Business Description*</FormLabel>
               <FormControl>
-                <Textarea
+                <Textarea //TODO: Add max height to this and every other textareas
                   placeholder="Briefly describe your business and its offerings"
                   className="resize-none"
                   spellCheck={false}

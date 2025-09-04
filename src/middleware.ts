@@ -22,7 +22,7 @@ export default clerkMiddleware(
     return NextResponse.next();
   },
   {
-    clockSkewInMs: process.env.NODE_ENV === "development" ? 60000 : 5000,
+    clockSkewInMs: process.env.NODE_ENV === "development" ? 120000 : 5000,
   }
 );
 

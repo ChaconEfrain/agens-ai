@@ -1,7 +1,7 @@
 import { createEmbeddings } from "@/services/openai";
 import { db } from ".";
 import { embeddings } from "./schema";
-import { cosineDistance, eq } from "drizzle-orm";
+import { cosineDistance, eq, and, isNull } from "drizzle-orm";
 import { Transaction } from "@/types/db-types";
 
 export async function saveEmbeddings(
@@ -53,4 +53,37 @@ export async function getRelatedEmbeddings({
     .limit(limit);
 
   return contextChunks;
+}
+
+export async function updateChatbotEmbeddings(
+  {
+    chunks,
+    chatbotId,
+  }: {
+    chunks: string[];
+    chatbotId: number;
+  },
+  trx?: Transaction
+) {
+  try {
+    const database = trx ?? db;
+
+    await Promise.all([
+      database
+      .delete(embeddings)
+      .where(
+        and(
+        eq(embeddings.chatbotId, chatbotId),
+        isNull(embeddings.fileId)
+        )
+      ),
+      saveEmbeddings({ chatbotId, chunks }, trx)
+    ]);
+  } catch (error) {
+    if (error instanceof Error) {
+      throw new Error("UpdateChatbotEmbeddings", {
+        cause: error.message,
+      });
+    }
+  }
 }

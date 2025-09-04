@@ -171,6 +171,9 @@ export const embeddings = pgTable(
     chatbotId: integer("chatbot_id")
       .references(() => chatbots.id, { onDelete: "cascade" })
       .notNull(),
+    fileId: integer("file_id").references(() => files.id, {
+      onDelete: "cascade",
+    }),
     content: text("content").notNull(),
     embedding: vector("embedding", { dimensions: 1536 }).notNull(),
     createdAt: timestamp("created_at").notNull().defaultNow(),
@@ -317,6 +320,10 @@ export const embeddingsRelations = relations(embeddings, ({ one }) => ({
   chatbot: one(chatbots, {
     fields: [embeddings.chatbotId],
     references: [chatbots.id],
+  }),
+  file: one(files, {
+    fields: [embeddings.fileId],
+    references: [files.id],
   }),
 }));
 

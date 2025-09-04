@@ -68,6 +68,8 @@ export async function getCoherentChunksFromPdf({
 
     Return a JSON array of strings, where each string is an independent block. Do not include incomplete fragments or irrelevant content.
 
+    **ALWAYS WRITE THE CHUNKS IN ENGLISH, NO MATTER THE LANGUAGE OF THE FILE.**
+
     Text:
     """${pdfText}"""
   `;

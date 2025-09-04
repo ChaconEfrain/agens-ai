@@ -60,15 +60,14 @@ export default function Nav() {
           <span className="font-bold">AI</span>
         </div>
       </Link>
-      <div className="flex items-center gap-6">
+      <div className="flex items-center gap-2">
         <ul
-          className="relative flex gap-2"
+          className="relative flex"
           ref={containerRef}
           onMouseLeave={handleMouseLeave}
         >
-          {/* highlight dinámico */}
           <span
-            className="absolute rounded-md bg-primary transition-all duration-500 ease-in-out"
+            className="absolute rounded-md bg-accent transition-all duration-500 ease-in-out"
             style={{
               left: hoverStyle.left,
               width: hoverStyle.width,
@@ -81,33 +80,29 @@ export default function Nav() {
             <Link
               href="/pricing"
               onMouseEnter={handleMouseEnter}
-              className="relative z-10 px-2 py-1 rounded-md transition-colors hover:text-white"
+              className="relative z-10 px-2 py-1 rounded-md"
             >
               Pricing
             </Link>
           </li>
-          {isSignedIn && (
-            <>
-              <li>
-                <Link
-                  href="/create-chatbot"
-                  onMouseEnter={handleMouseEnter}
-                  className="relative z-10 px-2 py-1 rounded-md transition-colors hover:text-white"
-                >
-                  Create chatbot
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/dashboard"
-                  onMouseEnter={handleMouseEnter}
-                  className="relative z-10 px-2 py-1 rounded-md transition-colors hover:text-white"
-                >
-                  Dashboard
-                </Link>
-              </li>
-            </>
-          )}
+          <li>
+            <Link
+              href="/create-chatbot"
+              onMouseEnter={handleMouseEnter}
+              className="relative z-10 px-2 py-1 rounded-md"
+            >
+              Create chatbot
+            </Link>
+          </li>
+          <li>
+            <Link
+              href="/dashboard"
+              onMouseEnter={handleMouseEnter}
+              className="relative z-10 px-2 py-1 rounded-md"
+            >
+              Dashboard
+            </Link>
+          </li>
         </ul>
         <SignedIn>
           <UserButton />

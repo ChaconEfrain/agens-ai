@@ -1,8 +1,10 @@
 import ChatbotCards from '@/components/chatbot-cards'
-import { Card, CardHeader } from '@/components/ui/card'
+import { Button } from "@/components/ui/button";
+import { Card, CardFooter, CardHeader } from "@/components/ui/card";
 import { getChatbotsByClerkId } from "@/db/chatbot";
 import { Chatbot, Subscription } from "@/db/schema";
 import { Prettify } from "@/types/helpers";
+import Link from "next/link";
 import React from "react";
 
 interface Props {
@@ -20,6 +22,11 @@ export default async function UserChatbots({ clerkId, sub }: Props) {
           <h2 className="text-2xl font-semibold">Your Chatbots</h2>
         </CardHeader>
         <ChatbotCards userChatbots={chatbots} sub={sub} />
+        <CardFooter>
+          <Button asChild className="w-full">
+            <Link href="/dashboard/business-info">Edit Chatbot Context</Link>
+          </Button>
+        </CardFooter>
       </Card>
     </section>
   );

@@ -60,7 +60,7 @@ export async function updateChatbotFilesAction({
         const { chunks, inputTokens, outputTokens } =
           await getCoherentChunksFromPdf({ pdfText: fullText });
         await updateChatbotPdfTokens({
-          pdfInputTokens: inputTokens,
+          pdfInputTokens: inputTokens, //TODO: Sum existing tokens
           pdfOutputTokens: outputTokens,
           chatbotId,
         });
