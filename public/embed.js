@@ -37,7 +37,7 @@
   // Floating button
   const button = document.createElement("button");
   const buttonIcon = document.createElement("img");
-  buttonIcon.src = `https://www.agensai.chat${styles.button.icon}`;
+  buttonIcon.src = styles.button.icon.startsWith('/') ? `https://www.agensai.chat${styles.button.icon}` : styles.button.icon;
   buttonIcon.alt = "Chatbot icon";
   buttonIcon.style.height = "32px";
   buttonIcon.style.width = "32px";
